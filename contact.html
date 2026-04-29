@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contact Us — Diraflow</title>
+<meta name="description" content="Get in touch with the Diraflow team. We're ready to scope your AI training data project and get started fast.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/logo.jpg">
+<script>(function(){var t=localStorage.getItem('diraflow-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.setAttribute('data-theme',t||(d?'dark':'light'));})();</script>
+
+<style>
+  /* ── Contact layout ── */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 4rem;
+    align-items: start;
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+  @media (max-width: 820px) {
+    .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  }
+
+  /* ── Left info panel ── */
+  .contact-info { position: sticky; top: 6rem; }
+  .contact-info h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.2rem;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    color: var(--fg);
+    margin: 0 0 1rem;
+  }
+  .contact-info h2 em { color: #c8922a; font-style: italic; }
+  .contact-info p {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--fg2, #888);
+    margin-bottom: 2rem;
+  }
+
+  /* Info cards */
+  .info-cards { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem; }
+  .info-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: var(--bg2, #f7f5f2);
+    border: 1px solid var(--border, #e5e5e5);
+    border-radius: 0.875rem;
+    padding: 1.1rem 1.25rem;
+    transition: border-color 0.2s;
+  }
+  .info-card:hover { border-color: #c8922a; }
+  .info-card-icon {
+    width: 36px; height: 36px;
+    border-radius: 0.5rem;
+    background: rgba(200,146,42,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+  }
+  .info-card-body { min-width: 0; }
+  .info-card-body span {
+    display: block; font-size: 0.72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--fg2, #888); margin-bottom: 0.2rem;
+  }
+  .info-card-body a, .info-card-body p {
+    font-size: 0.875rem; color: var(--fg); font-weight: 500;
+    text-decoration: none; margin: 0; line-height: 1.5;
+  }
+  .info-card-body a:hover { color: #c8922a; }
+
+  /* Response time badge */
+  .response-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(126, 203, 143, 0.12);
+    border: 1px solid rgba(126, 203, 143, 0.3);
+    border-radius: 2rem; padding: 0.4rem 0.875rem;
+    font-size: 0.75rem; font-weight: 600; color: #4a9e5c;
+  }
+  .response-badge::before {
+    content: ''; width: 7px; height: 7px;
+    border-radius: 50%; background: #4a9e5c;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+  }
+
+  /* ── Form panel ── */
+  .contact-form-wrap {
+    background: var(--bg, #fff);
+    border: 1px solid var(--border, #e5e5e5);
+    border-radius: 1.25rem;
+    padding: 2.25rem;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.05);
+  }
+  .contact-form-wrap h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.35rem; font-weight: 400;
+    color: var(--fg); margin: 0 0 0.35rem;
+  }
+  .contact-form-wrap > p {
+    font-size: 0.85rem; color: var(--fg2, #888);
+    margin: 0 0 1.75rem; line-height: 1.6;
+  }
+
+  /* Tabs */
+  .form-tabs {
+    display: flex; gap: 0.5rem; margin-bottom: 1.75rem;
+    background: var(--bg2, #f7f5f2);
+    border-radius: 0.75rem; padding: 0.3rem;
+  }
+  .form-tab {
+    flex: 1; padding: 0.55rem 0.75rem;
+    border: none; border-radius: 0.5rem;
+    background: transparent; cursor: pointer;
+    font-family: 'Sora', sans-serif; font-size: 0.8rem;
+    font-weight: 600; color: var(--fg2, #888);
+    transition: background 0.2s, color 0.2s;
+  }
+  .form-tab.active {
+    background: var(--bg, #fff);
+    color: var(--fg, #111);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+  }
+  .form-panel { display: none; }
+  .form-panel.active { display: block; }
+
+  /* Field styles */
+  .field-group { margin-bottom: 1rem; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+  @media (max-width: 480px) { .field-row { grid-template-columns: 1fr; } }
+
+  .field-label {
+    display: block; font-size: 0.75rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--fg2, #888); margin-bottom: 0.4rem;
+  }
+  .field-input {
+    width: 100%; background: var(--bg2, #f7f5f2);
+    border: 1.5px solid var(--border, #e5e5e5);
+    border-radius: 0.625rem; padding: 0.75rem 1rem;
+    font-size: 0.875rem; color: var(--fg, #111);
+    font-family: 'Sora', sans-serif;
+    box-sizing: border-box; outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative; z-index: 2; pointer-events: auto;
+  }
+  .field-input:focus { border-color: #c8922a; background: var(--bg, #fff); }
+  .field-input::placeholder { color: var(--fg2, #aaa); }
+  textarea.field-input { resize: vertical; min-height: 110px; }
+  select.field-input { cursor: pointer; }
+
+  .submit-btn {
+    width: 100%; padding: 0.875rem;
+    background: #c8922a; color: #fff;
+    border: none; border-radius: 2rem;
+    font-family: 'Sora', sans-serif; font-size: 0.9rem;
+    font-weight: 700; letter-spacing: 0.02em;
+    cursor: pointer; margin-top: 0.5rem;
+    transition: background 0.2s, transform 0.15s;
+    position: relative; z-index: 2; pointer-events: auto;
+  }
+  .submit-btn:hover { background: #a8771e; transform: translateY(-1px); }
+
+  .form-success {
+    display: none; text-align: center;
+    padding: 1.5rem; border-radius: 0.75rem;
+    background: rgba(126,203,143,0.1);
+    border: 1px solid rgba(126,203,143,0.3);
+    color: #4a9e5c; font-size: 0.9rem;
+    margin-top: 1rem; line-height: 1.6;
+  }
+  .form-error {
+    display: none; text-align: center;
+    font-size: 0.85rem; color: #e07070;
+    margin-top: 0.75rem;
+  }
+  .form-note {
+    font-size: 0.72rem; color: var(--fg2, #aaa);
+    text-align: center; margin-top: 0.75rem;
+  }
+
+  /* ── Social strip ── */
+  .social-strip {
+    display: flex; gap: 0.6rem; margin-top: 1.75rem; flex-wrap: wrap;
+  }
+  .social-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none; flex-shrink: 0;
+    transition: transform 0.2s, opacity 0.2s;
+  }
+  .social-icon:hover { transform: translateY(-2px); opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<!-- ── Nav ── -->
+<nav class="top">
+  <div class="container inner">
+    <a href="/" class="brand">
+      <img src="/assets/logo.jpg" alt="Diraflow" class="nav-logo-img nav-logo-transparent">
+      <span class="brand-text">
+        <span class="brand-name">Diraflow</span>
+        <span class="brand-tagline">Training data for frontier AI</span>
+      </span>
+    </a>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="solutions.html">Solutions</a></li>
+      <li><a href="industries.html">Industries</a></li>
+      <li><a href="blog.html">Blog</a></li>
+      <li><a href="careers.html">Careers</a></li>
+      <li><a href="contact.html" class="active">Contact Us</a></li>
+      <li><a href="report.html">Report Concerns</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☾</span>
+      </button>
+      <a href="contact.html" class="btn btn-sm">Talk to us</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Page header ── -->
+<section class="page-head">
+  <div class="page-head-bg"></div>
+  <div class="container">
+    <div class="section-label fade-up fade-up-1">Get in touch</div>
+    <h1 class="fade-up fade-up-2">Let's <em>talk</em></h1>
+    <p class="fade-up fade-up-3">Whether you have a project in mind, a question about our work, or just want to explore what's possible — we'd love to hear from you.</p>
+  </div>
+</section>
+
+<!-- ── Contact body ── -->
+<section class="block">
+  <div class="contact-grid">
+
+    <!-- LEFT — Info -->
+    <div class="contact-info">
+      <h2>We're here to <em>help</em> you build better AI Systems</h2>
+      <p>Our team typically responds within one business day. For urgent matters, email us directly and we'll prioritise your request.</p>
+
+      <div class="info-cards">
+
+        <div class="info-card">
+          <div class="info-card-icon">✉</div>
+          <div class="info-card-body">
+            <span>General Enquiries</span>
+            <a href="mailto:diraflow.ai@gmail.com">diraflow.ai@gmail.com</a>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-icon">💼</div>
+          <div class="info-card-body">
+            <span>Business &amp; Partnerships</span>
+            <a href="mailto:diraflow.ai@gmail.com?subject=Partnership Enquiry">diraflow.ai@gmail.com</a>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-icon">🛡</div>
+          <div class="info-card-body">
+            <span>Ethics &amp; Compliance</span>
+            <a href="mailto:diraflow.ai@gmail.com?subject=Ethics Concern">diraflow.ai@gmail.com</a>
+          </div>
+        </div>
+
+        <div class="info-card">
+  <div class="info-card-icon">📍</div>
+  <div class="info-card-body">
+    <span>Location</span>
+    <p>
+      <a href="https://maps.app.goo.gl/dt6dxg5wMe8dzoAi9" target="_blank">
+        Sameer Business Park Offices – Serving Global AI Teams
+      </a>
+    </p>
+  </div>
+</div>
+
+      </div>
+
+      <div class="response-badge">We respond within 1 business day</div>
+
+      <!-- Social icons -->
+      <div class="social-strip">
+        <a href="https://linkedin.com/company/diraflow" target="_blank" rel="noopener" aria-label="LinkedIn" class="social-icon" style="background:#0A66C2;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+        <a href="https://x.com/diraflow_" target="_blank" rel="noopener" aria-label="X" class="social-icon" style="background:#000; border:1px solid #333;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+        <a href="https://facebook.com/diraflow" target="_blank" rel="noopener" aria-label="Facebook" class="social-icon" style="background:#1877F2;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+        <a href="https://www.instagram.com/diraflow_?utm_source=qr&igsh=MTVkdHRwem92dHQ4cQ==" target="_blank" rel="noopener" aria-label="Instagram" class="social-icon" style="background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%);">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- RIGHT — Form -->
+    <div class="contact-form-wrap">
+      <h3>Send us a message</h3>
+      <p>Choose the type of enquiry below and fill in the form — we'll route it to the right person.</p>
+
+      <!-- Tabs -->
+      <div class="form-tabs">
+        <button class="form-tab active" onclick="switchTab('general', this)">General</button>
+        <button class="form-tab" onclick="switchTab('project', this)">Start a Project</button>
+        <button class="form-tab" onclick="switchTab('careers', this)">Careers</button>
+        <button class="form-tab" onclick="switchTab('press', this)">Press</button>
+      </div>
+
+      <!-- ── GENERAL TAB ── -->
+      <div id="tab-general" class="form-panel active">
+        <form id="general-form" action="https://formspree.io/f/xwvaawga" method="POST">
+          <input type="hidden" name="_subject" value="General Enquiry — Diraflow Contact">
+          <div class="field-row">
+            <div>
+              <label class="field-label">First name *</label>
+              <input type="text" name="first_name" required placeholder="Ada" class="field-input">
+            </div>
+            <div>
+              <label class="field-label">Last name *</label>
+              <input type="text" name="last_name" required placeholder="Lovelace" class="field-input">
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Email *</label>
+            <input type="email" name="email" required placeholder="ada@company.com" class="field-input">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Message *</label>
+            <textarea name="message" required placeholder="What would you like to know?" class="field-input"></textarea>
+          </div>
+          <button type="submit" class="submit-btn" id="general-btn">Send message →</button>
+          <div id="general-success" class="form-success">✓ Message received! We'll be in touch within one business day.</div>
+          <p id="general-error" class="form-error">Something went wrong — email us at <a href="mailto:diraflowai@gmail.com" style="color:#e07070;">diraflowai@gmail.com</a></p>
+          <p class="form-note">We respond within one business day. Your data is handled per our <a href="/privacy-policy.html" style="color:var(--fg2);">Privacy Policy</a>.</p>
+        </form>
+      </div>
+
+      <!-- ── PROJECT TAB ── -->
+      <div id="tab-project" class="form-panel">
+        <form id="project-form" action="https://formspree.io/f/xwvaawga" method="POST">
+          <input type="hidden" name="_subject" value="New Project Enquiry — Diraflow Contact">
+          <div class="field-row">
+            <div>
+              <label class="field-label">First name *</label>
+              <input type="text" name="first_name" required placeholder="Ada" class="field-input">
+            </div>
+            <div>
+              <label class="field-label">Last name *</label>
+              <input type="text" name="last_name" required placeholder="Lovelace" class="field-input">
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Work email *</label>
+            <input type="email" name="email" required placeholder="ada@company.com" class="field-input">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Company</label>
+            <input type="text" name="company" placeholder="Acme AI" class="field-input">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Service needed *</label>
+            <select name="service" required class="field-input">
+              <option value="" disabled selected>Select a service…</option>
+              <option>Agentic Datasets</option>
+              <option>RLHF &amp; Preference Data</option>
+              <option>Red-Teaming / Safety</option>
+              <option>STEM Data</option>
+              <option>Multilingual AI</option>
+              <option>Environment Generation</option>
+              <option>Custom / Not sure yet</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Approximate budget</label>
+            <select name="budget" class="field-input">
+              <option value="" disabled selected>Select a range…</option>
+              <option>Under $10k</option>
+              <option>$10k – $50k</option>
+              <option>$50k – $150k</option>
+              <option>$150k+</option>
+              <option>Not sure yet</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Project brief *</label>
+            <textarea name="brief" required placeholder="Describe your data challenge, timeline, and what success looks like…" class="field-input"></textarea>
+          </div>
+          <button type="submit" class="submit-btn" id="project-btn">Send project brief →</button>
+          <div id="project-success" class="form-success">✓ Brief received! We'll be in touch within one business day.</div>
+          <p id="project-error" class="form-error">Something went wrong — email us at <a href="mailto:diraflowai@gmail.com" style="color:#e07070;">diraflowai@gmail.com</a></p>
+          <p class="form-note">We respond within one business day. No commitment required.</p>
+        </form>
+      </div>
+
+      <!-- ── CAREERS TAB ── -->
+      <div id="tab-careers" class="form-panel">
+        <form id="careers-form" action="https://formspree.io/f/xwvaawga" method="POST">
+          <input type="hidden" name="_subject" value="Careers Enquiry — Diraflow Contact">
+          <div class="field-row">
+            <div>
+              <label class="field-label">First name *</label>
+              <input type="text" name="first_name" required placeholder="Ada" class="field-input">
+            </div>
+            <div>
+              <label class="field-label">Last name *</label>
+              <input type="text" name="last_name" required placeholder="Lovelace" class="field-input">
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Email *</label>
+            <input type="email" name="email" required placeholder="ada@gmail.com" class="field-input">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Role you're interested in *</label>
+            <select name="role" required class="field-input">
+              <option value="" disabled selected>Select a role type…</option>
+              <option>AI Annotator</option>
+              <option>Data Quality Analyst</option>
+              <option>Research Engineer</option>
+              <option>Project Manager</option>
+              <option>Sales &amp; Partnerships</option>
+              <option>Other / Open application</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">LinkedIn or Portfolio URL</label>
+            <input type="url" name="portfolio" placeholder="https://linkedin.com/in/yourname" class="field-input">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Tell us about yourself *</label>
+            <textarea name="message" required placeholder="Your background, what excites you about Diraflow, and what you're looking for…" class="field-input"></textarea>
+          </div>
+          <button type="submit" class="submit-btn" id="careers-btn">Send application →</button>
+          <div id="careers-success" class="form-success">✓ Application received! We review all submissions and will be in touch if there's a fit.</div>
+          <p id="careers-error" class="form-error">Something went wrong — email us at <a href="mailto:diraflowai@gmail.com" style="color:#e07070;">diraflowai@gmail.com</a></p>
+          <p class="form-note">You can also browse open roles on our <a href="/careers/" style="color:var(--fg2);">Careers page</a>.</p>
+        </form>
+      </div>
+
+      <!-- ── PRESS TAB ── -->
+      <div id="tab-press" class="form-panel">
+        <form id="press-form" action="https://formspree.io/f/xwvaawga" method="POST">
+          <input type="hidden" name="_subject" value="Press Enquiry — Diraflow Contact">
+          <div class="field-row">
+            <div>
+              <label class="field-label">First name *</label>
+              <input type="text" name="first_name" required placeholder="Ada" class="field-input">
+            </div>
+            <div>
+              <label class="field-label">Last name *</label>
+              <input type="text" name="last_name" required placeholder="Lovelace" class="field-input">
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Email *</label>
+            <input type="email" name="email" required placeholder="ada@publication.com" class="field-input">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Publication / Organisation *</label>
+            <input type="text" name="publication" required placeholder="TechCrunch, BBC, etc." class="field-input">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Your enquiry *</label>
+            <textarea name="message" required placeholder="What are you working on and how can Diraflow help?" class="field-input"></textarea>
+          </div>
+          <button type="submit" class="submit-btn" id="press-btn">Send press enquiry →</button>
+          <div id="press-success" class="form-success">✓ Enquiry received! Our communications team will respond within one business day.</div>
+          <p id="press-error" class="form-error">Something went wrong — email us at <a href="mailto:diraflow.ai@gmail.com" style="color:#e07070;">diraflow.ai@gmail.com</a></p>
+          <p class="form-note">For urgent press requests please email <a href="mailto:diraflow.ai@gmail.com" style="color:var(--fg2);">diraflow.ai@gmail.com</a> directly.</p>
+        </form>
+      </div>
+
+    </div><!-- end contact-form-wrap -->
+  </div><!-- end contact-grid -->
+</section>
+
+<!-- ── FAQ strip ── -->
+<section class="block" style="background:var(--bg2);">
+  <div class="container-narrow" style="text-align:center;">
+    <div class="section-label" style="justify-content:center;">Common questions</div>
+    <h2 class="section-title">Before you reach out</h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem; margin-top:2rem; text-align:left;">
+      <div class="card" style="padding:1.5rem;">
+        <p style="font-weight:700; font-size:0.9rem; color:var(--fg); margin-bottom:0.4rem;">How quickly can you start a project?</p>
+        <p style="font-size:0.85rem; color:var(--fg2); margin:0;">Most projects begin within 1–2 weeks of scope agreement. Urgent timelines can often be accommodated.</p>
+      </div>
+      <div class="card" style="padding:1.5rem;">
+        <p style="font-weight:700; font-size:0.9rem; color:var(--fg); margin-bottom:0.4rem;">What's the minimum project size?</p>
+        <p style="font-size:0.85rem; color:var(--fg2); margin:0;">We work with projects of all sizes. Contact us and we'll tell you honestly whether we're the right fit.</p>
+      </div>
+      <div class="card" style="padding:1.5rem;">
+        <p style="font-weight:700; font-size:0.9rem; color:var(--fg); margin-bottom:0.4rem;">Do you sign NDAs?</p>
+        <p style="font-size:0.85rem; color:var(--fg2); margin:0;">Yes. We're happy to sign mutual NDAs before any project discussion begins. Just ask.</p>
+      </div>
+    </div>
+    <p style="margin-top:2rem; font-size:0.875rem; color:var(--fg2);">More questions? See our <a href="/#faq" style="color:#c8922a; font-weight:600;">full FAQ →</a></p>
+  </div>
+</section>
+
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/" class="brand" style="display:inline-flex;gap:.625rem;align-items:center;font-weight:700;font-size:1.125rem;letter-spacing:-.025em;margin-bottom:1rem;"><img src="/assets/logo.jpg" alt="Diraflow" class="nav-logo-img nav-logo-transparent"></a>
+        <p>Premium training data for AI agents and LLMs. Built by experts, trusted by frontier AI teams worldwide.</p>
+        <div style="display:flex;gap:0.6rem;align-items:center;margin-top:1.25rem;flex-wrap:wrap;">
+          <a href="https://linkedin.com/company/diraflow" target="_blank" rel="noopener" aria-label="LinkedIn" style="width:38px;height:38px;border-radius:9px;background:#0A66C2;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+          <a href="https://x.com/diraflow_" target="_blank" rel="noopener" aria-label="X" style="width:38px;height:38px;border-radius:9px;background:#000;border:1px solid #333;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+          <a href="https://facebook.com/diraflow" target="_blank" rel="noopener" aria-label="Facebook" style="width:38px;height:38px;border-radius:9px;background:#1877F2;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+          <a href="https://www.instagram.com/diraflow_?utm_source=qr&igsh=MTVkdHRwem92dHQ4cQ==" target="_blank" rel="noopener" aria-label="Instagram" style="width:38px;height:38px;border-radius:9px;background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%);display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col"><h4>Solutions</h4><ul><li><a href="/#solutions">Environment Generation</a></li><li><a href="/#solutions">Agentic Datasets</a></li><li><a href="/#solutions">Red-Teaming</a></li><li><a href="/#solutions">RLHF &amp; Preference</a></li><li><a href="/#solutions">STEM Data</a></li><li><a href="/#solutions">Custom Projects</a></li></ul></div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a href="/blog/">Blog</a></li><li><a href="/careers/">Careers</a></li><li><a href="/#faq">FAQ</a></li><li><a href="/#industries">Industries</a></li><li><a href="/contact.html">Contact</a></li></ul></div>
+    
+    </div>
+    <div class="footer-bottom">
+      <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+        <p>© 2026 Diraflow AI. All rights reserved.</p>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="/code-of-conduct.html" style="font-size:.8125rem;color:var(--subtle);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="/privacy-policy.html" style="font-size:.8125rem;color:var(--subtle);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:1.5rem;">
+        <p style="font-size:.8125rem;color:var(--subtle);">Made with care for the AI community.</p>
+        <button class="theme-toggle" aria-label="Toggle dark mode" style="flex-shrink:0;"><span class="icon-sun">☀</span><span class="icon-moon">☾</span></button>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/main.js" defer></script>
+<script>
+  // ── Tab switching ──
+  function switchTab(name, btn) {
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.form-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── Generic form handler ──
+  ['general','project','careers','press'].forEach(id => {
+    const form = document.getElementById(id + '-form');
+    if (!form) return;
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn     = document.getElementById(id + '-btn');
+      const success = document.getElementById(id + '-success');
+      const error   = document.getElementById(id + '-error');
+
+      btn.textContent = 'Sending…';
+      btn.disabled    = true;
+      if (error) error.style.display = 'none';
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          form.reset();
+          btn.style.display     = 'none';
+          success.style.display = 'block';
+        } else { throw new Error(); }
+      } catch {
+        if (error) error.style.display = 'block';
+        btn.textContent = btn.textContent.replace('Sending…', 'Try again →');
+        btn.disabled    = false;
+      }
+    });
+  });
+</script>
+</body>
+</html>

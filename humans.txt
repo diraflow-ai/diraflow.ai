@@ -1,0 +1,15 @@
+/* TEAM */
+Diraflow AI Team
+Contact: diraflowai@gmail.com
+Location: Remote-first, worldwide
+
+/* THANKS */
+Unsplash — Photography
+Pexels — Videos
+Google Fonts — Typography
+
+/* SITE */
+Last update: 2026
+Language: English
+Doctype: HTML5
+IDE: VS Code

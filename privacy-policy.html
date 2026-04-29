@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy Policy & Company Policies — Diraflow</title>
+<meta name="description" content="Diraflow AI Company Policy Handbook — policies governing AI ethics, data governance, research integrity, employment, security, and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/logo.jpg">
+<script>(function(){var t=localStorage.getItem('diraflow-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.setAttribute('data-theme',t||(d?'dark':'light'));})();</script>
+
+<style>
+  /* ── Layout ── */
+  .policy-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 3rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .policy-layout { grid-template-columns: 1fr; }
+    .policy-sidebar { display: none; }
+  }
+
+  /* ── Sidebar ── */
+  .policy-sidebar {
+    position: sticky;
+    top: 6rem;
+  }
+  .policy-sidebar h4 {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg2, #888);
+    margin-bottom: 1rem;
+  }
+  .sidebar-nav a {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--fg2, #888);
+    text-decoration: none;
+    padding: 0.4rem 0.75rem;
+    border-left: 2px solid var(--border, #e5e5e5);
+    transition: color 0.2s, border-color 0.2s;
+    line-height: 1.4;
+    margin-bottom: 0.15rem;
+  }
+  .sidebar-nav a:hover,
+  .sidebar-nav a.active {
+    color: #c8922a;
+    border-left-color: #c8922a;
+  }
+
+  /* ── Content ── */
+  .policy-content { min-width: 0; }
+
+  .policy-meta-box {
+    background: var(--bg2, #f7f5f2);
+    border: 1px solid var(--border, #e5e5e5);
+    border-radius: 0.875rem;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 2.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+  .policy-meta-box div { font-size: 0.85rem; }
+  .policy-meta-box span { display: block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--fg2, #888); margin-bottom: 0.2rem; }
+  .policy-meta-box strong { color: var(--fg, #111); }
+
+  .policy-intro {
+    font-size: 0.95rem;
+    line-height: 1.85;
+    color: var(--fg2, #666);
+    margin-bottom: 1rem;
+  }
+
+  /* ── Policy blocks ── */
+  .policy-block {
+    margin-top: 3.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border, #e5e5e5);
+    scroll-margin-top: 6rem;
+  }
+  .policy-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+    background: var(--fg, #111);
+    border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem;
+  }
+  .policy-number {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    padding-top: 0.15rem;
+  }
+  .policy-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #fff;
+    margin: 0;
+    line-height: 1.3;
+  }
+  .policy-header .policy-date {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.4);
+    white-space: nowrap;
+    padding-top: 0.2rem;
+    flex-shrink: 0;
+  }
+
+  .policy-content h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #c8922a;
+    margin: 1.75rem 0 0.6rem;
+    letter-spacing: -0.01em;
+  }
+  .policy-content p {
+    font-size: 0.9rem;
+    line-height: 1.85;
+    color: var(--fg2, #666);
+    margin-bottom: 0.75rem;
+  }
+  .policy-content ul {
+    padding-left: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .policy-content ul li {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--fg2, #666);
+    margin-bottom: 0.35rem;
+  }
+  .policy-content ul li::marker { color: #c8922a; }
+
+  /* ── Callout boxes ── */
+  .callout {
+    border-radius: 0.625rem;
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    font-size: 0.875rem;
+    line-height: 1.75;
+  }
+  .callout-warning {
+    background: rgba(200,146,42,0.08);
+    border-left: 3px solid #c8922a;
+    color: var(--fg, #111);
+  }
+  .callout-danger {
+    background: rgba(220,60,60,0.07);
+    border-left: 3px solid #dc3c3c;
+    color: var(--fg, #111);
+  }
+  .callout-info {
+    background: rgba(59,130,246,0.07);
+    border-left: 3px solid #3b82f6;
+    color: var(--fg, #111);
+  }
+  .callout strong {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 0.4rem;
+  }
+  .callout-warning strong { color: #c8922a; }
+  .callout-danger  strong { color: #dc3c3c; }
+  .callout-info    strong { color: #3b82f6; }
+
+  /* ── Tables ── */
+  .policy-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin: 1.25rem 0 1.75rem;
+    border-radius: 0.625rem;
+    overflow: hidden;
+  }
+  .policy-table th {
+    background: var(--fg, #111);
+    color: #fff;
+    padding: 0.7rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+  .policy-table td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--border, #e5e5e5);
+    color: var(--fg2, #666);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  .policy-table tr:last-child td { border-bottom: none; }
+  .policy-table tr:nth-child(even) td { background: var(--bg2, #f7f5f2); }
+
+  /* ── Acknowledgement ── */
+  .ack-box {
+    background: var(--bg2, #f7f5f2);
+    border: 1px solid var(--border, #e5e5e5);
+    border-radius: 0.875rem;
+    padding: 2rem;
+    margin-top: 1.5rem;
+  }
+  .ack-field {
+    border: none;
+    border-bottom: 1.5px solid var(--border, #ccc);
+    background: transparent;
+    width: 100%;
+    padding: 0.5rem 0;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.9rem;
+    color: var(--fg, #111);
+    outline: none;
+    margin-bottom: 1.25rem;
+    transition: border-color 0.2s;
+  }
+  .ack-field:focus { border-bottom-color: #c8922a; }
+  .ack-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--fg2, #888);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Nav ── -->
+<nav class="top">
+  <div class="container inner">
+    <a href="/" class="brand">
+      <img src="/assets/logo.jpg" alt="Diraflow" class="nav-logo-img nav-logo-transparent">
+      <span class="brand-text">
+        <span class="brand-name">Diraflow</span>
+        <span class="brand-tagline">Training data for frontier AI</span>
+      </span>
+    </a>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="solutions.html">Solutions</a></li>
+      <li><a href="industries.html">Industries</a></li>
+      <li><a href="blog.html">Blog</a></li>
+      <li><a href="careers.html">Careers</a></li>
+      <li><a href="contact.html">Contact Us</a></li>
+      <li><a href="report.html">Report Concerns</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☾</span>
+      </button>
+      <a href="contact.html" class="btn btn-sm">Talk to us</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Page header ── -->
+<section class="page-head">
+  <div class="page-head-bg"></div>
+  <div class="container">
+    <div class="section-label fade-up fade-up-1">How we operate</div>
+    <h1 class="fade-up fade-up-2">Company <em>Policy Handbook</em></h1>
+    <p class="fade-up fade-up-3">Policies governing AI research, data, ethics, employment and operations. Version 1.0 — April 2026.</p>
+  </div>
+</section>
+
+<!-- ── Body ── -->
+<section class="block">
+  <div class="policy-layout">
+
+    <!-- Sidebar nav -->
+    <aside class="policy-sidebar">
+      <h4>Contents</h4>
+      <nav class="sidebar-nav">
+        <a href="#intro">Introduction</a>
+        <a href="#policy1">Policy 1.0 — AI Ethics</a>
+        <a href="#policy2">Policy 2.0 — Data Governance</a>
+        <a href="#policy3">Policy 3.0 — Research Integrity</a>
+        <a href="#policy4">Policy 4.0 — Annotator Workforce</a>
+        <a href="#policy5">Policy 5.0 — Information Security</a>
+        <a href="#policy6">Policy 6.0 — Employment & Conduct</a>
+        <a href="#policy7">Policy 7.0 — Sustainability</a>
+        <a href="#policy8">Policy 8.0 — Whistleblowing</a>
+        <a href="#acknowledgement">Acknowledgement</a>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <div class="policy-content">
+
+      <!-- Meta box -->
+      <div class="policy-meta-box">
+        <div><span>Version</span><strong>1.0 — April 2026</strong></div>
+        <div><span>Classification</span><strong>Internal / Confidential</strong></div>
+        <div><span>Approved By</span><strong>Board Members</strong></div>
+        <div><span>Next Review</span><strong>April 2027</strong></div>
+      </div>
+
+      <!-- Introduction -->
+      <div id="intro">
+        <span class="coc-badge" style="display:inline-flex; align-items:center; gap:0.4rem; background:rgba(200,146,42,0.1); border:1px solid rgba(200,146,42,0.25); color:#c8922a; font-size:0.72rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:0.35rem 0.875rem; border-radius:2rem; margin-bottom:1.25rem;">✦ Introduction</span>
+        <p class="policy-intro">Diraflow Ltd. is a high-performance AI training and evaluation partner delivering production-grade data solutions for today's most demanding machine learning systems. We specialise in scalable data annotation, human-in-the-loop training, and rigorous model evaluation — enabling organisations to build, refine, and deploy AI that performs reliably in real-world environments.</p>
+        <p class="policy-intro">Built for speed and precision, our operations combine expert human talent with structured workflows, multi-layer quality assurance, and domain-specific expertise. We handle complex, high-volume datasets across vision, language, and multimodal AI, ensuring consistency, accuracy, and measurable performance gains at every stage.</p>
+        <p class="policy-intro">This Policy Handbook sets out the standards, obligations, and expectations that govern how we operate — from how we handle training data to how we treat our people. These policies apply to all employees, contractors, researchers, and interns globally.</p>
+        <div class="callout callout-warning">
+          <strong>Core Principle</strong>
+          Every AI system we build must be safe, explainable, and fair. These are not constraints on our business — they are the foundation of it. We will not sacrifice ethics for speed, and we will not compromise safety for commercial pressure.
+        </div>
+        <p class="policy-intro">All staff are required to read this handbook in full, complete the annual policy acknowledgement, and raise any concerns with their line manager or the Ethics &amp; Compliance team.</p>
+      </div>
+
+      <!-- Policy 1 -->
+      <div id="policy1" class="policy-block">
+        <div class="policy-header">
+          <span class="policy-number">Policy 1.0</span>
+          <h2>AI Ethics &amp; Responsible Development Policy</h2>
+          <span class="policy-date">Apr 2026</span>
+        </div>
+
+        <h3>1.1 Purpose</h3>
+        <p>This policy establishes the ethical principles that govern all AI research, training, and deployment activities at DiraflowAI. It ensures that every AI system we build respects human rights, avoids harm, and operates transparently.</p>
+
+        <h3>1.2 Core Ethical Principles</h3>
+        <p><strong style="color:var(--fg);">Fairness &amp; Non-Discrimination</strong></p>
+        <ul>
+          <li>AI models must be tested for bias across protected characteristics including race, gender, age, religion, disability, and national origin before deployment.</li>
+          <li>Training datasets must be audited for representation gaps. Datasets that skew heavily toward any demographic must be balanced or supplemented before use.</li>
+          <li>Discriminatory outputs must be documented, reported to the Ethics team within 24 hours, and resolved before the model is released.</li>
+        </ul>
+        <p><strong style="color:var(--fg);">Transparency &amp; Explainability</strong></p>
+        <ul>
+          <li>All production AI systems must include model cards documenting intended use, known limitations, training data sources, and evaluation metrics.</li>
+          <li>Clients must be informed when they are interacting with an AI system, not a human.</li>
+          <li>Where technically feasible, model decisions must be explainable to affected users in plain language.</li>
+        </ul>
+        <p><strong style="color:var(--fg);">Human Oversight</strong></p>
+        <ul>
+          <li>No AI system operating in high-stakes domains (healthcare, legal, financial, criminal justice) may make autonomous decisions without human review.</li>
+          <li>Every deployed model must have a human escalation path and a documented shutdown procedure.</li>
+          <li>All automated decisions affecting individuals must be logged and be subject to appeal.</li>
+        </ul>
+        <p><strong style="color:var(--fg);">Safety &amp; Non-Maleficence</strong></p>
+        <ul>
+          <li>AI systems must not be designed or trained to deceive, manipulate, surveil, or harm individuals or groups.</li>
+          <li>Red-teaming and adversarial testing is mandatory for all public-facing models before release.</li>
+          <li>Employees who identify unsafe model behaviour must report it immediately via the Safety Incident channel.</li>
+        </ul>
+
+        <h3>1.3 Prohibited AI Applications</h3>
+        <p>DiraflowAI will not build, train, or supply AI systems for the following purposes:</p>
+        <ul>
+          <li>Mass surveillance or social scoring of populations</li>
+          <li>Autonomous lethal weapons systems</li>
+          <li>Deepfakes intended to deceive without consent</li>
+          <li>Psychological manipulation targeting vulnerable groups</li>
+          <li>Generation of child sexual abuse material</li>
+          <li>Circumvention of democratic processes or electoral integrity</li>
+        </ul>
+        <div class="callout callout-danger">
+          <strong>Violations</strong>
+          Any employee found to be developing, supporting, or concealing prohibited AI applications will face immediate disciplinary action up to and including termination and referral to law enforcement.
+        </div>
+
+        <h3>1.4 Ethics Review Process</h3>
+        <p>All new AI projects must pass an Ethics Review Board (ERB) and the Data Protection Act (2019), the UNESCO Ethical Impact Assessment tool through and after development. High-risk projects additionally require review by the independent AI Ethics Board.</p>
+        <table class="policy-table">
+          <thead><tr><th>Risk Level</th><th>Criteria</th><th>Review Required</th></tr></thead>
+          <tbody>
+            <tr><td>Low</td><td>Internal tools, research prototypes</td><td>Team lead sign-off</td></tr>
+            <tr><td>Medium</td><td>Client-facing, limited scope</td><td>Ethics team review</td></tr>
+            <tr><td>High</td><td>Public deployment, sensitive domains</td><td>Ethics Board + Legal</td></tr>
+            <tr><td>Critical</td><td>Healthcare, legal, law enforcement AI</td><td>Full panel review + external audit</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Policy 2 -->
+      <div id="policy2" class="policy-block">
+        <div class="policy-header">
+          <span class="policy-number">Policy 2.0</span>
+          <h2>Training Data Governance &amp; Privacy Policy</h2>
+          <span class="policy-date">Apr 2026</span>
+        </div>
+
+        <h3>2.1 Purpose</h3>
+        <p>This policy governs how DiraflowAI acquires, stores, labels, uses, and disposes of data used in AI training. It ensures compliance with the Ethics Review Boards (ERB), the Data Protection Act (2019), the UNESCO Ethical Impact Assessment tool and other applicable data protection laws, and protects the privacy and rights of data subjects.</p>
+
+        <h3>2.2 Data Acquisition</h3>
+        <ul>
+          <li>All training data must have a documented legal basis for use: licensed purchase, explicit consent, public domain, or synthetic generation.</li>
+          <li>Web-scraped data must be reviewed for copyright compliance, personal data, and sensitive content before ingestion into the training pipeline.</li>
+          <li>Data acquisition from third-party vendors requires a signed Data Processing Agreement (DPA) and vendor due diligence review.</li>
+          <li>Employee personal data may never be used as training data without explicit, documented consent.</li>
+        </ul>
+
+        <h3>2.3 Data Classification</h3>
+        <table class="policy-table">
+          <thead><tr><th>Class</th><th>Definition</th><th>Controls Required</th></tr></thead>
+          <tbody>
+            <tr><td>Public</td><td>Openly available, no PII</td><td>Standard access controls</td></tr>
+            <tr><td>Internal</td><td>Proprietary, business-sensitive</td><td>Role-based access, encryption at rest</td></tr>
+            <tr><td>Confidential</td><td>Client data, licensed datasets</td><td>Strict need-to-know, audit logging</td></tr>
+            <tr><td>Restricted</td><td>PII, health data, biometric data</td><td>Encryption + anonymisation + DPO sign-off</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.8rem; color:var(--fg2);">PII — Personally Identifiable Information &nbsp;|&nbsp; DPO — Data Protection Officer</p>
+
+        <h3>2.4 Data Storage &amp; Security</h3>
+        <ul>
+          <li>All Confidential and Restricted data must be encrypted at rest.</li>
+          <li>Training datasets must be stored in access-controlled data lakes. Access is granted on a project basis and reviewed quarterly.</li>
+          <li>Personal data must be anonymised or pseudonymised before being used in model training wherever technically possible.</li>
+          <li>Data retention periods must be defined at the time of acquisition. No training data may be retained beyond its authorised period.</li>
+        </ul>
+
+        <h3>2.5 Data Subject Rights</h3>
+        <p>Where personal data is used in training, DiraflowAI must be able to comply with the following rights upon valid request:</p>
+        <ul>
+          <li><strong>Right of access</strong> — provide a copy of personal data held within 30 days.</li>
+          <li><strong>Right to erasure</strong> — remove personal data from datasets and retrain or fine-tune affected models as required.</li>
+          <li><strong>Right to rectification</strong> — correct inaccurate personal data.</li>
+          <li><strong>Right to object</strong> — cease processing for specific purposes.</li>
+        </ul>
+        <div class="callout callout-info">
+          <strong>Data Breach Response</strong>
+          Any suspected data breach must be reported to the Data Protection Officer within 2 hours of discovery. Confirmed breaches involving personal data must be notified to the relevant supervisory authority within 72 hours or as guided otherwise by the law.
+        </div>
+      </div>
+
+      <!-- Policy 3 -->
+      <div id="policy3" class="policy-block">
+        <div class="policy-header">
+          <span class="policy-number">Policy 3.0</span>
+          <h2>AI Research Integrity &amp; Publication Policy</h2>
+          <span class="policy-date">Apr 2026</span>
+        </div>
+
+        <h3>3.1 Purpose</h3>
+        <p>This policy ensures that all AI research conducted at Diraflow is rigorous, reproducible, honest, and appropriately attributed. It governs internal research, published papers, conference submissions, and public model releases.</p>
+
+        <h3>3.2 Research Standards</h3>
+        <ul>
+          <li>All experimental results must be reproducible. Code, datasets (where permissible), and hyperparameters must be documented and archived for reference.</li>
+          <li>Researchers must report results honestly, including negative results and failure cases. Selective reporting of only positive outcomes is a violation of this policy.</li>
+          <li>Benchmark evaluations must use held-out test sets. Training on evaluation data (data contamination) must be disclosed if it occurs.</li>
+          <li>Statistical claims must include confidence intervals, significance tests, and effect sizes where applicable.</li>
+        </ul>
+
+        <h3>3.3 Authorship &amp; Attribution</h3>
+        <ul>
+          <li>Authorship on published work must reflect genuine intellectual contribution. Honorary or gift authorship is prohibited.</li>
+          <li>All contributors must be listed in acknowledgements. Third-party datasets, models, and code must be cited appropriately.</li>
+          <li>The use of AI-generated text in research papers must be disclosed in accordance with the target journal or conference policy.</li>
+        </ul>
+
+        <h3>3.4 Intellectual Property</h3>
+        <ul>
+          <li>All research outputs produced using Diraflow resources, time, or data are the intellectual property of Diraflow unless otherwise agreed in writing.</li>
+          <li>Researchers wishing to publish must obtain written approval from the relevant authorities of Research at least 5 working days before submission.</li>
+          <li>Open-source releases of models, code, or datasets require board member and Legal team review, and a defined licence before publication.</li>
+        </ul>
+
+        <h3>3.5 Research Safety Review</h3>
+        <ul>
+          <li>Research into dual-use capabilities requires Safety Board review in relation to the Data Protection Act (2019) and the UNESCO Ethical Impact Assessment tool before continuation.</li>
+          <li>Capability evaluations that reveal dangerous emergent behaviours must be reported to the Safety Board within 48 hours and may not be published without Board approval.</li>
+        </ul>
+      </div>
+
+      <!-- Policy 4 -->
+      <div id="policy4" class="policy-block">
+        <div class="policy-header">
+          <span class="policy-number">Policy 4.0</span>
+          <h2>Human Annotator &amp; Labelling Workforce Policy</h2>
+          <span class="policy-date">Apr 2026</span>
+        </div>
+
+        <h3>4.1 Purpose</h3>
+        <p>Human annotators are central to Diraflow's training pipeline. This policy ensures that all annotators — employees, contractors, and third-party labelers — are treated fairly, paid equitably, and protected from psychological harm.</p>
+
+        <h3>4.2 Fair Compensation</h3>
+        <ul>
+          <li>All annotators must be paid at or above the prevailing living wage in their country of work. Diraflow does not participate in exploitative micro-task platforms where effective hourly pay falls below minimum wage.</li>
+          <li>Piece-rate pay structures must be benchmarked quarterly to ensure effective hourly earnings remain fair.</li>
+          <li>Payment must be made within 30 or 31 days of task completion for contractors and on the standard payroll cycle for employees, or otherwise agreed in writing.</li>
+        </ul>
+
+        <h3>4.3 Psychological Safety &amp; Harmful Content</h3>
+        <ul>
+          <li>Annotators must be informed before assignment if a task involves potentially distressing content (violence, abuse, self-harm, explicit material).</li>
+          <li>No annotator may be required to review harmful content without prior consent, appropriate training, and ongoing wellbeing support.</li>
+          <li>Exposure to graphic or disturbing content must be time-limited. Annotators may not be assigned to harmful-content tasks for more than 2 consecutive hours without a mandatory break.</li>
+          <li>Free and confidential counselling must be available to all annotators working on sensitive content tasks.</li>
+          <li>Annotators may decline distressing tasks without penalty or pay reduction.</li>
+        </ul>
+
+        <h3>4.4 Quality &amp; Transparency</h3>
+        <ul>
+          <li>Annotators must be given clear, unambiguous task guidelines and calibration examples before beginning work.</li>
+          <li>Inter-annotator agreement must be tracked. Systematic disagreements must trigger guideline review, not annotator penalisation.</li>
+          <li>Annotators must never be deceived about the purpose of their labelling work. The general intended use of the model must be disclosed.</li>
+        </ul>
+      </div>
+
+      <!-- Policy 5 -->
+      <div id="policy5" class="policy-block">
+        <div class="policy-header">
+          <span class="policy-number">Policy 5.0</span>
+          <h2>Information Security &amp; Model Safety Policy</h2>
+          <span class="policy-date">Apr 2026</span>
+        </div>
+
+        <h3>5.1 Access Control</h3>
+        <ul>
+          <li>Access to model weights, training data, and production systems is granted on a least-privilege basis and reviewed every 90 days.</li>
+          <li>All staff must use multi-factor authentication (MFA) for all company systems. Password-only authentication is not permitted.</li>
+          <li>Privileged access (root, admin, model weight download) must be time-limited, logged, and approved by a line manager.</li>
+          <li>Departing employees and contractors must have all access revoked immediately or within 4 hours of their last working day.</li>
+        </ul>
+
+        <h3>5.2 Model Weight Security</h3>
+        <ul>
+          <li>Trained model weights are classified as Confidential. Unauthorised copying, sharing, or export of weights is a serious disciplinary offence.</li>
+          <li>Model weights must be stored in encrypted, access-controlled repositories. Local copies on personal devices are prohibited.</li>
+          <li>Any suspected exfiltration of model weights must be reported to the CISO immediately.</li>
+        </ul>
+
+        <h3>5.3 Acceptable Use of AI Tools</h3>
+        <ul>
+          <li>Employees may not input client data, proprietary source code, or confidential business information into public AI tools unless the tool has a signed enterprise data agreement.</li>
+          <li>Use of AI coding assistants is permitted for general development tasks. All AI-generated code must be reviewed by a human engineer before merging.</li>
+          <li>Employees must not use company AI systems to generate content that violates any other policy in this handbook.</li>
+        </ul>
+
+        <h3>5.4 Incident Response</h3>
+        <p>Security incidents must be classified and responded to as follows:</p>
+        <table class="policy-table">
+          <thead><tr><th>Severity</th><th>Example</th><th>Report Within</th><th>Escalate To</th></tr></thead>
+          <tbody>
+            <tr><td><strong>P1 — Critical</strong></td><td>Personal data breach, major system compromise, financial fraud, critical service outage</td><td>1 hour</td><td>CEO/MD, CISO, Legal Counsel, Data Protection Commissioner (Kenya)</td></tr>
+            <tr><td><strong>P2 — High</strong></td><td>Unauthorised access, ransomware, significant data exposure risk</td><td>4 hours</td><td>Head of IT/Security, Senior Management, Compliance Officer</td></tr>
+            <tr><td><strong>P3 — Medium</strong></td><td>Policy violation, phishing attempt, suspicious activity with limited impact</td><td>24 hours</td><td>IT Department, Information Security Team</td></tr>
+            <tr><td><strong>P4 — Low</strong></td><td>Suspicious email, minor anomaly, non-critical system issue</td><td>72 hours</td><td>IT Support / Line Manager</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Policy 6 -->
+      <div id="policy6" class="policy-block">
+        <div class="policy-header">
+          <span class="policy-number">Policy 6.0</span>
+          <h2>Employment, Equal Opportunity &amp; Conduct Policy</h2>
+          <span class="policy-date">Apr 2026</span>
+        </div>
+
+        <h3>6.1 Equal Opportunity</h3>
+        <p>Diraflow is an equal opportunity employer. We do not discriminate on the basis of race, colour, ethnicity, religion, gender, gender identity, sexual orientation, age, disability, pregnancy, marital status, or national origin in any employment decision.</p>
+        <ul>
+          <li>All job advertisements must use inclusive language and be reviewed by Operations before posting.</li>
+          <li>Structured interviews with standardised scoring must be used for all roles. Unstructured interviews that rely solely on "culture fit" judgements are not permitted.</li>
+          <li>Compensation bands for equivalent roles must be published internally. Pay equity audits must be conducted annually.</li>
+        </ul>
+
+        <h3>6.2 Anti-Harassment &amp; Respectful Workplace</h3>
+        <ul>
+          <li>Harassment, bullying, and intimidation of any kind are prohibited and will result in disciplinary action.</li>
+          <li>Harassment includes but is not limited to: verbal abuse, unwanted physical contact, offensive jokes, exclusionary behaviour, and online harassment via company platforms.</li>
+          <li>All reports of harassment will be investigated promptly, confidentially, and impartially. Retaliation against anyone who raises a concern is a separate disciplinary offence.</li>
+        </ul>
+
+        <h3>6.3 Conflicts of Interest</h3>
+        <ul>
+          <li>Employees must disclose any financial interest, secondary employment, or personal relationship that could conflict with their duties at Diraflow.</li>
+          <li>Employees may not work for direct competitors, clients, or partners without prior written approval from their manager and the People team.</li>
+        </ul>
+
+        <h3>6.4 Moonlighting &amp; Intellectual Property Assignment</h3>
+        <ul>
+          <li>Employees may engage in personal projects outside work hours provided they do not use Diraflow resources, compete with Diraflow, or derive from work performed at Diraflow.</li>
+          <li>Any AI model, tool, or invention created using Diraflow resources, time, or data belongs to Diraflow and must be assigned accordingly unless agreed otherwise in writing.</li>
+        </ul>
+
+        <h3>6.5 AI-Specific Conduct Expectations</h3>
+        <p>Given the nature of our work, all employees are additionally expected to:</p>
+        <ul>
+          <li>Refuse instructions to build or train AI systems that violate Policy 1.0.</li>
+          <li>Raise safety concerns through official channels without fear of retaliation.</li>
+          <li>Participate in mandatory AI ethics and safety training (minimum 8 hours per year).</li>
+          <li>Not publicly comment on Diraflow's AI capabilities, risks, or model details without Communications approval.</li>
+        </ul>
+      </div>
+
+      <!-- Policy 7 -->
+      <div id="policy7" class="policy-block">
+        <div class="policy-header">
+          <span class="policy-number">Policy 7.0</span>
+          <h2>Environmental Sustainability Policy</h2>
+          <span class="policy-date">Apr 2026</span>
+        </div>
+
+        <h3>7.1 Purpose</h3>
+        <p>AI model training is computationally intensive and has a significant environmental footprint. Diraflow is committed to minimising our impact and operating transparently about our energy use and carbon emissions.</p>
+
+        <h3>7.2 Compute Efficiency</h3>
+        <ul>
+          <li>All large training runs must include a compute budget justification. Runs must not proceed if the projected improvement does not justify the compute cost.</li>
+          <li>Training infrastructure must use the most energy-efficient hardware available. GPU utilisation rates must be monitored and optimised continuously.</li>
+          <li>Idle compute resources must be shut down or scaled down automatically. Persistent idle compute is a wasteful use of energy and cost.</li>
+        </ul>
+
+        <h3>7.3 Renewable Energy</h3>
+        <ul>
+          <li>Diraflow targets 100% renewable energy for all owned or directly contracted compute infrastructure by 2026.</li>
+          <li>Cloud compute providers must be selected with preference given to those operating on renewable or carbon-neutral energy.</li>
+        </ul>
+      </div>
+
+      <!-- Policy 8 -->
+      <div id="policy8" class="policy-block">
+        <div class="policy-header">
+          <span class="policy-number">Policy 8.0</span>
+          <h2>Whistleblowing &amp; Speak-Up Policy</h2>
+          <span class="policy-date">Apr 2026</span>
+        </div>
+
+        <h3>8.1 Purpose</h3>
+        <p>Diraflow is committed to operating with integrity. This policy encourages and protects employees who raise concerns about unethical, illegal, or unsafe conduct — including concerns about the safety of AI systems we are building.</p>
+
+        <h3>8.2 What to Report</h3>
+        <ul>
+          <li>Violations of any policy in this handbook</li>
+          <li>Unsafe or harmful AI development practices</li>
+          <li>Fraud, bribery, or financial misconduct</li>
+          <li>Data breaches or privacy violations</li>
+          <li>Discrimination, harassment, or bullying</li>
+          <li>Pressure to suppress or ignore safety concerns</li>
+        </ul>
+
+        <h3>8.3 How to Report</h3>
+        <ul>
+          <li>Directly to your line manager or the Ethics &amp; Compliance team.</li>
+          <li>Anonymously via the independent Ethics Hotline.</li>
+          <li>Via the confidential online reporting portal — contact <a href="mailto:diraflowai@gmail.com" style="color:#c8922a;">diraflowai@gmail.com</a> to request access.</li>
+        </ul>
+
+        <h3>8.4 Protections</h3>
+        <p>Diraflow prohibits retaliation against any person who raises a concern in good faith. Retaliation includes demotion, dismissal, pay reduction, exclusion, and harassment. Any manager found to have retaliated against a whistleblower will face immediate disciplinary action.</p>
+        <div class="callout callout-info">
+          <strong>Legal Protection</strong>
+          Whistleblowers may also be protected under applicable national laws where Diraflow operates, including Kenya's legal and regulatory framework: the Bribery Act 2016 (Kenya), the Leadership and Integrity Act 2012 (Kenya), and the Public Officer Ethics Act 2003 (Kenya), as well as any other relevant legislation that provides for the protection of persons who report misconduct or unethical practices.
+        </div>
+      </div>
+
+      <!-- Acknowledgement -->
+      <div id="acknowledgement" class="policy-block">
+        <div class="policy-header">
+          <span class="policy-number">Final</span>
+          <h2>Policy Acknowledgement</h2>
+          <span class="policy-date">Apr 2026</span>
+        </div>
+        <p>All employees, contractors, and interns are required to sign this acknowledgement upon joining Diraflow and annually thereafter. The signed form must be submitted to the Operations Department.</p>
+        <div class="ack-box">
+          <p style="font-size:0.9rem; line-height:1.75; color:var(--fg2); margin-bottom:1.75rem;">I, the undersigned, confirm that I have read, understood, and agree to comply with all policies contained in the Diraflow Company Policy Handbook (Version 1.0, April 2026). I understand that violations of these policies may result in disciplinary action up to and including termination of employment.</p>
+          <div>
+            <label class="ack-label">Full Name</label>
+            <input class="ack-field" type="text" placeholder="Your full legal name">
+          </div>
+          <div>
+            <label class="ack-label">Job Title</label>
+            <input class="ack-field" type="text" placeholder="Your role at Diraflow">
+          </div>
+          <div>
+            <label class="ack-label">Signature</label>
+            <input class="ack-field" type="text" placeholder="Type full name as signature">
+          </div>
+          <div>
+            <label class="ack-label">Date</label>
+            <input class="ack-field" type="date">
+          </div>
+          <button class="btn btn-lg" style="margin-top:0.5rem; width:100%; justify-content:center;" onclick="submitAck()">Submit Acknowledgement →</button>
+          <p id="ack-success" style="display:none; text-align:center; color:#7ecb8f; font-size:0.875rem; margin-top:1rem;">✓ Acknowledgement submitted. Thank you.</p>
+        </div>
+      </div>
+
+    </div><!-- end .policy-content -->
+  </div><!-- end .policy-layout -->
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/" class="brand" style="display:inline-flex; gap:.625rem; align-items:center; font-weight:700; font-size:1.125rem; letter-spacing:-.025em; margin-bottom:1rem;">
+          <img src="/assets/logo.jpg" alt="Diraflow" class="nav-logo-img nav-logo-transparent">
+        </a>
+        <p>Premium training data for AI agents and LLMs. Built by experts, trusted by frontier AI teams worldwide.</p>
+        <div style="display:flex; gap:0.6rem; align-items:center; margin-top:1.25rem; flex-wrap:wrap;">
+          <a href="https://linkedin.com/company/diraflow" target="_blank" rel="noopener" aria-label="LinkedIn" style="width:38px;height:38px;border-radius:9px;background:#0A66C2;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+          <a href="https://x.com/diraflow_" target="_blank" rel="noopener" aria-label="X" style="width:38px;height:38px;border-radius:9px;background:#000;border:1px solid #333;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+          <a href="https://facebook.com/diraflow" target="_blank" rel="noopener" aria-label="Facebook" style="width:38px;height:38px;border-radius:9px;background:#1877F2;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+          <a href="https://www.instagram.com/diraflow_?utm_source=qr&igsh=MTVkdHRwem92dHQ4cQ==" target="_blank" rel="noopener" aria-label="Instagram" style="width:38px;height:38px;border-radius:9px;background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%);display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col"><h4>Solutions</h4><ul><li><a href="/#solutions">Environment Generation</a></li><li><a href="/#solutions">Agentic Datasets</a></li><li><a href="/#solutions">Red-Teaming</a></li><li><a href="/#solutions">RLHF &amp; Preference</a></li><li><a href="/#solutions">STEM Data</a></li><li><a href="/#solutions">Custom Projects</a></li></ul></div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a href="/blog/">Blog</a></li><li><a href="/careers/">Careers</a></li><li><a href="/#faq">FAQ</a></li><li><a href="/#industries">Industries</a></li><li><a href="/#contact">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Connect</h4><ul><li><a href="mailto:diraflowai@gmail.com">diraflowai@gmail.com</a></li><li><a href="https://linkedin.com/company/diraflow" target="_blank" rel="noopener">LinkedIn</a></li><li><a href="https://x.com/diraflow" target="_blank" rel="noopener">Twitter / X</a></li><li><a href="#">Newsletter</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+        <p>© 2026 Diraflow AI. All rights reserved.</p>
+        <span style="color:var(--subtle); font-size:.8125rem;">·</span>
+        <a href="/code-of-conduct.html" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
+        <span style="color:var(--subtle); font-size:.8125rem;">·</span>
+        <a href="/privacy-policy.html" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
+      </div>
+      <div style="display:flex; align-items:center; gap:1.5rem;">
+        <p style="font-size:.8125rem; color:var(--subtle);">Made with care for the AI community.</p>
+        <button class="theme-toggle" aria-label="Toggle dark mode" style="flex-shrink:0;"><span class="icon-sun">☀</span><span class="icon-moon">☾</span></button>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/main.js" defer></script>
+<script>
+  // Sidebar active state on scroll
+  const sections = document.querySelectorAll('[id]');
+  const navLinks = document.querySelectorAll('.sidebar-nav a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 120) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  });
+
+  // Acknowledgement submit (UI only — hook to backend/email if needed)
+  function submitAck() {
+    const inputs = document.querySelectorAll('.ack-field');
+    const filled = [...inputs].every(i => i.value.trim() !== '');
+    if (!filled) { alert('Please complete all fields before submitting.'); return; }
+    inputs.forEach(i => i.disabled = true);
+    document.querySelector('#acknowledgement .btn').style.display = 'none';
+    document.getElementById('ack-success').style.display = 'block';
+  }
+</script>
+</body>
+</html>

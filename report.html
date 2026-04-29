@@ -1,0 +1,970 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Speak Up — Diraflow</title>
+<meta name="description" content="Diraflow's confidential whistleblowing and speak-up portal. Report concerns about ethics, safety, misconduct, or policy violations securely and anonymously.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="icon" type="image/png" href="assets/logo.jpg">
+<script>
+  (function(){
+    var t = localStorage.getItem('diraflow-theme');
+    var d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', t || (d ? 'dark' : 'light'));
+  })();
+</script>
+
+<style>
+/* ════════════════════════════════
+   CSS VARIABLES
+════════════════════════════════ */
+:root {
+  --bg: #f7f6f2; --bg2: #eeecea; --fg: #111110; --fg2: #666460;
+  --border: #d8d6d0; --card: #ffffff; --subtle: #999690;
+  --gold: #c8922a; --green: #4a9e5c; --red: #dc3c3c;
+  --radius: 0.75rem; --radius-lg: 1.25rem;
+  --transition: 0.2s ease; --shadow: 0 4px 24px rgba(0,0,0,0.07);
+}
+[data-theme="dark"] {
+  --bg: #111110; --bg2: #1a1918; --fg: #f7f6f2;
+  --fg2: #999690; --border: #2a2826; --card: #1e1c1b; --subtle: #666460;
+}
+
+/* ════════════════════════════════
+   RESET & BASE
+════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--fg); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+img { display: block; max-width: 100%; }
+a { color: inherit; }
+ul { list-style: none; }
+button { font-family: inherit; }
+em { font-style: italic; }
+
+/* ════════════════════════════════
+   LAYOUT
+════════════════════════════════ */
+.container        { max-width: 1160px; margin: 0 auto; padding: 0 1.5rem; }
+.container-narrow { max-width: 760px;  margin: 0 auto; padding: 0 1.5rem; }
+.block            { padding: 5rem 0; }
+@media (max-width: 600px) { .block { padding: 3rem 0; } }
+
+/* ════════════════════════════════
+   NAV
+════════════════════════════════ */
+nav.top {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  height: 68px; display: flex; align-items: center;
+}
+nav.top .container.inner {
+  max-width: 1160px; margin: 0 auto; padding: 0 1.5rem;
+  display: flex; align-items: center; gap: 2rem; width: 100%;
+}
+.brand {
+  display: inline-flex; align-items: center; gap: 0.625rem;
+  text-decoration: none; font-weight: 700; color: var(--fg);
+  white-space: nowrap; flex-shrink: 0;
+}
+.nav-logo-img { width: 36px; height: 36px; border-radius: 8px; object-fit: contain; }
+.brand-text   { display: flex; flex-direction: column; }
+.brand-name    { font-size: 1rem; font-weight: 700; line-height: 1.1; color: var(--fg); }
+.brand-tagline { font-size: 0.65rem; font-weight: 400; color: var(--fg2); letter-spacing: 0.02em; }
+nav.top ul {
+  display: flex; gap: 0; list-style: none; margin: 0; padding: 0; flex: 1;
+}
+nav.top ul li a {
+  text-decoration: none; font-size: 0.875rem; font-weight: 500; color: var(--fg2);
+  padding: 0.5rem 0.875rem; border-radius: 0.5rem;
+  transition: color var(--transition), background var(--transition);
+  white-space: nowrap; display: block;
+}
+nav.top ul li a:hover, nav.top ul li a.active { color: var(--fg); background: var(--bg2); }
+.nav-right { display: flex; align-items: center; gap: 0.75rem; margin-left: auto; flex-shrink: 0; }
+@media (max-width: 860px) { nav.top ul { display: none; } }
+
+/* ════════════════════════════════
+   BUTTONS
+════════════════════════════════ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 0.4rem; padding: 0.6rem 1.25rem; border-radius: 2rem;
+  font-weight: 600; font-size: 0.875rem; font-family: 'Sora', sans-serif;
+  cursor: pointer; text-decoration: none; border: none;
+  transition: all var(--transition); white-space: nowrap;
+  background: var(--fg); color: var(--bg);
+}
+.btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.btn-sm { padding: 0.45rem 1rem; font-size: 0.8rem; }
+.btn-lg { padding: 0.8rem 1.75rem; font-size: 0.95rem; }
+
+/* ════════════════════════════════
+   THEME TOGGLE
+════════════════════════════════ */
+.theme-toggle {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 2rem; padding: 0.35rem 0.75rem;
+  cursor: pointer; font-size: 0.9rem;
+  display: flex; align-items: center; gap: 0.4rem;
+  transition: all var(--transition);
+}
+.theme-toggle:hover { border-color: var(--gold); }
+[data-theme="dark"]  .icon-sun  { display: none; }
+[data-theme="light"] .icon-moon { display: none; }
+
+/* ════════════════════════════════
+   PAGE HEADER
+════════════════════════════════ */
+.page-head {
+  padding: 5rem 0 4rem; position: relative;
+  background: var(--fg); border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+.page-head-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 70% 0%, rgba(200,146,42,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+.page-head h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  font-weight: 400; line-height: 1.1;
+  letter-spacing: -0.035em; margin-bottom: 1rem; color: #fff;
+}
+.page-head h1 em { color: var(--gold); font-style: italic; }
+.page-head > .container > p {
+  font-size: 1.05rem; color: rgba(255,255,255,0.65);
+  max-width: 560px; line-height: 1.75;
+}
+
+/* ════════════════════════════════
+   SECTION LABELS & TITLES
+════════════════════════════════ */
+.section-label {
+  display: flex; align-items: center; gap: 0.625rem;
+  font-size: 0.6875rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--gold); margin-bottom: 0.75rem;
+}
+.section-label::before { content: ''; display: block; width: 1.5rem; height: 1.5px; background: var(--gold); }
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 400; line-height: 1.15;
+  letter-spacing: -0.03em; color: var(--fg); margin-bottom: 1.25rem;
+}
+.section-title em { color: var(--gold); font-style: italic; }
+
+/* ════════════════════════════════
+   FADE UP
+════════════════════════════════ */
+.fade-up { opacity: 0; transform: translateY(20px); animation: fadeUp 0.6s ease forwards; }
+.fade-up-1 { animation-delay: 0.1s; }
+.fade-up-2 { animation-delay: 0.2s; }
+.fade-up-3 { animation-delay: 0.3s; }
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+/* ════════════════════════════════
+   PROTECTION BADGES
+════════════════════════════════ */
+.protection-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1rem; margin: 0 0 3rem;
+}
+@media (max-width: 700px) { .protection-strip { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 420px) { .protection-strip { grid-template-columns: 1fr; } }
+.protection-badge {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.25rem;
+  text-align: center; transition: border-color 0.2s;
+}
+.protection-badge:hover { border-color: var(--gold); }
+.protection-badge .icon {
+  font-size: 1.5rem; margin-bottom: 0.5rem;
+  width: 44px; height: 44px; border-radius: 0.625rem;
+  background: rgba(200,146,42,0.1); border: 1px solid rgba(200,146,42,0.2);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 0.75rem;
+}
+.protection-badge h4 { font-size: 0.82rem; font-weight: 700; color: var(--fg); margin-bottom: 0.3rem; }
+.protection-badge p  { font-size: 0.75rem; color: var(--fg2); line-height: 1.5; margin: 0; }
+
+/* ════════════════════════════════
+   REPORT CATEGORIES
+════════════════════════════════ */
+.categories-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 3rem;
+}
+@media (max-width: 700px) { .categories-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 460px) { .categories-grid { grid-template-columns: 1fr; } }
+.category-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.25rem;
+  display: flex; align-items: flex-start; gap: 0.875rem;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: default;
+}
+.category-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.category-card .cat-icon {
+  font-size: 1.25rem; width: 40px; height: 40px;
+  border-radius: 0.625rem; background: var(--bg2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.category-card h4 { font-size: 0.85rem; font-weight: 700; color: var(--fg); margin-bottom: 0.25rem; }
+.category-card p  { font-size: 0.78rem; color: var(--fg2); line-height: 1.5; margin: 0; }
+
+/* ════════════════════════════════
+   SEVERITY INDICATOR
+════════════════════════════════ */
+.severity-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 2rem;
+}
+@media (max-width: 600px) { .severity-row { grid-template-columns: 1fr 1fr; } }
+.severity-card {
+  border-radius: 0.875rem; padding: 1rem; border: 1px solid transparent;
+}
+.sev-critical { background: rgba(220,60,60,0.08);  border-color: rgba(220,60,60,0.25); }
+.sev-high     { background: rgba(234,130,52,0.08); border-color: rgba(234,130,52,0.25); }
+.sev-medium   { background: rgba(200,146,42,0.08); border-color: rgba(200,146,42,0.25); }
+.sev-low      { background: rgba(74,158,92,0.08);  border-color: rgba(74,158,92,0.25); }
+.sev-label {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 0.35rem; display: block;
+}
+.sev-critical .sev-label { color: #dc3c3c; }
+.sev-high     .sev-label { color: #ea8234; }
+.sev-medium   .sev-label { color: var(--gold); }
+.sev-low      .sev-label { color: #4a9e5c; }
+.sev-time {
+  font-family: 'DM Serif Display', serif; font-size: 1.35rem;
+  color: var(--fg); line-height: 1; margin-bottom: 0.35rem;
+}
+.sev-card p { font-size: 0.75rem; color: var(--fg2); line-height: 1.5; margin: 0; }
+
+/* ════════════════════════════════
+   REPORTING FORM
+════════════════════════════════ */
+.report-form-wrap {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 2.75rem;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+  position: relative; overflow: hidden;
+}
+.report-form-wrap::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--gold), #e5b44a);
+}
+.field-group { margin-bottom: 1.25rem; }
+.field-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+@media (max-width: 560px) { .field-row { grid-template-columns: 1fr; } }
+.field-label {
+  display: block; font-size: 0.78rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--fg2); margin-bottom: 0.45rem;
+}
+.field-input {
+  width: 100%; background: var(--bg2); border: 1.5px solid var(--border);
+  border-radius: 0.625rem; padding: 0.8rem 1rem;
+  font-size: 0.875rem; color: var(--fg); font-family: 'Sora', sans-serif;
+  box-sizing: border-box; outline: none; transition: border-color 0.2s, background 0.2s;
+  display: block;
+}
+.field-input:focus { border-color: var(--gold); background: var(--bg); }
+.field-input::placeholder { color: var(--subtle); }
+textarea.field-input { resize: vertical; min-height: 120px; }
+select.field-input   { cursor: pointer; }
+
+/* Anonymous toggle */
+.anon-toggle {
+  display: flex; align-items: center; gap: 0.875rem;
+  padding: 1rem 1.25rem;
+  background: rgba(200,146,42,0.06); border: 1.5px solid rgba(200,146,42,0.2);
+  border-radius: 0.75rem; cursor: pointer; margin-bottom: 1.25rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.anon-toggle:hover { background: rgba(200,146,42,0.1); }
+.anon-toggle input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--gold); }
+.anon-toggle-text strong { display: block; font-size: 0.875rem; font-weight: 700; color: var(--fg); margin-bottom: 0.1rem; }
+.anon-toggle-text span  { font-size: 0.78rem; color: var(--fg2); line-height: 1.4; }
+
+/* Submit button */
+.submit-btn {
+  width: 100%; padding: 1rem; background: var(--gold); color: #fff;
+  border: none; border-radius: 2rem; font-family: 'Sora', sans-serif;
+  font-size: 0.95rem; font-weight: 700; cursor: pointer;
+  transition: background 0.2s, transform 0.15s; margin-top: 0.5rem;
+}
+.submit-btn:hover { background: #a8771e; transform: translateY(-1px); }
+
+/* Status messages */
+.form-success {
+  display: none; text-align: center; padding: 1.75rem;
+  border-radius: 0.875rem; background: rgba(74,158,92,0.08);
+  border: 1px solid rgba(74,158,92,0.25); margin-top: 1.25rem;
+}
+.form-success h4 { font-size: 1.1rem; color: #4a9e5c; margin-bottom: 0.5rem; }
+.form-success p  { font-size: 0.875rem; color: var(--fg2); line-height: 1.7; margin: 0; }
+.form-error {
+  display: none; text-align: center; font-size: 0.875rem;
+  color: #dc3c3c; margin-top: 0.75rem;
+}
+
+/* Callout boxes */
+.callout {
+  border-radius: 0.75rem; padding: 1.1rem 1.25rem;
+  margin: 1.25rem 0; font-size: 0.875rem; line-height: 1.7;
+}
+.callout-gold {
+  background: rgba(200,146,42,0.07);
+  border-left: 3px solid var(--gold); color: var(--fg);
+}
+.callout-red {
+  background: rgba(220,60,60,0.06);
+  border-left: 3px solid #dc3c3c; color: var(--fg);
+}
+.callout-green {
+  background: rgba(74,158,92,0.07);
+  border-left: 3px solid #4a9e5c; color: var(--fg);
+}
+.callout strong { font-weight: 700; display: block; margin-bottom: 0.25rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.callout-gold  strong { color: var(--gold); }
+.callout-red   strong { color: #dc3c3c; }
+.callout-green strong { color: #4a9e5c; }
+
+/* Section divider */
+.form-section-divider {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--fg2);
+  border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
+  margin: 1.75rem 0 1.25rem; display: flex; align-items: center; gap: 0.75rem;
+}
+.form-section-divider::before {
+  content: ''; display: block; width: 1rem; height: 1.5px; background: var(--gold);
+}
+
+/* Footer */
+footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 4rem 0 0; }
+.footer-grid { display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+@media (max-width: 860px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; } }
+@media (max-width: 500px) { .footer-grid { grid-template-columns: 1fr; } }
+.footer-brand p { font-size: 0.875rem; color: var(--fg2); line-height: 1.7; margin-top: 0.75rem; }
+.footer-col h4 { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg2); margin-bottom: 1.25rem; }
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.625rem; }
+.footer-col ul li a { font-size: 0.875rem; color: var(--fg2); text-decoration: none; transition: color var(--transition); }
+.footer-col ul li a:hover { color: var(--gold); }
+.footer-bottom { border-top: 1px solid var(--border); padding: 1.5rem 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+.footer-bottom p { font-size: 0.8125rem; color: var(--subtle); }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════
+     NAV
+════════════════════════════════ -->
+<nav class="top">
+  <div class="container inner">
+    <a href="index.html" class="brand">
+      <img src="assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+      <span class="brand-text">
+        <span class="brand-name">Diraflow</span>
+        <span class="brand-tagline">Training data for frontier AI</span>
+      </span>
+    </a>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="solutions.html">Solutions</a></li>
+      <li><a href="industries.html">Industries</a></li>
+      <li><a href="blog/index.html">Blog</a></li>
+      <li><a href="careers/index.html">Careers</a></li>
+      <li><a href="contact.html">Contact Us</a></li>
+      <li><a href="report.html" class="active">Report Concerns</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀</span><span class="icon-moon">☾</span>
+      </button>
+      <a href="contact.html" class="btn btn-sm">Talk to us</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════
+     PAGE HEADER
+════════════════════════════════ -->
+<section class="page-head">
+  <div class="page-head-bg"></div>
+  <div class="container">
+    <div class="section-label fade-up fade-up-1" style="color:var(--gold);">✦ Speak up</div>
+    <h1 class="fade-up fade-up-2">Whistleblowing &amp; <em>Speak-Up</em> Portal</h1>
+    <p class="fade-up fade-up-3">Diraflow is committed to operating with integrity. This is your confidential space to raise concerns about unethical, illegal, or unsafe conduct — including concerns about the AI systems we are building. Your voice matters and you are protected.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     PROTECTION BADGES
+════════════════════════════════ -->
+<section style="background:var(--bg2); padding:3rem 0; border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="protection-strip">
+      <div class="protection-badge">
+        <div class="icon">🔒</div>
+        <h4>Fully confidential</h4>
+        <p>Your report is handled with strict confidentiality. Details are shared only with those who need to investigate.</p>
+      </div>
+      <div class="protection-badge">
+        <div class="icon">👤</div>
+        <h4>Anonymous option</h4>
+        <p>You may submit anonymously. We cannot follow up, but your report will still be reviewed and acted upon.</p>
+      </div>
+      <div class="protection-badge">
+        <div class="icon">🛡️</div>
+        <h4>No retaliation</h4>
+        <p>Diraflow strictly prohibits retaliation. Any manager found to have retaliated faces immediate disciplinary action.</p>
+      </div>
+      <div class="protection-badge">
+        <div class="icon">⚖️</div>
+        <h4>Legal protection</h4>
+        <p>Whistleblowers are protected under Kenya's Bribery Act 2016, Leadership and Integrity Act 2012, and Public Officer Ethics Act 2003.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     WHAT TO REPORT
+════════════════════════════════ -->
+<section class="block">
+  <div class="container">
+    <div class="section-label">Policy 8.2</div>
+    <h2 class="section-title">What to <em>Report</em></h2>
+    <p style="font-size:0.95rem; color:var(--fg2); line-height:1.8; max-width:620px; margin-bottom:2.5rem;">The following types of concerns should be reported through this portal. If you are unsure whether something qualifies — report it anyway. We would rather investigate something that turns out to be minor than miss something serious.</p>
+
+    <div class="categories-grid">
+
+      <div class="category-card">
+        <div class="cat-icon">📋</div>
+        <div>
+          <h4>Policy violations</h4>
+          <p>Violations of any policy in the Diraflow Company Policy Handbook — including AI ethics, data governance, research integrity, and employment policies.</p>
+        </div>
+      </div>
+
+      <div class="category-card">
+        <div class="cat-icon">⚠️</div>
+        <div>
+          <h4>Unsafe AI development</h4>
+          <p>Unsafe or harmful AI development practices — including building prohibited AI systems, bypassing ethics review, or ignoring safety testing requirements.</p>
+        </div>
+      </div>
+
+      <div class="category-card">
+        <div class="cat-icon">💰</div>
+        <div>
+          <h4>Fraud &amp; financial misconduct</h4>
+          <p>Fraud, bribery, corruption, embezzlement, expense manipulation, or any financial irregularity involving company or client funds.</p>
+        </div>
+      </div>
+
+      <div class="category-card">
+        <div class="cat-icon">🗄️</div>
+        <div>
+          <h4>Data breaches &amp; privacy</h4>
+          <p>Data breaches, unauthorised access to personal data, privacy violations, or misuse of client or contributor data in breach of our data governance policy.</p>
+        </div>
+      </div>
+
+      <div class="category-card">
+        <div class="cat-icon">🤝</div>
+        <div>
+          <h4>Discrimination &amp; harassment</h4>
+          <p>Discrimination, bullying, harassment, or intimidation based on race, gender, age, religion, disability, sexual orientation, or any other characteristic.</p>
+        </div>
+      </div>
+
+      <div class="category-card">
+        <div class="cat-icon">🔇</div>
+        <div>
+          <h4>Suppression of safety concerns</h4>
+          <p>Pressure from any person to suppress, conceal, ignore, or not report safety concerns, ethical issues, or potential misconduct.</p>
+        </div>
+      </div>
+
+      <div class="category-card">
+        <div class="cat-icon">🧾</div>
+        <div>
+          <h4>Intellectual property abuse</h4>
+          <p>Unauthorised use, sharing, or theft of intellectual property — including client datasets, model weights, or proprietary Diraflow methodologies.</p>
+        </div>
+      </div>
+
+      <div class="category-card">
+        <div class="cat-icon">🌍</div>
+        <div>
+          <h4>Environmental violations</h4>
+          <p>Deliberate circumvention of Diraflow's environmental sustainability commitments — including wasteful compute use or misrepresentation of energy usage.</p>
+        </div>
+      </div>
+
+      <div class="category-card">
+        <div class="cat-icon">❓</div>
+        <div>
+          <h4>Other concerns</h4>
+          <p>Any other conduct you believe is unethical, illegal, or contrary to Diraflow's values — even if it doesn't fit neatly into the categories above.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Response time by severity -->
+    <h3 style="font-size:1rem; font-weight:700; color:var(--fg); margin-bottom:1rem;">Response timelines by severity</h3>
+    <div class="severity-row">
+      <div class="severity-card sev-critical">
+        <span class="sev-label">P1 — Critical</span>
+        <div class="sev-time">24 hrs</div>
+        <p>Data breaches, active harm, financial fraud, AI safety emergencies</p>
+      </div>
+      <div class="severity-card sev-high">
+        <span class="sev-label">P2 — High</span>
+        <div class="sev-time">3 days</div>
+        <p>Harassment, discrimination, serious policy violations, misconduct</p>
+      </div>
+      <div class="severity-card sev-medium">
+        <span class="sev-label">P3 — Medium</span>
+        <div class="sev-time">5 days</div>
+        <p>Policy breaches, workplace conflicts, minor misconduct</p>
+      </div>
+      <div class="severity-card sev-low">
+        <span class="sev-label">P4 — Low</span>
+        <div class="sev-time">10 days</div>
+        <p>General concerns, process improvements, minor irregularities</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     REPORTING FORM
+════════════════════════════════ -->
+<section class="block" style="background:var(--bg2);" id="report">
+  <div class="container-narrow">
+    <div class="section-label">Submit a report</div>
+    <h2 class="section-title">Make a <em>confidential report</em></h2>
+    <p style="font-size:0.9rem; color:var(--fg2); line-height:1.8; margin-bottom:2rem;">Complete the form below as fully as you can. The more detail you provide, the more effectively we can investigate. All submissions are reviewed by senior leadership within the timeframes above.</p>
+
+    <div class="callout callout-green" style="margin-bottom:2rem;">
+      <strong>🔒 Your privacy is protected</strong>
+      All submissions are encrypted and handled on a strict need-to-know basis. Choosing to identify yourself helps us follow up, but anonymous reports are equally valid and will be fully investigated.
+    </div>
+
+    <div class="report-form-wrap">
+
+      <!-- Anonymous toggle -->
+      <label class="anon-toggle">
+        <input type="checkbox" id="anonymous-toggle" onchange="toggleAnonymous(this)">
+        <div class="anon-toggle-text">
+          <strong>Submit anonymously</strong>
+          <span>Check this box to submit without sharing your name or contact details. We won't be able to follow up, but your report will be fully investigated.</span>
+        </div>
+      </label>
+
+      <form id="report-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <input type="hidden" name="_subject" value="Whistleblowing Report — Diraflow Speak-Up Portal">
+        <input type="hidden" name="submission_type" value="Whistleblowing Report">
+
+        <!-- SECTION 1: YOUR DETAILS -->
+        <div class="form-section-divider">1 — Your details (optional if anonymous)</div>
+
+        <div id="identity-fields">
+          <div class="field-row">
+            <div class="field-group" style="margin-bottom:0;">
+              <label class="field-label">First name</label>
+              <input type="text" name="first_name" placeholder="Ada" class="field-input">
+            </div>
+            <div class="field-group" style="margin-bottom:0;">
+              <label class="field-label">Last name</label>
+              <input type="text" name="last_name" placeholder="Lovelace" class="field-input">
+            </div>
+          </div>
+          <div class="field-row" style="margin-top:1rem;">
+            <div class="field-group" style="margin-bottom:0;">
+              <label class="field-label">Email address</label>
+              <input type="email" name="email" id="reporter-email" placeholder="ada@company.com" class="field-input">
+            </div>
+            <div class="field-group" style="margin-bottom:0;">
+              <label class="field-label">Your role at Diraflow</label>
+              <select name="reporter_role" class="field-input">
+                <option value="" disabled selected>Select your role…</option>
+                <option>Employee (full-time)</option>
+                <option>Contractor / Freelancer</option>
+                <option>Annotator / Contributor</option>
+                <option>Intern</option>
+                <option>Client</option>
+                <option>Partner / Vendor</option>
+                <option>External observer</option>
+                <option>Prefer not to say</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: THE CONCERN -->
+        <div class="form-section-divider">2 — The concern</div>
+
+        <div class="field-group">
+          <label class="field-label">Category of concern *</label>
+          <select name="concern_category" required class="field-input">
+            <option value="" disabled selected>Select the type of concern…</option>
+            <option>Policy violation</option>
+            <option>Unsafe or harmful AI development</option>
+            <option>Fraud, bribery, or financial misconduct</option>
+            <option>Data breach or privacy violation</option>
+            <option>Discrimination, harassment, or bullying</option>
+            <option>Pressure to suppress safety concerns</option>
+            <option>Intellectual property abuse</option>
+            <option>Environmental violations</option>
+            <option>Retaliation against a previous report</option>
+            <option>Other / Multiple concerns</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Severity (your assessment) *</label>
+          <select name="severity" required class="field-input">
+            <option value="" disabled selected>How serious do you believe this is?</option>
+            <option value="critical">Critical — immediate harm occurring or imminent</option>
+            <option value="high">High — serious ongoing misconduct</option>
+            <option value="medium">Medium — significant policy breach</option>
+            <option value="low">Low — minor concern or irregularity</option>
+            <option value="unsure">I'm not sure — please assess</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">When did this occur (approximately)? *</label>
+          <select name="timeframe" required class="field-input">
+            <option value="" disabled selected>Select a timeframe…</option>
+            <option>Today or yesterday</option>
+            <option>Within the past week</option>
+            <option>Within the past month</option>
+            <option>1–3 months ago</option>
+            <option>3–6 months ago</option>
+            <option>More than 6 months ago</option>
+            <option>Ongoing / still happening</option>
+            <option>I'm not sure</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Is this still ongoing? *</label>
+          <select name="is_ongoing" required class="field-input">
+            <option value="" disabled selected>Select…</option>
+            <option value="yes">Yes — this is still happening</option>
+            <option value="no">No — it has stopped</option>
+            <option value="unsure">I'm not sure</option>
+          </select>
+        </div>
+
+        <!-- SECTION 3: PEOPLE INVOLVED -->
+        <div class="form-section-divider">3 — People involved</div>
+
+        <div class="field-group">
+          <label class="field-label">Who is involved? (names, roles, or descriptions) *</label>
+          <textarea name="people_involved" required rows="3" placeholder="E.g. 'My line manager, [name], Head of Data Science' or 'A senior annotator on the Project X team — I don't know their full name but they work in the Nairobi office'…" class="field-input"></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Are there other witnesses or people aware of this?</label>
+          <textarea name="witnesses" rows="2" placeholder="Names or descriptions of anyone else who may have witnessed or be aware of the situation (optional)…" class="field-input"></textarea>
+        </div>
+
+        <!-- SECTION 4: WHAT HAPPENED -->
+        <div class="form-section-divider">4 — What happened</div>
+
+        <div class="field-group">
+          <label class="field-label">Describe what happened in as much detail as possible *</label>
+          <textarea name="description" required rows="7" placeholder="Please describe: what happened, where, when, how, and any relevant context. Include direct quotes if you remember them. The more detail you can provide, the more effectively we can investigate…" class="field-input"></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Is there any evidence? (documents, emails, screenshots, recordings)</label>
+          <textarea name="evidence" rows="3" placeholder="Describe any evidence that exists, even if you can't attach it here. E.g. 'I have screenshots of the messages — I can share these if contacted' or 'There is a project log that would show the decision was made on [date]'…" class="field-input"></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Have you reported this to anyone else already?</label>
+          <select name="previously_reported" class="field-input">
+            <option value="" disabled selected>Select…</option>
+            <option value="no">No — this is my first report</option>
+            <option value="yes_line_manager">Yes — to my line manager</option>
+            <option value="yes_hr">Yes — to HR or People team</option>
+            <option value="yes_ethics">Yes — to the Ethics &amp; Compliance team</option>
+            <option value="yes_external">Yes — to an external authority or regulator</option>
+            <option value="yes_other">Yes — to someone else</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">If you reported previously, what was the outcome?</label>
+          <textarea name="previous_outcome" rows="2" placeholder="What happened after your previous report? Were you satisfied with the response? (optional)…" class="field-input"></textarea>
+        </div>
+
+        <!-- SECTION 5: IMPACT & REQUESTED ACTION -->
+        <div class="form-section-divider">5 — Impact &amp; what you're asking for</div>
+
+        <div class="field-group">
+          <label class="field-label">What impact has this had on you or others? *</label>
+          <textarea name="impact" required rows="3" placeholder="Describe the impact — on yourself, colleagues, clients, contributors, or the organisation. This could be professional, personal, financial, or reputational…" class="field-input"></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">What outcome are you hoping for?</label>
+          <select name="requested_outcome" class="field-input">
+            <option value="" disabled selected>Select…</option>
+            <option>I want this to stop immediately</option>
+            <option>I want a full investigation</option>
+            <option>I want the responsible person(s) held accountable</option>
+            <option>I want process or policy changes to prevent this happening again</option>
+            <option>I want acknowledgement and an apology</option>
+            <option>I'm not sure — I just want it reported</option>
+            <option>Other (please describe below)</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Any other information or context you'd like to add?</label>
+          <textarea name="additional_info" rows="3" placeholder="Anything else you think is important for us to know…" class="field-input"></textarea>
+        </div>
+
+        <!-- SECTION 6: FOLLOW-UP CONSENT -->
+        <div class="form-section-divider">6 — Follow-up</div>
+
+        <div class="field-group">
+          <label class="field-label">Are you willing to be contacted for follow-up questions?</label>
+          <select name="contact_consent" id="contact-consent" class="field-input" onchange="toggleContactMethod(this)">
+            <option value="" disabled selected>Select…</option>
+            <option value="yes_email">Yes — by email</option>
+            <option value="yes_any">Yes — by any means</option>
+            <option value="no">No — please investigate without contacting me</option>
+            <option value="anonymous">N/A — I am submitting anonymously</option>
+          </select>
+        </div>
+
+        <div class="field-group" id="preferred-contact" style="display:none;">
+          <label class="field-label">Preferred contact method / time</label>
+          <input type="text" name="preferred_contact" placeholder="E.g. 'Email only, weekday mornings' or 'Signal preferred — I can share my number if contacted'" class="field-input">
+        </div>
+
+        <!-- Confidentiality acknowledgement -->
+        <div class="callout callout-gold" style="margin-top:1.5rem;">
+          <strong>Acknowledgement</strong>
+          By submitting this form, you confirm that the information provided is accurate and given in good faith. Deliberately false reports are a serious disciplinary offence. All information will be handled with strict confidentiality in accordance with Diraflow's Whistleblowing &amp; Speak-Up Policy (Policy 8.0).
+        </div>
+
+        <div style="display:flex; align-items:flex-start; gap:0.75rem; margin:1.25rem 0;">
+          <input type="checkbox" id="confirm-checkbox" required style="width:18px; height:18px; margin-top:3px; cursor:pointer; accent-color:var(--gold); flex-shrink:0;">
+          <label for="confirm-checkbox" style="font-size:0.85rem; color:var(--fg2); line-height:1.6; cursor:pointer;">
+            I confirm that the information I have provided is accurate to the best of my knowledge and submitted in good faith.
+          </label>
+        </div>
+
+        <button type="submit" class="submit-btn" id="report-submit-btn">
+          🔒 Submit confidential report →
+        </button>
+
+        <div id="report-success" class="form-success">
+          <h4>✓ Report received</h4>
+          <p>Thank you for speaking up. Your report has been securely submitted and will be reviewed by senior leadership within the timeframe appropriate to its severity. If you provided contact details and consented to follow-up, you will hear from us. We take every report seriously.</p>
+          <p style="margin-top:0.75rem; font-size:0.8rem; color:var(--subtle);">Your reference: <strong id="report-ref" style="color:var(--fg);"></strong></p>
+        </div>
+        <p id="report-error" class="form-error">Something went wrong — please email <a href="mailto:diraflowai@gmail.com" style="color:#dc3c3c;">diraflowai@gmail.com</a> directly.</p>
+
+      </form>
+    </div>
+
+    <!-- Alternative channels -->
+    <div style="margin-top:2rem; display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+      <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem;">
+        <div style="font-size:1.25rem; margin-bottom:0.5rem;">📧</div>
+        <h4 style="font-weight:700; font-size:0.9rem; color:var(--fg); margin-bottom:0.35rem;">Direct email</h4>
+        <p style="font-size:0.82rem; color:var(--fg2); line-height:1.6; margin:0;">Email the Ethics &amp; Compliance team directly at <a href="mailto:diraflowai@gmail.com" style="color:var(--gold); font-weight:600;">diraflowai@gmail.com</a> with subject line "Speak-Up Report".</p>
+      </div>
+      <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem;">
+        <div style="font-size:1.25rem; margin-bottom:0.5rem;">👤</div>
+        <h4 style="font-weight:700; font-size:0.9rem; color:var(--fg); margin-bottom:0.35rem;">In person</h4>
+        <p style="font-size:0.82rem; color:var(--fg2); line-height:1.6; margin:0;">You may report directly to your line manager or the Ethics &amp; Compliance team in person if you feel comfortable doing so.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     PROTECTIONS DETAIL
+════════════════════════════════ -->
+<section class="block">
+  <div class="container-narrow">
+    <div class="section-label">Policy 8.4</div>
+    <h2 class="section-title">Your <em>protections</em></h2>
+
+    <div class="callout callout-red" style="margin-bottom:1.5rem;">
+      <strong>Zero tolerance for retaliation</strong>
+      Diraflow prohibits retaliation against any person who raises a concern in good faith. Retaliation includes demotion, dismissal, pay reduction, exclusion, hostile treatment, and harassment. Any manager found to have retaliated against a whistleblower will face immediate disciplinary action — up to and including termination.
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
+      <div style="background:var(--bg2); border-radius:var(--radius-lg); padding:1.25rem; border:1px solid var(--border);">
+        <h4 style="font-size:0.85rem; font-weight:700; color:var(--fg); margin-bottom:0.5rem;">What "good faith" means</h4>
+        <p style="font-size:0.82rem; color:var(--fg2); line-height:1.6; margin:0;">You are protected if you genuinely believe the concern you're reporting is real — even if an investigation later finds no wrongdoing. You are <em>not</em> protected if you knowingly make a false report to harm someone.</p>
+      </div>
+      <div style="background:var(--bg2); border-radius:var(--radius-lg); padding:1.25rem; border:1px solid var(--border);">
+        <h4 style="font-size:0.85rem; font-weight:700; color:var(--fg); margin-bottom:0.5rem;">Legal protection in Kenya</h4>
+        <p style="font-size:0.82rem; color:var(--fg2); line-height:1.6; margin:0;">You may additionally be protected under the Bribery Act 2016 (Kenya), the Leadership and Integrity Act 2012 (Kenya), and the Public Officer Ethics Act 2003 (Kenya).</p>
+      </div>
+    </div>
+
+    <div class="callout callout-gold">
+      <strong>Investigation process</strong>
+      All reports are reviewed by senior leadership within the timeframes stated above. Investigations are conducted impartially and confidentially. You will be updated on the outcome where you have provided contact details and consented to follow-up. Diraflow will not disclose who made a report without your consent, except where required by law.
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     FOOTER
+════════════════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="brand" style="margin-bottom:0.875rem; display:inline-flex;">
+          <img src="assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+        </a>
+        <p>Premium training data for AI agents and LLMs. Built by experts, trusted by frontier AI teams worldwide.</p>
+        <div style="display:flex; gap:0.6rem; align-items:center; margin-top:1.25rem; flex-wrap:wrap;">
+          <a href="https://linkedin.com/company/diraflow" target="_blank" rel="noopener" aria-label="LinkedIn" style="width:38px;height:38px;border-radius:9px;background:#0A66C2;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+          <a href="https://x.com/diraflow_" target="_blank" rel="noopener" aria-label="X" style="width:38px;height:38px;border-radius:9px;background:#000;border:1px solid #333;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+          <a href="https://facebook.com/diraflow" target="_blank" rel="noopener" aria-label="Facebook" style="width:38px;height:38px;border-radius:9px;background:#1877F2;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+          <a href="https://www.instagram.com/diraflow_?utm_source=qr&igsh=MTVkdHRwem92dHQ4cQ==" target="_blank" rel="noopener" aria-label="Instagram" style="width:38px;height:38px;border-radius:9px;background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%);display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col"><h4>Solutions</h4><ul><li><a href="solutions.html">Environment Generation</a></li><li><a href="solutions.html">Agentic Datasets</a></li><li><a href="solutions.html">Red-Teaming</a></li><li><a href="solutions.html">RLHF &amp; Preference</a></li><li><a href="solutions.html">STEM Data</a></li></ul></div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a href="blog/index.html">Blog</a></li><li><a href="careers/index.html">Careers</a></li><li><a href="index.html#faq">FAQ</a></li><li><a href="contact.html">Contact Us</a></li></ul></div>
+      <div class="footer-col"><h4>Policies</h4><ul><li><a href="code-of-conduct.html">Code of Conduct</a></li><li><a href="privacy-policy.html">Privacy Policy</a></li><li><a href="whistleblowing.html" style="color:var(--gold);">Speak-Up Portal</a></li><li><a href="mailto:diraflowai@gmail.com">diraflowai@gmail.com</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+        <p>© 2026 Diraflow AI. All rights reserved.</p>
+        <span style="color:var(--subtle); font-size:.8125rem;">·</span>
+        <a href="code-of-conduct.html" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
+        <span style="color:var(--subtle); font-size:.8125rem;">·</span>
+        <a href="privacy-policy.html" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
+      </div>
+      <div style="display:flex; align-items:center; gap:1.5rem;">
+        <p style="font-size:.8125rem; color:var(--subtle);">Made with care for the AI community.</p>
+        <button class="theme-toggle" aria-label="Toggle dark mode" style="flex-shrink:0;"><span class="icon-sun">☀</span><span class="icon-moon">☾</span></button>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/main.js" defer></script>
+<script>
+/* ── Theme toggle ── */
+document.querySelectorAll('.theme-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('diraflow-theme', next);
+  });
+});
+
+/* ── Anonymous toggle ── */
+function toggleAnonymous(checkbox) {
+  const fields = document.getElementById('identity-fields');
+  const inputs = fields.querySelectorAll('input, select');
+  if (checkbox.checked) {
+    fields.style.opacity = '0.35';
+    fields.style.pointerEvents = 'none';
+    inputs.forEach(i => i.removeAttribute('required'));
+  } else {
+    fields.style.opacity = '1';
+    fields.style.pointerEvents = 'auto';
+  }
+}
+
+/* ── Show/hide preferred contact method ── */
+function toggleContactMethod(sel) {
+  const field = document.getElementById('preferred-contact');
+  const show  = sel.value === 'yes_email' || sel.value === 'yes_any';
+  field.style.display = show ? 'block' : 'none';
+}
+
+/* ── Generate reference number ── */
+function generateRef() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let ref = 'DWB-';
+  for (let i = 0; i < 8; i++) ref += chars[Math.floor(Math.random() * chars.length)];
+  return ref;
+}
+
+/* ── Report form submission ── */
+const reportForm = document.getElementById('report-form');
+if (reportForm) {
+  reportForm.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    // Validate checkbox
+    const confirm = document.getElementById('confirm-checkbox');
+    if (!confirm.checked) {
+      alert('Please confirm that the information is accurate before submitting.');
+      return;
+    }
+
+    const btn     = document.getElementById('report-submit-btn');
+    const success = document.getElementById('report-success');
+    const error   = document.getElementById('report-error');
+    const refEl   = document.getElementById('report-ref');
+
+    btn.textContent = '🔒 Submitting securely…';
+    btn.disabled    = true;
+    error.style.display = 'none';
+
+    // Add reference number to submission
+    const ref = generateRef();
+    const hiddenRef = document.createElement('input');
+    hiddenRef.type  = 'hidden';
+    hiddenRef.name  = 'reference_number';
+    hiddenRef.value = ref;
+    reportForm.appendChild(hiddenRef);
+
+    try {
+      const res = await fetch(reportForm.action, {
+        method:  'POST',
+        body:    new FormData(reportForm),
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        reportForm.querySelectorAll('input, select, textarea, button').forEach(el => el.disabled = true);
+        document.querySelector('.anon-toggle').style.pointerEvents = 'none';
+        btn.style.display     = 'none';
+        refEl.textContent     = ref;
+        success.style.display = 'block';
+        success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else { throw new Error(); }
+    } catch {
+      error.style.display = 'block';
+      btn.textContent     = '🔒 Submit confidential report →';
+      btn.disabled        = false;
+    }
+  });
+}
+</script>
+</body>
+</html>

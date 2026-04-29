@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diraflow — Home</title>
+<meta name="description" content="Diraflow builds world-class training data for AI agents and LLMs — from agentic environments to red-teaming datasets. Trusted by leading AI teams.">
+<meta property="og:title" content="Diraflow — Premium Training Data for AI">
+<meta property="og:description" content="Expert-curated training data for AI agents, LLMs, and safety research.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/logo.jpg">
+<script>
+  // Apply theme before paint to prevent flash
+  (function(){
+    var t = localStorage.getItem('diraflow-theme');
+    var d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', t || (d ? 'dark' : 'light'));
+  })();
+</script>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav class="top">
+  <div class="container inner">
+    <a href="/" class="brand">
+      <img src="/assets/logo.jpg" alt="Diraflow" class="nav-logo-img nav-logo-transparent">
+      <span class="brand-text">
+        <span class="brand-name">Diraflow</span>
+        <span class="brand-tagline">Training data for frontier AI</span>
+      </span>
+    </a>
+    <ul>
+      <li><a href="/" class="active">Home</a></li>
+      <li><a href="solutions.html">Solutions</a></li>
+      <li><a href="industries.html">Industries</a></li>
+      <li><a href="blog.html">Blog</a></li>
+      <li><a href="careers.html">Careers</a></li>
+      <li><a href="contact.html">Contact Us</a></li>
+      <li><a href="report.html">Report Concerns</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☾</span>
+      </button>
+      <a href="contact.html" class="btn btn-sm">Talk to us</a>
+    </div>
+  </div>
+</nav>
+<!-- ── Hero ── -->
+<section class="hero">
+  <!-- AI background video -->
+  <div class="hero-video-wrap">
+    <video class="hero-video" autoplay muted loop playsinline>
+      <source src="https://videos.pexels.com/video-files/3141208/3141208-uhd_2560_1440_30fps.mp4" type="video/mp4">
+      <source src="https://videos.pexels.com/video-files/3141208/3141208-hd_1920_1080_30fps.mp4" type="video/mp4">
+    </video>
+    <div class="hero-video-overlay"></div>
+  </div>
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="container">
+    <h1 class="fade-up fade-up-1">
+      Training data that<br>
+      <em>moves</em> <span class="highlight">AI forward</span>
+    </h1>
+    <p class="hero-desc fade-up fade-up-2">
+      From agentic task environments to safety red-teaming — we build premium data solutions that integrate deep human expertise with scalable technology to accelerate frontier AI development.
+    </p>
+    <div class="hero-actions fade-up fade-up-3">
+      <a href="contact.html" class="btn btn-lg">Talk to an expert →</a>
+      <a href="solutions.html" class="btn-ghost btn">Explore solutions</a>
+    </div>
+    <div class="hero-stats fade-up fade-up-4">
+      <div class="hero-stat">
+        <div class="val"><span class="count-up" data-target="135" data-suffix="+" data-prefix="">135+</span></div>
+        <div class="lbl">Active contributors</div>
+      </div>
+      <div class="hero-stat">
+        <div class="val"><span class="count-up" data-target="90" data-suffix="+">90+</span></div>
+        <div class="lbl">Domains of expertise</div>
+      </div>
+      <div class="hero-stat">
+        <div class="val"><span class="count-up" data-target="70" data-suffix="%+">70%+</span></div>
+        <div class="lbl">Hold advanced degrees</div>
+      </div>
+      <div class="hero-stat">
+        <div class="val"><span class="count-up" data-target="4.2" data-suffix="★" data-decimals="1">4.2★</span></div>
+        <div class="lbl">Client satisfaction</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Ticker ── -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span class="ticker-item">Environment Generation</span>
+    <span class="ticker-item">Red-Teaming &amp; Safety</span>
+    <span class="ticker-item">Agentic Datasets</span>
+    <span class="ticker-item">RLHF &amp; Preference Data</span>
+    <span class="ticker-item">STEM &amp; Scientific Data</span>
+    <span class="ticker-item">Multilingual Data</span>
+    <span class="ticker-item">Legal &amp; Compliance</span>
+    <span class="ticker-item">Medical Reasoning</span>
+    <span class="ticker-item">Code Evaluation</span>
+    <span class="ticker-item">Custom Engagements</span>
+  </div>
+</div>
+
+<!-- ── What We Do — Blurred Video Showcase ── -->
+<section class="video-showcase-section">
+  <div class="video-showcase-header">
+    <div class="section-label" style="justify-content:center; margin-bottom:.75rem;">What we do</div>
+    <h2 class="section-title" style="text-align:center; margin-bottom:.75rem;">Powering the frontier of <em>AI development</em></h2>
+    <p style="text-align:center; color:var(--muted); max-width:42rem; margin:0 auto 2.5rem; font-size:1rem; line-height:1.75;">From LiDAR perception pipelines to agentic training environments — we collect, curate, and annotate the world's most complex AI training data.</p>
+  </div>
+  <div class="video-mosaic" style="
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: 420px;
+  gap: 0.75rem;
+  width: 100%;
+">
+
+  <!-- Cell 1: Agentic AI Environments -->
+  <div class="vm-cell" style="position:relative; border-radius:1rem; overflow:hidden;">
+    <img
+      src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=85&auto=format&fit=crop"
+      alt="Agentic AI Environments"
+      loading="lazy"
+      style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.5s ease;"
+      onmouseover="this.style.transform='scale(1.05)'"
+      onmouseout="this.style.transform='scale(1)'"
+    >
+    <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.08) 60%);"></div>
+    <div style="position:absolute; bottom:1.25rem; left:1.25rem; background:rgba(10,10,10,0.75); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(8px); border-radius:2rem; padding:0.45rem 1rem; display:flex; align-items:center; gap:0.5rem; font-size:0.7rem; font-weight:700; letter-spacing:0.08em; color:#fff; text-transform:uppercase; white-space:nowrap;">
+      <span style="width:6px; height:6px; border-radius:50%; background:#c8922a; display:inline-block; flex-shrink:0;"></span>
+      Agentic AI Environments
+    </div>
+  </div>
+
+  <!-- Cell 2: LiDAR & Perception Data -->
+  <div class="vm-cell" style="position:relative; border-radius:1rem; overflow:hidden;">
+    <img
+      src="https://plus.unsplash.com/premium_photo-1741466913893-f66b4100cb0d?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      alt="LiDAR and Perception Data"
+      loading="lazy"
+      style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.5s ease;"
+      onmouseover="this.style.transform='scale(1.05)'"
+      onmouseout="this.style.transform='scale(1)'"
+    >
+    <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.08) 60%);"></div>
+    <div style="position:absolute; bottom:1.25rem; left:1.25rem; background:rgba(10,10,10,0.75); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(8px); border-radius:2rem; padding:0.45rem 1rem; display:flex; align-items:center; gap:0.5rem; font-size:0.7rem; font-weight:700; letter-spacing:0.08em; color:#fff; text-transform:uppercase; white-space:nowrap;">
+      <span style="width:6px; height:6px; border-radius:50%; background:#c8922a; display:inline-block; flex-shrink:0;"></span>
+      LiDAR &amp; Perception Data
+    </div>
+  </div>
+
+  <!-- Cell 3: Safety & Red-Teaming -->
+  <div class="vm-cell" style="position:relative; border-radius:1rem; overflow:hidden;">
+    <img
+      src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=800&q=85&auto=format&fit=crop"
+      alt="Safety and Red-Teaming"
+      loading="lazy"
+      style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.5s ease;"
+      onmouseover="this.style.transform='scale(1.05)'"
+      onmouseout="this.style.transform='scale(1)'"
+    >
+    <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.08) 60%);"></div>
+    <div style="position:absolute; bottom:1.25rem; left:1.25rem; background:rgba(10,10,10,0.75); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(8px); border-radius:2rem; padding:0.45rem 1rem; display:flex; align-items:center; gap:0.5rem; font-size:0.7rem; font-weight:700; letter-spacing:0.08em; color:#fff; text-transform:uppercase; white-space:nowrap;">
+      <span style="width:6px; height:6px; border-radius:50%; background:#c8922a; display:inline-block; flex-shrink:0;"></span>
+      Safety &amp; Red-Teaming
+    </div>
+  </div>
+
+  <!-- Cell 4: RLHF & Human Feedback -->
+  <div class="vm-cell" style="position:relative; border-radius:1rem; overflow:hidden;">
+    <img
+      src="https://images.unsplash.com/photo-1677212004257-103cfa6b59d0?q=80&w=464&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      alt="RLHF and Human Feedback"
+      loading="lazy"
+      style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.5s ease;"
+      onmouseover="this.style.transform='scale(1.05)'"
+      onmouseout="this.style.transform='scale(1)'"
+    >
+    <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.08) 60%);"></div>
+    <div style="position:absolute; bottom:1.25rem; left:1.25rem; background:rgba(10,10,10,0.75); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(8px); border-radius:2rem; padding:0.45rem 1rem; display:flex; align-items:center; gap:0.5rem; font-size:0.7rem; font-weight:700; letter-spacing:0.08em; color:#fff; text-transform:uppercase; white-space:nowrap;">
+      <span style="width:6px; height:6px; border-radius:50%; background:#c8922a; display:inline-block; flex-shrink:0;"></span>
+      RLHF &amp; Human Feedback
+    </div>
+  </div>
+
+</div>
+
+<!-- Responsive breakpoints -->
+<style>
+  @media (max-width: 900px) {
+    .video-mosaic {
+      grid-template-columns: repeat(2, 1fr) !important;
+      grid-template-rows: repeat(2, 280px) !important;
+    }
+  }
+  @media (max-width: 540px) {
+    .video-mosaic {
+      grid-template-columns: 1fr !important;
+      grid-template-rows: repeat(4, 220px) !important;
+    }
+  }
+</style>
+  </div>
+</section>
+
+<!-- ── Testimonials ── -->
+<section class="block">
+  <div class="container">
+    <div class="section-label">Client voices</div>
+    <h2 class="section-title" style="margin-bottom:3.5rem;">Trusted by <em>AI builders</em></h2>
+    <div class="grid-3">
+      <div class="testimonial">
+        <div class="testimonial-stars">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <blockquote>Diraflow delivered STEM annotation quality we couldn't find anywhere else. Their mathematics contributors caught subtle errors that would have degraded our reward model significantly.</blockquote>
+        <div class="testimonial-author">
+          <div class="avatar"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=120&q=80&auto=format&fit=crop&crop=face" alt="James Mitchell"></div>
+          <div>
+            <div class="name">James Mitchell</div>
+            <div class="role">Head of Data Science, Google DeepMind</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <blockquote>The agentic environment datasets they built were genuinely novel — not recycled from public sources. The quality bar is exceptionally high and turnaround was faster than promised.</blockquote>
+        <div class="testimonial-author">
+          <div class="avatar"><img src="https://images.unsplash.com/photo-1573496799652-408c2ac9fe98?w=120&q=80&auto=format&fit=crop&crop=face" alt="Sarah Chen"></div>
+          <div>
+            <div class="name">Sarah Chen</div>
+            <div class="role">Research Lead, Anthropic</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <blockquote>Red-teaming at scale without compromising on adversarial creativity is incredibly hard. Diraflow solved it. They're our go-to safety data partner without question.</blockquote>
+        <div class="testimonial-author">
+          <div class="avatar"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&q=80&auto=format&fit=crop&crop=face" alt="Michael Torres"></div>
+          <div>
+            <div class="name">Michael Torres</div>
+            <div class="role">Safety Engineering Manager, OpenAI</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Scrolling quote strip ── -->
+<div class="quote-strip">
+  <div class="quote-track">
+    <span class="quote-item">Exceptional quality — <strong>Google DeepMind</strong></span>
+    <span class="quote-item">Fastest turnaround we've seen — <strong>Anthropic</strong></span>
+    <span class="quote-item">Our go-to safety partner — <strong>OpenAI</strong></span>
+    <span class="quote-item">Genuinely novel datasets — <strong>Meta AI</strong></span>
+    <span class="quote-item">Zero compromise on quality — <strong>Microsoft Research</strong></span>
+    <span class="quote-item">Best RLHF data we've sourced — <strong>Cohere</strong></span>
+  </div>
+</div>
+
+<!-- ── Case Studies ── -->
+<section class="block" style="background:var(--bg2);">
+  <div class="container">
+    <div class="section-label">In practice</div>
+    <h2 class="section-title" style="margin-bottom:3rem;">From the <em>field</em></h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+      <div style="background:var(--fg); border-radius:var(--radius-lg); overflow:hidden; grid-row:span 2; transition:background var(--transition);">
+        <div style="aspect-ratio:16/10; overflow:hidden;">
+          <img src="https://images.unsplash.com/photo-1551836022-4c4c79ecde51?w=900&q=85&auto=format&fit=crop" alt="AI safety researchers" loading="lazy" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+        <div style="padding:2.25rem;">
+          <div style="font-size:.6875rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--gold); margin-bottom:1rem;">Featured case study</div>
+          <h3 style="font-family:'DM Serif Display',serif; font-weight:400; font-size:1.5rem; letter-spacing:-.025em; line-height:1.2; margin-bottom:1rem; color:var(--bg);">Building 50,000 adversarial prompts for a frontier safety benchmark</h3>
+          <p style="color:rgba(247,246,242,.55); font-size:.9375rem; margin-bottom:1.75rem; line-height:1.7;">A leading AI lab needed diverse, creative adversarial content that couldn't be generated by the model being tested. We mobilised 120 specialist contributors across 6 weeks to deliver an industry-defining safety benchmark.</p>
+          <div style="display:flex; gap:2.5rem; margin-bottom:1.75rem; flex-wrap:wrap;">
+            <div><div style="font-family:'DM Serif Display',serif; font-size:2rem; letter-spacing:-.03em; color:var(--gold);">50K</div><div style="font-size:.75rem; color:rgba(247,246,242,.4);">adversarial prompts</div></div>
+            <div><div style="font-family:'DM Serif Display',serif; font-size:2rem; letter-spacing:-.03em; color:var(--gold);">6 wks</div><div style="font-size:.75rem; color:rgba(247,246,242,.4);">end-to-end</div></div>
+            <div><div style="font-family:'DM Serif Display',serif; font-size:2rem; letter-spacing:-.03em; color:var(--gold);">0.94</div><div style="font-size:.75rem; color:rgba(247,246,242,.4);">quality score</div></div>
+          </div>
+          
+        </div>
+      </div>
+      <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:2rem; transition:all var(--transition);">
+        <div style="font-size:.6875rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--subtle); margin-bottom:.875rem;">Case study</div>
+        <h3 style="font-size:1.125rem; font-weight:600; letter-spacing:-.015em; margin-bottom:.75rem; line-height:1.35; color:var(--fg);">Agentic coding environments for multi-step software tasks</h3>
+        <p style="font-size:.9rem; margin-bottom:1.25rem;">We designed 12,000 realistic software engineering tasks across Python, TypeScript, and Go — each with ground-truth solutions verified by senior engineers.</p>
+        <div style="display:flex; gap:2rem; margin-bottom:1.375rem;">
+          <div><div style="font-family:'DM Serif Display',serif; font-size:1.625rem; letter-spacing:-.03em; color:var(--fg);">12K</div><div style="font-size:.75rem; color:var(--subtle);">task environments</div></div>
+          <div><div style="font-family:'DM Serif Display',serif; font-size:1.625rem; letter-spacing:-.03em; color:var(--fg);">3</div><div style="font-size:.75rem; color:var(--subtle);">languages covered</div></div>
+        </div>
+        
+      </div>
+      <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:2rem; transition:all var(--transition);">
+        <div style="font-size:.6875rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--subtle); margin-bottom:.875rem;">Case study</div>
+        <h3 style="font-size:1.125rem; font-weight:600; letter-spacing:-.015em; margin-bottom:.75rem; line-height:1.35; color:var(--fg);">Medical reasoning preference dataset for a clinical AI assistant</h3>
+        <p style="font-size:.9rem; margin-bottom:1.25rem;">500 clinicians across three specialties ranked AI-generated medical responses — producing a high-signal RLHF dataset that improved clinical accuracy by 18%.</p>
+        <div style="display:flex; gap:2rem; margin-bottom:1.375rem;">
+          <div><div style="font-family:'DM Serif Display',serif; font-size:1.625rem; letter-spacing:-.03em; color:var(--fg);">500</div><div style="font-size:.75rem; color:var(--subtle);">annotators</div></div>
+          <div><div style="font-family:'DM Serif Display',serif; font-size:1.625rem; letter-spacing:-.03em; color:var(--fg);">+18%</div><div style="font-size:.75rem; color:var(--subtle);">accuracy lift</div></div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Process ── -->
+<section class="block">
+  <div class="container">
+    <div class="section-label">How we work</div>
+    <h2 class="section-title" style="margin-bottom:3rem;">From brief to <em>delivery</em></h2>
+    <div class="grid-2">
+      <div>
+        <div class="process-list">
+          <div class="process-step"><div class="step-num">01</div><div><h3>Discovery &amp; Scoping</h3><p>A deep-dive call to understand your model, use case, quality bar, and timeline. We design the taxonomy and task spec together — collaboratively.</p></div></div>
+          <div class="process-step"><div class="step-num">02</div><div><h3>Expert Selection</h3><p>We hand-pick contributors from our vetted network based on domain expertise, annotation style, and calibration performance on your task type.</p></div></div>
+          <div class="process-step"><div class="step-num">03</div><div><h3>Pilot &amp; Calibration</h3><p>A small pilot batch is reviewed together. We iterate on guidelines and calibrate contributors before committing to full production.</p></div></div>
+          <div class="process-step"><div class="step-num">04</div><div><h3>Production &amp; QA</h3><p>Full-scale production with multi-layer review, IAA monitoring, and weekly progress reports delivered directly to your team.</p></div></div>
+          <div class="process-step"><div class="step-num">05</div><div><h3>Delivery &amp; Iteration</h3><p>Versioned, documented datasets delivered in your preferred format. We remain available for follow-up batches and expansions.</p></div></div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <div class="feature-img" style="width:100%; aspect-ratio:3/4;">
+          <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=85&auto=format&fit=crop" alt="LiDAR autonomous vehicle sensor technology" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── NEW: By the numbers ── -->
+<section class="block" style="background:var(--bg2);">
+  <div class="container">
+    <div class="section-label">Scale &amp; impact</div>
+    <h2 class="section-title" style="margin-bottom:3.5rem;">Numbers that <em>speak for themselves</em></h2>
+    <div class="grid-4">
+      <div class="card card-number">
+        <div class="num">50M+</div>
+        <div class="label">Tasks completed to date</div>
+        <div class="sub">Across all client projects since founding</div>
+      </div>
+      <div class="card card-number">
+        <div class="num">48h</div>
+        <div class="label">Avg. time to first proposal</div>
+        <div class="sub">After initial scoping call</div>
+      </div>
+      <div class="card card-number">
+        <div class="num">99.1%</div>
+        <div class="label">On-time delivery rate</div>
+        <div class="sub">Across all production projects</div>
+      </div>
+      <div class="card card-number">
+        <div class="num">0.94</div>
+        <div class="label">Average IAA score</div>
+        <div class="sub">Across complex annotation tasks</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── NEW: How we're different (image + text) ── -->
+<section class="block">
+  <div class="container">
+    <div class="feature-row">
+      <div class="feature-img" style="aspect-ratio:1/1;">
+        <img src="https://plus.unsplash.com/premium_photo-1730133744101-9ccb86a3eddf?q=80&w=725&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Research expert reviewing data" loading="lazy">
+      </div>
+      <div class="feature-text">
+        <div class="section-label">Our philosophy</div>
+        <h2>We believe in <em>human intelligence</em> at the core</h2>
+        <p>Synthetic data has its place — but the frontier of AI capability is still defined by the quality of human-generated signal. We exist to make that signal accessible, at scale, without sacrificing the nuance that makes it valuable.</p>
+        <ul class="feature-list">
+          <li>Every dataset is built by humans — no AI-generated fill-in, ever</li>
+          <li>We publish our quality methodology openly — ask us for our QA framework</li>
+          <li>Contributors are paid fairly and treated as professionals, not gig workers</li>
+          <li>We maintain long-term relationships with contributors, ensuring consistency across your projects</li>
+        </ul>
+        <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="block" id="faq" style="background:var(--bg2);">
+  <div class="container-narrow">
+    <div class="section-label">Common questions</div>
+    <h2 class="section-title" style="margin-bottom:3rem;">Frequently <em>asked</em></h2>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>How do you ensure contributor quality?</summary>
+        <div class="faq-body"><p>Every contributor goes through structured onboarding: credential review, domain knowledge test, and calibration tasks scored against gold-standard examples. During production, we monitor inter-annotator agreement continuously and remove contributors whose scores fall below threshold. Project leads conduct spot checks at regular intervals.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary>What's the minimum project size?</summary>
+        <div class="faq-body"><p>We typically work best on projects of 1,000 tasks or more. For smaller exploratory pilots, we offer a structured 200-task pilot package to test fit before scaling. Get in touch and we'll find an approach that works for your situation and budget.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary>Can you handle confidential or proprietary content?</summary>
+        <div class="faq-body"><p>Yes. All contributors sign NDAs before accessing any project materials. We can work within your preferred data handling environment — including air-gapped annotation setups, your own VPC, or Diraflow's SOC 2-aligned infrastructure. Data security is standard, not an add-on.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary>How quickly can you start a new project?</summary>
+        <div class="faq-body"><p>For well-defined tasks with clear guidelines, we can typically begin a pilot within 5–7 business days of scope sign-off. More complex projects requiring custom tooling or specialised contributor recruitment may take 2–3 weeks to spin up. We'll give you an honest timeline during scoping.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary>Do you work with academic or non-profit research teams?</summary>
+        <div class="faq-body"><p>Absolutely. We work with research labs, universities, and non-profit AI organisations. We offer flexible engagement structures for academic budgets — reach out and let's talk about what's possible.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary>What data formats do you deliver in?</summary>
+        <div class="faq-body"><p>We deliver in whatever format your training pipeline expects — JSON, JSONL, CSV, Parquet, HuggingFace datasets, and more. Full schema documentation, versioning, and incremental or batch delivery depending on your workflow.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary>Can you guarantee zero AI-generated content in my dataset?</summary>
+        <div class="faq-body"><p>Yes. This is a foundational commitment at Diraflow — all work is produced by verified human contributors. Our QA pipeline includes AI-content detection checks, and any flagged output is reviewed and rejected before delivery. We can provide signed attestations on request.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary>How do you price projects?</summary>
+        <div class="faq-body"><p>Pricing depends on task complexity, required expertise, review depth, and volume. After scoping we provide a fixed per-task rate along with a total project estimate. We never upcharge mid-project — if scope changes, we re-quote transparently.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary>Do you support multilingual or low-resource language data?</summary>
+        <div class="faq-body"><p>Yes. We produce original human content in 30+ languages with native-speaker contributors. For low-resource languages, we work with in-region partners and linguists to maintain cultural fidelity and correct dialect handling.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary>Who owns the data once it's delivered?</summary>
+        <div class="faq-body"><p>You do. All deliverables transfer to the client on payment, with full IP assignment. We retain no rights to re-use, re-sell, or reference your data in other engagements.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary>Do you build evaluation harnesses as well as training data?</summary>
+        <div class="faq-body"><p>Yes. Many engagements pair training data with custom evaluation suites — including held-out benchmarks, scoring rubrics, and automated grading pipelines — so you can measure lift from the data you commission.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary>Can we work with a dedicated team across multiple projects?</summary>
+        <div class="faq-body"><p>Absolutely. For partners with recurring needs we set up a dedicated pod — a stable group of contributors, a lead reviewer, and a project manager — so institutional knowledge compounds across projects.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ── Contact ── -->
+<section class="block" id="Contact Us">
+  <div class="container">
+    <div class="section-label">Get in touch</div>
+    <h2 class="section-title" style="margin-bottom:.875rem;">Start a <em>conversation</em></h2>
+    <p class="section-intro">Tell us about your project and we'll respond within one business day with initial thoughts and next steps.</p>
+    <div class="grid-2" style="gap:3.5rem; align-items:start;">
+      <div style="display:flex; flex-direction:column; gap:1.25rem;">
+        <div class="card" style="display:flex; gap:1.125rem; align-items:flex-start;">
+          <div style="font-size:1.375rem; flex-shrink:0; line-height:1;">✉️</div>
+          <div>
+            <div style="font-weight:600; font-size:.9375rem; margin-bottom:.25rem; color:var(--fg);">Email us</div>
+            <a href="mailto:diraflow.ai@gmail.com" style="color:var(--gold); font-size:.9rem; font-weight:500;">diraflow.ai@gmail.com</a>
+            <p style="font-size:.8125rem; margin-top:.375rem;">For project enquiries, quotes, and general questions.</p>
+          </div>
+        </div>
+        <div class="card" style="display:flex; gap:1.125rem; align-items:flex-start;">
+          <div style="font-size:1.375rem; flex-shrink:0; line-height:1;">🌍</div>
+          <div>
+            <div style="font-weight:600; font-size:.9375rem; margin-bottom:.25rem; color:var(--fg);">Remote-first</div>
+            <p style="font-size:.8125rem;">We work with clients across North America, Europe, Africa, and Asia. No timezone is too cumbersome — we'll make it work.</p>
+          </div>
+        </div>
+        <div class="card" style="display:flex; gap:1.125rem; align-items:flex-start;">
+          <div style="font-size:1.375rem; flex-shrink:0; line-height:1;">⚡</div>
+          <div>
+            <div style="font-weight:600; font-size:.9375rem; margin-bottom:.25rem; color:var(--fg);">Fast response</div>
+            <p style="font-size:.8125rem;">We respond to all project enquiries within one business day. For urgent timelines, mention it and we'll prioritise.</p>
+          </div>
+        </div>
+        <div class="card" style="overflow:hidden; padding:0;">
+          <img src="https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?w=800&q=80&auto=format&fit=crop" alt="Collaborative work" loading="lazy" style="width:100%; height:200px; object-fit:cover;">
+        </div>
+      </div>
+      <div class="card" style="padding:2.75rem;">
+  <h3 style="font-size:1.25rem; font-weight:600; letter-spacing:-.015em; margin-bottom:.5rem; color:var(--fg);">Send us a brief</h3>
+  <p style="font-size:.9rem; margin-bottom:2rem;">Include your use case, approximate task volume, and desired timeline and we'll come back with a tailored proposal.</p>
+
+  <form id="brief-form" action="https://formspree.io/f/xnjllewe" method="POST" style="display:flex; flex-direction:column; gap:1rem;">
+    <input type="hidden" name="_subject" value="New Project Brief — Diraflow">
+
+    <div>
+      <label style="font-size:.8125rem; font-weight:600; display:block; margin-bottom:.5rem; color:var(--fg);">Name</label>
+      <input
+        type="text"
+        name="name"
+        required
+        placeholder="Your full name"
+        style="width:100%; background:var(--bg2); border:1.5px solid var(--border); border-radius:.625rem; padding:.875rem 1.125rem; font-size:.875rem; color:var(--fg); font-family:'Sora',sans-serif; box-sizing:border-box; outline:none; transition:border-color 0.2s, background 0.2s;"
+        onfocus="this.style.borderColor='#c8922a'"
+        onblur="this.style.borderColor='var(--border)'"
+      >
+    </div>
+
+    <div>
+      <label style="font-size:.8125rem; font-weight:600; display:block; margin-bottom:.5rem; color:var(--fg);">Work email</label>
+      <input
+        type="email"
+        name="email"
+        required
+        placeholder="you@company.com"
+        style="width:100%; background:var(--bg2); border:1.5px solid var(--border); border-radius:.625rem; padding:.875rem 1.125rem; font-size:.875rem; color:var(--fg); font-family:'Sora',sans-serif; box-sizing:border-box; outline:none; transition:border-color 0.2s, background 0.2s;"
+        onfocus="this.style.borderColor='#c8922a'"
+        onblur="this.style.borderColor='var(--border)'"
+      >
+    </div>
+
+    <div>
+      <label style="font-size:.8125rem; font-weight:600; display:block; margin-bottom:.5rem; color:var(--fg);">Project brief</label>
+      <textarea
+        name="brief"
+        required
+        rows="5"
+        placeholder="Use case, task type, volume, timeline..."
+        style="width:100%; background:var(--bg2); border:1.5px solid var(--border); border-radius:.625rem; padding:.875rem 1.125rem; font-size:.875rem; color:var(--fg); font-family:'Sora',sans-serif; box-sizing:border-box; outline:none; resize:vertical; min-height:110px; transition:border-color 0.2s, background 0.2s;"
+        onfocus="this.style.borderColor='#c8922a'"
+        onblur="this.style.borderColor='var(--border)'"
+      ></textarea>
+    </div>
+
+    <button type="submit" id="brief-submit-btn" class="btn" style="justify-content:center; margin-top:.5rem;">
+      Send enquiry →
+    </button>
+
+    <p id="brief-success" style="display:none; font-size:.85rem; color:#7ecb8f; text-align:center; margin:0;">
+      ✓ Brief received! We'll be in touch within one business day.
+    </p>
+    <p id="brief-error" style="display:none; font-size:.85rem; color:#e07070; text-align:center; margin:0;">
+      Something went wrong — please email us at diraflow.ai@gmail.com
+    </p>
+    <p style="font-size:.75rem; color:var(--subtle); text-align:center; margin-top:.25rem;">We respond within one business day.</p>
+  </form>
+</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── Vision & Mission ── -->
+<section class="vision-mission-section">
+  <div class="container">
+    <div class="vm-header">
+      <div class="section-label" style="justify-content:center;">Our purpose</div>
+      <h2 class="section-title" style="text-align:center; margin-bottom:0;">What we <em>stand for</em></h2>
+    </div>
+    <div class="vm-grid">
+      <div class="vm-card vm-vision">
+        <div class="vm-icon">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="6" stroke="currentColor" stroke-width="2"/>
+            <path d="M16 4C16 4 8 10 8 16C8 22 16 28 16 28C16 28 24 22 24 16C24 10 16 4 16 4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M4 16H8M24 16H28M16 4V8M16 24V28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="vm-label">Vision</div>
+        <h3>A world where AI empowers everyone equally</h3>
+        <p>A world where artificial intelligence empowers everyone equally, operating transparently, ethically, and free from harm, making AI a trusted ally for all humanity.</p>
+        <div class="vm-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="vm-divider"></div>
+      <div class="vm-card vm-mission">
+        <div class="vm-icon">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 4L20 12L28 13.5L22 20L23.5 28L16 24L8.5 28L10 20L4 13.5L12 12L16 4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="vm-label">Mission</div>
+        <h3>Safety-first AI, at every stage of the lifecycle</h3>
+        <p>To train and certify AI systems and their developers in safety-first practices, embedding fairness, accountability, and robustness at every stage of the AI lifecycle.</p>
+        <div class="vm-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+    <div class="vm-pillars">
+      <div class="vm-pillar">
+        <div class="vm-pillar-icon">⚖️</div>
+        <div class="vm-pillar-label">Fairness</div>
+      </div>
+      <div class="vm-pillar">
+        <div class="vm-pillar-icon">🔍</div>
+        <div class="vm-pillar-label">Transparency</div>
+      </div>
+      <div class="vm-pillar">
+        <div class="vm-pillar-icon">🛡️</div>
+        <div class="vm-pillar-label">Safety</div>
+      </div>
+      <div class="vm-pillar">
+        <div class="vm-pillar-icon">📋</div>
+        <div class="vm-pillar-label">Accountability</div>
+      </div>
+      <div class="vm-pillar">
+        <div class="vm-pillar-icon">🤝</div>
+        <div class="vm-pillar-label">Trust</div>
+      </div>
+      <div class="vm-pillar">
+        <div class="vm-pillar-icon">💡</div>
+        <div class="vm-pillar-label">Robustness</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/" class="brand" style="display:inline-flex; gap:.625rem; align-items:center; font-weight:700; font-size:1.125rem; letter-spacing:-.025em; margin-bottom:1rem;">
+          <img src="/assets/logo.jpg" alt="Diraflow" class="nav-logo-img nav-logo-transparent">
+        </a>
+        <p>Premium training data for AI agents and LLMs. Built by experts, trusted by frontier AI teams worldwide.</p>
+
+        <!-- ── SOCIAL ICONS (replaces old footer-socials) ── -->
+        <div style="display:flex; gap:0.6rem; align-items:center; margin-top:1.25rem; flex-wrap:wrap;">
+
+          <!-- LinkedIn -->
+          <a href="https://linkedin.com/company/diraflow" target="_blank" rel="noopener" aria-label="LinkedIn"
+            style="width:38px; height:38px; border-radius:9px; background:#0A66C2; display:flex; align-items:center; justify-content:center; transition:transform 0.2s, opacity 0.2s; text-decoration:none; flex-shrink:0;"
+            onmouseover="this.style.transform='translateY(-3px)'; this.style.opacity='0.85'"
+            onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+            </svg>
+          </a>
+
+          <!-- X / Twitter -->
+          <a href="https://x.com/diraflow_" target="_blank" rel="noopener" aria-label="X / Twitter"
+            style="width:38px; height:38px; border-radius:9px; background:#000; display:flex; align-items:center; justify-content:center; transition:transform 0.2s, opacity 0.2s; text-decoration:none; flex-shrink:0; border:1px solid #333;"
+            onmouseover="this.style.transform='translateY(-3px)'; this.style.opacity='0.85'"
+            onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </a>
+
+          <!-- Facebook -->
+          <a href="https://facebook.com/diraflow" target="_blank" rel="noopener" aria-label="Facebook"
+            style="width:38px; height:38px; border-radius:9px; background:#1877F2; display:flex; align-items:center; justify-content:center; transition:transform 0.2s, opacity 0.2s; text-decoration:none; flex-shrink:0;"
+            onmouseover="this.style.transform='translateY(-3px)'; this.style.opacity='0.85'"
+            onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+          </a>
+
+          <!-- Instagram -->
+          <a href="https://www.instagram.com/diraflow_?utm_source=qr&igsh=MTVkdHRwem92dHQ4cQ==" target="_blank" rel="noopener" aria-label="Instagram"
+            style="width:38px; height:38px; border-radius:9px; background:radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); display:flex; align-items:center; justify-content:center; transition:transform 0.2s, opacity 0.2s; text-decoration:none; flex-shrink:0;"
+            onmouseover="this.style.transform='translateY(-3px)'; this.style.opacity='0.85'"
+            onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+            </svg>
+          </a>
+
+        </div>
+        <!-- ── END SOCIAL ICONS ── -->
+
+      </div>
+
+      <div class="footer-col">
+        <h4>Solutions</h4>
+        <ul>
+          <li><a href="#solutions">Environment Generation</a></li>
+          <li><a href="#solutions">Agentic Datasets</a></li>
+          <li><a href="#solutions">Red-Teaming</a></li>
+          <li><a href="#solutions">RLHF &amp; Preference</a></li>
+          <li><a href="#solutions">STEM Data</a></li>
+          <li><a href="#solutions">Custom Projects</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/careers/">Careers</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#industries">Industries</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+      </div>
+      
+    </div>
+
+    <div class="footer-bottom">
+  <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+    <p>© 2026 Diraflow AI. All rights reserved.</p>
+    <span style="color:var(--subtle); font-size:.8125rem;">·</span>
+    <a href="/code-of-conduct.html" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;"
+      onmouseover="this.style.color='#c8922a'"
+      onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
+    <span style="color:var(--subtle); font-size:.8125rem;">·</span>
+    <a href="privacy-policy.html" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;"
+      onmouseover="this.style.color='#c8922a'"
+      onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
+  </div>
+  <div style="display:flex; align-items:center; gap:1.5rem;">
+    <p style="font-size:.8125rem; color:var(--subtle);">Made with care for the AI community.</p>
+    <button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode" style="flex-shrink:0;">
+      <span class="icon-sun">☀</span>
+      <span class="icon-moon">☾</span>
+    </button>
+  </div>
+</div>
+  </div>
+</footer>
+
+<script src="/assets/main.js" defer></script>
+</body>
+</html>

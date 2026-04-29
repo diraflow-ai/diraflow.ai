@@ -1,0 +1,1045 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Industries — Diraflow</title>
+<meta name="description" content="Diraflow builds specialised AI training data for every industry — from healthcare and legal to finance, cybersecurity, and multilingual AI.">
+<meta property="og:title" content="Industries — Diraflow">
+<meta property="og:description" content="Domain-specific AI training data for every vertical — built by experts who actually work in your field.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="icon" type="image/png" href="assets/logo.jpg">
+<script>
+  (function(){
+    var t = localStorage.getItem('diraflow-theme');
+    var d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', t || (d ? 'dark' : 'light'));
+  })();
+</script>
+
+<style>
+/* ════════════════════════════════
+   CSS VARIABLES
+════════════════════════════════ */
+:root {
+  --bg:      #f7f6f2;
+  --bg2:     #eeecea;
+  --fg:      #111110;
+  --fg2:     #666460;
+  --border:  #d8d6d0;
+  --card:    #ffffff;
+  --subtle:  #999690;
+  --gold:    #c8922a;
+  --green:   #4a9e5c;
+  --red:     #dc3c3c;
+  --muted:   #888480;
+  --radius:     0.75rem;
+  --radius-lg:  1.25rem;
+  --transition: 0.2s ease;
+  --shadow:     0 4px 24px rgba(0,0,0,0.07);
+}
+[data-theme="dark"] {
+  --bg:     #111110;
+  --bg2:    #1a1918;
+  --fg:     #f7f6f2;
+  --fg2:    #999690;
+  --border: #2a2826;
+  --card:   #1e1c1b;
+  --subtle: #666460;
+}
+
+/* ════════════════════════════════
+   RESET & BASE
+════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Sora', sans-serif;
+  background: var(--bg); color: var(--fg);
+  font-size: 16px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+img { display: block; max-width: 100%; }
+a   { color: inherit; }
+ul  { list-style: none; }
+button { font-family: inherit; }
+em { font-style: italic; }
+
+/* ════════════════════════════════
+   LAYOUT
+════════════════════════════════ */
+.container        { max-width: 1160px; margin: 0 auto; padding: 0 1.5rem; }
+.container-narrow { max-width: 740px;  margin: 0 auto; padding: 0 1.5rem; }
+.block            { padding: 5rem 0; }
+@media (max-width: 600px) { .block { padding: 3rem 0; } }
+
+/* ════════════════════════════════
+   NAV
+════════════════════════════════ */
+nav.top {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  height: 68px; display: flex; align-items: center;
+}
+nav.top .container.inner {
+  max-width: 1160px; margin: 0 auto; padding: 0 1.5rem;
+  display: flex; align-items: center; gap: 2rem; width: 100%;
+}
+.brand {
+  display: inline-flex; align-items: center; gap: 0.625rem;
+  text-decoration: none; font-weight: 700;
+  color: var(--fg); white-space: nowrap; flex-shrink: 0;
+}
+.nav-logo-img { width: 36px; height: 36px; border-radius: 8px; object-fit: contain; }
+.brand-text   { display: flex; flex-direction: column; }
+.brand-name    { font-size: 1rem; font-weight: 700; line-height: 1.1; color: var(--fg); }
+.brand-tagline { font-size: 0.65rem; font-weight: 400; color: var(--fg2); letter-spacing: 0.02em; }
+nav.top ul {
+  display: flex; gap: 0; list-style: none;
+  margin: 0; padding: 0; flex: 1;
+}
+nav.top ul li a {
+  text-decoration: none; font-size: 0.875rem;
+  font-weight: 500; color: var(--fg2);
+  padding: 0.5rem 0.875rem; border-radius: 0.5rem;
+  transition: color var(--transition), background var(--transition);
+  white-space: nowrap; display: block;
+}
+nav.top ul li a:hover, nav.top ul li a.active {
+  color: var(--fg); background: var(--bg2);
+}
+.nav-right { display: flex; align-items: center; gap: 0.75rem; margin-left: auto; flex-shrink: 0; }
+@media (max-width: 860px) { nav.top ul { display: none; } }
+
+/* ════════════════════════════════
+   BUTTONS
+════════════════════════════════ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 0.4rem; padding: 0.6rem 1.25rem;
+  border-radius: 2rem; font-weight: 600; font-size: 0.875rem;
+  font-family: 'Sora', sans-serif; cursor: pointer;
+  text-decoration: none; border: none;
+  transition: all var(--transition); white-space: nowrap;
+  background: var(--fg); color: var(--bg);
+}
+.btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.btn-sm      { padding: 0.45rem 1rem; font-size: 0.8rem; }
+.btn-lg      { padding: 0.8rem 1.75rem; font-size: 0.95rem; }
+.btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--fg); }
+.btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+.btn-gold    { background: var(--gold); color: #fff; }
+.btn-gold:hover { background: #a8771e; }
+
+/* ════════════════════════════════
+   THEME TOGGLE
+════════════════════════════════ */
+.theme-toggle {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 2rem; padding: 0.35rem 0.75rem;
+  cursor: pointer; font-size: 0.9rem;
+  display: flex; align-items: center; gap: 0.4rem;
+  transition: all var(--transition);
+}
+.theme-toggle:hover { border-color: var(--gold); }
+[data-theme="dark"]  .icon-sun  { display: none; }
+[data-theme="light"] .icon-moon { display: none; }
+
+/* ════════════════════════════════
+   PAGE HEADER
+════════════════════════════════ */
+.page-head {
+  padding: 5rem 0 4rem; position: relative;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+.page-head-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 60% 0%, rgba(200,146,42,0.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+.page-head h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 400; line-height: 1.1;
+  letter-spacing: -0.035em; margin-bottom: 1rem; color: var(--fg);
+}
+.page-head h1 em { color: var(--gold); font-style: italic; }
+.page-head > .container > p {
+  font-size: 1.05rem; color: var(--fg2); max-width: 560px; line-height: 1.75;
+}
+
+/* ════════════════════════════════
+   SECTION LABELS & TITLES
+════════════════════════════════ */
+.section-label {
+  display: flex; align-items: center; gap: 0.625rem;
+  font-size: 0.6875rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--gold); margin-bottom: 0.75rem;
+}
+.section-label::before {
+  content: ''; display: block; width: 1.5rem;
+  height: 1.5px; background: var(--gold);
+}
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+  font-weight: 400; line-height: 1.15;
+  letter-spacing: -0.03em; color: var(--fg); margin-bottom: 1.25rem;
+}
+.section-title em { color: var(--gold); font-style: italic; }
+.section-intro {
+  font-size: 1rem; color: var(--fg2);
+  line-height: 1.75; max-width: 600px; margin-bottom: 2.5rem;
+}
+
+/* ════════════════════════════════
+   FADE UP
+════════════════════════════════ */
+.fade-up { opacity: 0; transform: translateY(20px); animation: fadeUp 0.6s ease forwards; }
+.fade-up-1 { animation-delay: 0.1s; }
+.fade-up-2 { animation-delay: 0.2s; }
+.fade-up-3 { animation-delay: 0.3s; }
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+/* ════════════════════════════════
+   INDUSTRY CARDS
+════════════════════════════════ */
+.industries-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+@media (max-width: 900px) { .industries-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .industries-grid { grid-template-columns: 1fr; } }
+
+.industry-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  scroll-margin-top: 7rem;
+  cursor: default;
+}
+.industry-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.09);
+  border-color: rgba(200,146,42,0.4);
+}
+.industry-card-media {
+  aspect-ratio: 16/9; overflow: hidden;
+}
+.industry-card-media img {
+  width: 100%; height: 100%; object-fit: cover;
+  display: block; transition: transform 0.5s ease;
+}
+.industry-card:hover .industry-card-media img { transform: scale(1.04); }
+.industry-card-body { padding: 1.75rem; }
+.industry-icon {
+  font-size: 1.5rem; width: 48px; height: 48px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 0.75rem; display: flex; align-items: center;
+  justify-content: center; margin-bottom: 1rem;
+}
+.industry-card-body h3 {
+  font-size: 1.1rem; font-weight: 700;
+  color: var(--fg); margin-bottom: 0.5rem; letter-spacing: -0.015em;
+}
+.industry-card-body > p {
+  font-size: 0.875rem; color: var(--fg2);
+  line-height: 1.75; margin-bottom: 1.25rem;
+}
+.industry-features {
+  list-style: none; padding: 0; margin: 0 0 1.5rem;
+  display: flex; flex-direction: column; gap: 0.45rem;
+}
+.industry-features li {
+  font-size: 0.82rem; color: var(--fg2);
+  display: flex; align-items: flex-start;
+  gap: 0.5rem; line-height: 1.5;
+}
+.industry-features li::before {
+  content: '✓'; color: var(--gold);
+  font-weight: 700; flex-shrink: 0; margin-top: 0.05rem;
+}
+.industry-tags {
+  display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 1rem;
+}
+.industry-tag {
+  font-size: 0.68rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  padding: 0.2rem 0.6rem; border-radius: 2rem;
+  background: rgba(200,146,42,0.1);
+  border: 1px solid rgba(200,146,42,0.25); color: var(--gold);
+}
+.industry-cta {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.85rem; font-weight: 700; color: var(--gold);
+  text-decoration: none; cursor: pointer;
+  background: none; border: none; padding: 0;
+  transition: gap 0.2s ease;
+}
+.industry-cta:hover { gap: 0.65rem; }
+
+/* ── Featured wide card ── */
+.industry-card-featured {
+  grid-column: span 2;
+  display: grid; grid-template-columns: 1fr 1fr;
+}
+.industry-card-featured .industry-card-media { aspect-ratio: auto; min-height: 320px; }
+.industry-card-featured .industry-card-body {
+  padding: 2.25rem; display: flex;
+  flex-direction: column; justify-content: center;
+}
+@media (max-width: 900px) {
+  .industry-card-featured { grid-column: span 2; grid-template-columns: 1fr; }
+  .industry-card-featured .industry-card-media { min-height: 200px; }
+}
+@media (max-width: 560px) {
+  .industry-card-featured { grid-column: span 1; grid-template-columns: 1fr; }
+}
+
+/* ── Dark accent card ── */
+.industry-card-dark {
+  background: var(--fg); border: none;
+}
+.industry-card-dark h3 { color: #fff; }
+.industry-card-dark > .industry-card-body > p,
+.industry-card-dark .industry-card-body > p { color: rgba(255,255,255,0.6); }
+.industry-card-dark .industry-features li { color: rgba(255,255,255,0.6); }
+.industry-card-dark .industry-features li::before { color: var(--gold); }
+.industry-card-dark .industry-icon { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); }
+.industry-card-dark .industry-tag { background: rgba(200,146,42,0.15); border-color: rgba(200,146,42,0.35); }
+.industry-card-dark .industry-cta { color: var(--gold); }
+
+/* ════════════════════════════════
+   SIDEBAR LAYOUT
+════════════════════════════════ */
+.industries-layout {
+  display: grid; grid-template-columns: 220px 1fr;
+  gap: 3rem; align-items: start;
+}
+@media (max-width: 860px) {
+  .industries-layout { grid-template-columns: 1fr; }
+  .industries-sidebar { display: none; }
+}
+.industries-sidebar { position: sticky; top: 6rem; }
+.industries-sidebar h4 {
+  font-size: 0.72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--fg2); margin-bottom: 0.875rem;
+}
+.industries-sidebar nav a {
+  display: flex; align-items: center; gap: 0.6rem;
+  font-size: 0.82rem; color: var(--fg2); text-decoration: none;
+  padding: 0.45rem 0.75rem; border-left: 2px solid var(--border);
+  transition: color 0.2s, border-color 0.2s;
+  margin-bottom: 0.15rem; line-height: 1.4;
+}
+.industries-sidebar nav a:hover,
+.industries-sidebar nav a.active { color: var(--gold); border-left-color: var(--gold); }
+.sidebar-cta {
+  margin-top: 2rem; padding: 1rem;
+  background: var(--bg2); border-radius: 0.875rem;
+  border: 1px solid var(--border);
+}
+.sidebar-cta p {
+  font-size: 0.78rem; color: var(--fg2);
+  line-height: 1.6; margin-bottom: 0.75rem;
+}
+
+/* ════════════════════════════════
+   STAT CARDS
+════════════════════════════════ */
+.stat-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1rem; margin-bottom: 3rem;
+}
+@media (max-width: 700px) { .stat-row { grid-template-columns: 1fr 1fr; } }
+.stat-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.5rem; text-align: center;
+}
+.stat-card .num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.25rem; color: var(--gold);
+  line-height: 1; margin-bottom: 0.4rem;
+}
+.stat-card .lbl {
+  font-size: 0.8rem; font-weight: 600; color: var(--fg); margin-bottom: 0.25rem;
+}
+.stat-card .sub { font-size: 0.72rem; color: var(--fg2); line-height: 1.4; }
+
+/* ════════════════════════════════
+   COMPARE GRID
+════════════════════════════════ */
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem; }
+@media (max-width: 700px) { .compare-grid { grid-template-columns: 1fr; } }
+.compare-card { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.compare-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); }
+.compare-header .label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.35rem; }
+.compare-header h3 { font-size: 1.05rem; font-weight: 700; color: var(--fg); }
+.compare-header.bad  { background: rgba(220,60,60,0.05); }
+.compare-header.bad  .label { color: var(--red); }
+.compare-header.good { background: rgba(200,146,42,0.06); }
+.compare-header.good .label { color: var(--gold); }
+.compare-body { padding: 1.25rem 1.5rem; background: var(--card); }
+.compare-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+.compare-list li { display: flex; gap: 0.625rem; font-size: 0.875rem; color: var(--fg2); line-height: 1.5; align-items: flex-start; }
+.compare-list .icon { flex-shrink: 0; font-weight: 700; }
+
+/* ════════════════════════════════
+   BRIEF FORM
+════════════════════════════════ */
+.brief-field {
+  width: 100%; background: var(--bg2); border: 1.5px solid var(--border);
+  border-radius: 0.625rem; padding: 0.875rem 1.125rem;
+  font-size: 0.875rem; color: var(--fg); font-family: 'Sora', sans-serif;
+  box-sizing: border-box; outline: none; transition: border-color 0.2s; display: block;
+}
+.brief-field:focus { border-color: var(--gold); }
+textarea.brief-field { resize: vertical; min-height: 110px; }
+select.brief-field   { cursor: pointer; }
+
+/* ════════════════════════════════
+   FOOTER
+════════════════════════════════ */
+footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 4rem 0 0; }
+.footer-grid {
+  display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr;
+  gap: 3rem; margin-bottom: 3rem;
+}
+@media (max-width: 860px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; } }
+@media (max-width: 500px) { .footer-grid { grid-template-columns: 1fr; } }
+.footer-brand p { font-size: 0.875rem; color: var(--fg2); line-height: 1.7; margin-top: 0.75rem; }
+.footer-col h4 { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg2); margin-bottom: 1.25rem; }
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.625rem; }
+.footer-col ul li a { font-size: 0.875rem; color: var(--fg2); text-decoration: none; transition: color var(--transition); }
+.footer-col ul li a:hover { color: var(--gold); }
+.footer-bottom { border-top: 1px solid var(--border); padding: 1.5rem 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+.footer-bottom p { font-size: 0.8125rem; color: var(--subtle); }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════
+     NAV
+════════════════════════════════ -->
+<nav class="top">
+  <div class="container inner">
+    <a href="/" class="brand">
+      <img src="/assets/logo.jpg" alt="Diraflow" class="nav-logo-img nav-logo-transparent">
+      <span class="brand-text">
+        <span class="brand-name">Diraflow</span>
+        <span class="brand-tagline">Training data for frontier AI</span>
+      </span>
+    </a>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="solutions.html">Solutions</a></li>
+      <li><a href="industries.html" class="active">Industries</a></li>
+      <li><a href="blog.html">Blog</a></li>
+      <li><a href="careers.html">Careers</a></li>
+      <li><a href="contact.html">Contact Us</a></li>
+      <li><a href="report.html">Report Concerns</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀</span><span class="icon-moon">☾</span>
+      </button>
+      <a href="contact.html" class="btn btn-sm">Talk to us</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════
+     PAGE HEADER
+════════════════════════════════ -->
+<section class="page-head">
+  <div class="page-head-bg"></div>
+  <div class="container">
+    <div class="section-label fade-up fade-up-1">Who we serve</div>
+    <h1 class="fade-up fade-up-2">Built for <em>every frontier</em></h1>
+    <p class="fade-up fade-up-3">Our data solutions adapt to the specific demands of your domain — whether you're building consumer AI, enterprise agents, or foundational research models. Every industry has unique data requirements, and we build for all of them.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     STATS STRIP
+════════════════════════════════ -->
+<section style="background:var(--bg2); padding:3rem 0; border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="num">10+</div>
+        <div class="lbl">Industries served</div>
+        <div class="sub">From healthcare to cybersecurity</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">40+</div>
+        <div class="lbl">Countries</div>
+        <div class="sub">Active contributors worldwide</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">30+</div>
+        <div class="lbl">Languages</div>
+        <div class="sub">Native-speaker coverage</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">100%</div>
+        <div class="lbl">Human-generated</div>
+        <div class="sub">Zero AI fill-in, ever</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     INDUSTRIES BODY
+════════════════════════════════ -->
+<section class="block">
+  <div class="container">
+    <div class="industries-layout">
+
+      <!-- ── Sidebar ── -->
+      <aside class="industries-sidebar">
+        <h4>Jump to</h4>
+        <nav id="industries-nav">
+          <a href="#software"      class="active">💻 Software Engineering</a>
+          <a href="#healthcare">          🏥 Healthcare &amp; Life Sciences</a>
+          <a href="#legal">               ⚖️ Legal &amp; Compliance</a>
+          <a href="#finance">             💹 Finance &amp; Economics</a>
+          <a href="#cybersecurity">       🔐 Cybersecurity</a>
+          <a href="#multilingual">        🌐 Multilingual AI</a>
+          <a href="#education">           🎓 Education &amp; EdTech</a>
+          <a href="#autonomous">          🚗 Autonomous Systems</a>
+          <a href="#research">            🔬 AI Safety Research</a>
+          <a href="#custom">              ✦ Your Industry</a>
+        </nav>
+        <div class="sidebar-cta">
+          <p>Don't see your industry? We work across many more verticals.</p>
+          <a href="contact.html" class="btn btn-sm" style="width:100%; justify-content:center; display:flex;">Talk to us →</a>
+        </div>
+      </aside>
+
+      <!-- ── Industry cards ── -->
+      <div>
+
+        <!-- ROW 1 -->
+        <div class="industries-grid" style="margin-bottom:1.5rem;">
+
+          <!-- SOFTWARE ENGINEERING — Featured -->
+          <div class="industry-card industry-card-featured" id="software">
+            <div class="industry-card-media">
+              <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80&auto=format&fit=crop" alt="Software engineering AI" loading="lazy">
+            </div>
+            <div class="industry-card-body">
+              <div class="industry-tags">
+                <span class="industry-tag">Most requested</span>
+                <span class="industry-tag">Agentic</span>
+              </div>
+              <div class="industry-icon">💻</div>
+              <h3>Software Engineering AI</h3>
+              <p>Code generation, debugging, and software architecture tasks — built for the messy reality of real codebases. Multi-file environments, repository-level reasoning, and real dev workflows that actually test agent capability.</p>
+              <ul class="industry-features">
+                <li>Multi-file, multi-language coding task environments (Python, TypeScript, Go, Rust, Java)</li>
+                <li>Repository-level reasoning — not just isolated functions</li>
+                <li>Debugging traces with deliberate bug injections and gold-standard fixes</li>
+                <li>Code review and refactoring datasets annotated by senior engineers</li>
+                <li>Test generation, documentation, and architecture decision datasets</li>
+              </ul>
+              <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
+            </div>
+          </div>
+
+          <!-- HEALTHCARE -->
+          <div class="industry-card" id="healthcare">
+            <div class="industry-card-media">
+              <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=700&q=80&auto=format&fit=crop" alt="Healthcare AI data" loading="lazy">
+            </div>
+            <div class="industry-card-body">
+              <div class="industry-tags">
+                <span class="industry-tag">High-stakes</span>
+                <span class="industry-tag">Clinical</span>
+              </div>
+              <div class="industry-icon">🏥</div>
+              <h3>Healthcare &amp; Life Sciences</h3>
+              <p>Clinical reasoning, medical literature annotation, and drug discovery datasets — built with licensed medical professionals and researchers who understand the stakes of getting it wrong.</p>
+              <ul class="industry-features">
+                <li>Clinical reasoning chains annotated by licensed physicians and nurses</li>
+                <li>Medical QA datasets across specialties: oncology, cardiology, neurology</li>
+                <li>Drug interaction and pharmacology annotation</li>
+                <li>Medical imaging description and radiology report datasets</li>
+                <li>Patient communication and triage dialogue corpora</li>
+              </ul>
+              <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ROW 2 -->
+        <div class="industries-grid" style="margin-bottom:1.5rem;">
+
+          <!-- LEGAL -->
+          <div class="industry-card" id="legal">
+            <div class="industry-card-media">
+              <img src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=700&q=80&auto=format&fit=crop" alt="Legal AI data" loading="lazy">
+            </div>
+            <div class="industry-card-body">
+              <div class="industry-tags">
+                <span class="industry-tag">Multi-jurisdiction</span>
+                <span class="industry-tag">Expert-verified</span>
+              </div>
+              <div class="industry-icon">⚖️</div>
+              <h3>Legal &amp; Compliance</h3>
+              <p>Contract analysis, regulatory classification, and legal reasoning tasks annotated by qualified lawyers across multiple jurisdictions. We understand that legal AI needs precision, not approximation.</p>
+              <ul class="industry-features">
+                <li>Contract clause extraction and analysis datasets</li>
+                <li>Regulatory compliance classification across US, EU, and African jurisdictions</li>
+                <li>Case law reasoning and precedent matching</li>
+                <li>Legal document summarisation with expert verification</li>
+                <li>Due diligence checklists and M&amp;A document review tasks</li>
+              </ul>
+              <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
+            </div>
+          </div>
+
+          <!-- FINANCE -->
+          <div class="industry-card" id="finance">
+            <div class="industry-card-media">
+              <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=700&q=80&auto=format&fit=crop" alt="Finance AI data" loading="lazy">
+            </div>
+            <div class="industry-card-body">
+              <div class="industry-tags">
+                <span class="industry-tag">CFA-level</span>
+                <span class="industry-tag">Quantitative</span>
+              </div>
+              <div class="industry-icon">💹</div>
+              <h3>Finance &amp; Economics</h3>
+              <p>Financial analysis, market reasoning, and economic modelling datasets built by contributors with CFA, FRM credentials and real-world trading and investment experience. Built for precision at every decimal place.</p>
+              <ul class="industry-features">
+                <li>Financial statement analysis and earnings interpretation datasets</li>
+                <li>Market sentiment annotation and macro-economic reasoning</li>
+                <li>Risk assessment and scenario analysis tasks</li>
+                <li>Investment thesis generation and critique datasets</li>
+                <li>Regulatory filing (10-K, 10-Q, prospectus) annotation</li>
+              </ul>
+              <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
+            </div>
+          </div>
+
+          <!-- CYBERSECURITY -->
+          <div class="industry-card" id="cybersecurity">
+            <div class="industry-card-media">
+              <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=700&q=80&auto=format&fit=crop" alt="Cybersecurity AI data" loading="lazy">
+            </div>
+            <div class="industry-card-body">
+              <div class="industry-tags">
+                <span class="industry-tag">Red-team</span>
+                <span class="industry-tag">Threat intel</span>
+              </div>
+              <div class="industry-icon">🔐</div>
+              <h3>Cybersecurity</h3>
+              <p>Threat detection, vulnerability analysis, and adversarial security datasets — with red-team expertise built in from day one. We help your models understand attacks so they can defend against them.</p>
+              <ul class="industry-features">
+                <li>CVE analysis and vulnerability description datasets</li>
+                <li>Phishing and social engineering detection training data</li>
+                <li>Malware behaviour description and classification</li>
+                <li>Penetration testing scenario datasets with expert annotations</li>
+                <li>Security incident response reasoning chains</li>
+              </ul>
+              <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ROW 3 -->
+        <div class="industries-grid" style="margin-bottom:1.5rem;">
+
+          <!-- MULTILINGUAL -->
+          <div class="industry-card" id="multilingual">
+            <div class="industry-card-media">
+              <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=700&q=80&auto=format&fit=crop" alt="Multilingual AI" loading="lazy">
+            </div>
+            <div class="industry-card-body">
+              <div class="industry-tags">
+                <span class="industry-tag">30+ languages</span>
+                <span class="industry-tag">Native speakers</span>
+              </div>
+              <div class="industry-icon">🌐</div>
+              <h3>Multilingual &amp; Cross-cultural AI</h3>
+              <p>High-quality data in 30+ languages — never machine-translated. Native-speaker contributors with deep cultural fluency for every target language, including low-resource and underrepresented languages.</p>
+              <ul class="industry-features">
+                <li>Original human-generated content — zero MT post-edit</li>
+                <li>Coverage: English, French, Spanish, Arabic, Swahili, Amharic, Hindi, Mandarin, Japanese, Korean + more</li>
+                <li>Low-resource language support via in-region partnerships</li>
+                <li>Cultural sensitivity review for safety and localisation</li>
+                <li>Cross-lingual preference annotation and translation quality evaluation</li>
+              </ul>
+              <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
+            </div>
+          </div>
+
+          <!-- EDUCATION -->
+          <div class="industry-card" id="education">
+            <div class="industry-card-media">
+              <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=700&q=80&auto=format&fit=crop" alt="Education AI data" loading="lazy">
+            </div>
+            <div class="industry-card-body">
+              <div class="industry-tags">
+                <span class="industry-tag">K-12 to PhD</span>
+                <span class="industry-tag">Curriculum-aligned</span>
+              </div>
+              <div class="industry-icon">🎓</div>
+              <h3>Education &amp; EdTech</h3>
+              <p>Curriculum-aligned STEM datasets, tutoring dialogue corpora, and adaptive learning feedback data for AI-powered education platforms. Built by teachers, tutors, and subject-matter experts across every level.</p>
+              <ul class="industry-features">
+                <li>Socratic tutoring dialogue datasets across subjects and grade levels</li>
+                <li>Misconception identification and correction datasets</li>
+                <li>Formative assessment question generation with difficulty calibration</li>
+                <li>Essay and writing feedback annotation by qualified educators</li>
+                <li>Adaptive learning path reasoning datasets</li>
+              </ul>
+              <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
+            </div>
+          </div>
+
+          <!-- AUTONOMOUS SYSTEMS -->
+          <div class="industry-card" id="autonomous">
+            <div class="industry-card-media">
+              <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80&auto=format&fit=crop" alt="Autonomous systems AI" loading="lazy">
+            </div>
+            <div class="industry-card-body">
+              <div class="industry-tags">
+                <span class="industry-tag">LiDAR</span>
+                <span class="industry-tag">Perception</span>
+              </div>
+              <div class="industry-icon">🚗</div>
+              <h3>Autonomous Systems</h3>
+              <p>LiDAR perception pipelines, sensor fusion annotation, and edge-case scenario datasets for autonomous vehicles, robotics, and drone systems. We handle the long tail of rare scenarios that matter most for safety.</p>
+              <ul class="industry-features">
+                <li>LiDAR point cloud annotation and object segmentation</li>
+                <li>Sensor fusion datasets combining camera, radar, and LiDAR</li>
+                <li>Edge-case scenario generation: adverse weather, occlusion, novel objects</li>
+                <li>Trajectory prediction and behaviour annotation</li>
+                <li>Simulation-to-real domain adaptation datasets</li>
+              </ul>
+              <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ROW 4 -->
+        <div class="industries-grid">
+
+          <!-- AI SAFETY RESEARCH -->
+          <div class="industry-card industry-card-featured" id="research">
+            <div class="industry-card-media">
+              <img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80&auto=format&fit=crop" alt="AI safety research" loading="lazy">
+            </div>
+            <div class="industry-card-body">
+              <div class="industry-tags">
+                <span class="industry-tag">Safety-critical</span>
+                <span class="industry-tag">Alignment</span>
+              </div>
+              <div class="industry-icon">🔬</div>
+              <h3>AI Safety Research</h3>
+              <p>Interpretability datasets, alignment probes, and adversarial evaluation suites built in close collaboration with safety research teams. We understand that safety data requires a different mindset — and different annotators — than standard AI data work.</p>
+              <ul class="industry-features">
+                <li>Adversarial prompt datasets with harm severity taxonomy</li>
+                <li>Human preference data for alignment research with rationale capture</li>
+                <li>Interpretability probing datasets across model architectures</li>
+                <li>Sycophancy, deception, and manipulation detection datasets</li>
+                <li>Red-teaming corpora with structured creative variation</li>
+              </ul>
+              <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
+            </div>
+          </div>
+
+          <!-- YOUR INDUSTRY — Dark card -->
+          <div class="industry-card industry-card-dark" id="custom">
+            <div class="industry-card-media">
+              <img src="https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=700&q=80&auto=format&fit=crop" alt="Custom industry AI data" loading="lazy">
+            </div>
+            <div class="industry-card-body">
+              <div class="industry-tags">
+                <span class="industry-tag">Any domain</span>
+                <span class="industry-tag">Bespoke</span>
+              </div>
+              <div class="industry-icon">✦</div>
+              <h3>Your Industry</h3>
+              <p style="color:rgba(255,255,255,0.6);">Don't see your vertical listed? We work across many more domains — from insurance and real estate to agriculture, energy, and government. Our contributor network covers a remarkable breadth of specialisms.</p>
+              <ul class="industry-features">
+                <li>Domain-specific contributor recruitment for any specialisation</li>
+                <li>Custom taxonomy design for your unique annotation requirements</li>
+                <li>Pilot projects to validate fit before full-scale production</li>
+                <li>Bespoke QA frameworks tailored to your domain's quality standards</li>
+              </ul>
+              <button class="industry-cta" onclick="window.location='contact.html'">Start a conversation →</button>
+              <p style="margin-top:0.875rem; font-size:0.78rem; color:rgba(255,255,255,0.4);">
+                Or email <a href="mailto:diraflowai@gmail.com" style="color:rgba(255,255,255,0.65); text-decoration:underline; text-underline-offset:3px;">diraflowai@gmail.com</a>
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div><!-- end main content -->
+    </div><!-- end industries-layout -->
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     WHY DOMAIN EXPERTISE MATTERS
+════════════════════════════════ -->
+<section class="block" style="background:var(--bg2);">
+  <div class="container">
+    <div class="section-label">The Diraflow difference</div>
+    <h2 class="section-title">Domain expertise <em>isn't optional</em></h2>
+    <p class="section-intro">Generic crowdworkers produce generic data. In high-stakes domains, that's not just suboptimal — it's dangerous. Every industry we serve gets contributors who actually work in that field.</p>
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-header bad">
+          <div class="label">❌ Generic data providers</div>
+          <h3>What you get elsewhere</h3>
+        </div>
+        <div class="compare-body">
+          <ul class="compare-list">
+            <li><span class="icon" style="color:var(--red);">✗</span> Non-specialist annotators guessing at domain terminology</li>
+            <li><span class="icon" style="color:var(--red);">✗</span> No credential verification — anyone can annotate medical data</li>
+            <li><span class="icon" style="color:var(--red);">✗</span> Surface-level accuracy that hides deep domain errors</li>
+            <li><span class="icon" style="color:var(--red);">✗</span> No understanding of professional standards, ethics, or norms</li>
+            <li><span class="icon" style="color:var(--red);">✗</span> One-size-fits-all QA that misses domain-specific failure modes</li>
+          </ul>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-header good">
+          <div class="label">✦ Diraflow standard</div>
+          <h3>What you get with us</h3>
+        </div>
+        <div class="compare-body">
+          <ul class="compare-list">
+            <li><span class="icon" style="color:var(--green);">✓</span> Verified domain experts — licensed practitioners, PhDs, researchers</li>
+            <li><span class="icon" style="color:var(--green);">✓</span> Credential review and domain knowledge testing before project start</li>
+            <li><span class="icon" style="color:var(--green);">✓</span> Contributors who catch errors a generalist would never notice</li>
+            <li><span class="icon" style="color:var(--green);">✓</span> Understanding of professional norms, regulatory context, and edge cases</li>
+            <li><span class="icon" style="color:var(--green);">✓</span> Domain-specific QA rubrics built with your team's input</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     PROCESS STRIP
+════════════════════════════════ -->
+<section class="block">
+  <div class="container">
+    <div class="section-label">How it works</div>
+    <h2 class="section-title" style="margin-bottom:2.5rem;">From your domain <em>to your dataset</em></h2>
+    <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:1rem;">
+      <div style="background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem; text-align:center;">
+        <div style="font-family:'DM Serif Display',serif; font-size:2rem; color:var(--gold); line-height:1; margin-bottom:0.5rem;">01</div>
+        <h4 style="font-size:0.85rem; font-weight:700; color:var(--fg); margin-bottom:0.35rem;">You describe your domain</h4>
+        <p style="font-size:0.78rem; color:var(--fg2); line-height:1.5; margin:0;">Tell us your field, model goals, quality bar, and any regulatory requirements</p>
+      </div>
+      <div style="background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem; text-align:center;">
+        <div style="font-family:'DM Serif Display',serif; font-size:2rem; color:var(--gold); line-height:1; margin-bottom:0.5rem;">02</div>
+        <h4 style="font-size:0.85rem; font-weight:700; color:var(--fg); margin-bottom:0.35rem;">We match experts</h4>
+        <p style="font-size:0.78rem; color:var(--fg2); line-height:1.5; margin:0;">Hand-picked contributors from our vetted network with verified credentials in your domain</p>
+      </div>
+      <div style="background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem; text-align:center;">
+        <div style="font-family:'DM Serif Display',serif; font-size:2rem; color:var(--gold); line-height:1; margin-bottom:0.5rem;">03</div>
+        <h4 style="font-size:0.85rem; font-weight:700; color:var(--fg); margin-bottom:0.35rem;">Pilot batch</h4>
+        <p style="font-size:0.78rem; color:var(--fg2); line-height:1.5; margin:0;">Small test batch reviewed together — calibrate and iterate before full production</p>
+      </div>
+      <div style="background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem; text-align:center;">
+        <div style="font-family:'DM Serif Display',serif; font-size:2rem; color:var(--gold); line-height:1; margin-bottom:0.5rem;">04</div>
+        <h4 style="font-size:0.85rem; font-weight:700; color:var(--fg); margin-bottom:0.35rem;">Production &amp; QA</h4>
+        <p style="font-size:0.78rem; color:var(--fg2); line-height:1.5; margin:0;">Full-scale with multi-layer review, IAA tracking, and weekly progress reports</p>
+      </div>
+      <div style="background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem; text-align:center;">
+        <div style="font-family:'DM Serif Display',serif; font-size:2rem; color:var(--gold); line-height:1; margin-bottom:0.5rem;">05</div>
+        <h4 style="font-size:0.85rem; font-weight:700; color:var(--fg); margin-bottom:0.35rem;">Delivery</h4>
+        <p style="font-size:0.78rem; color:var(--fg2); line-height:1.5; margin:0;">Versioned, documented datasets delivered in your preferred format with full audit trails</p>
+      </div>
+    </div>
+    <!-- NOTE: Responsive stacking on mobile -->
+    <style>
+      @media (max-width: 700px) {
+        .process-strip-grid { grid-template-columns: 1fr 1fr !important; }
+      }
+      @media (max-width: 460px) {
+        .process-strip-grid { grid-template-columns: 1fr !important; }
+      }
+    </style>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     BRIEF FORM CTA
+════════════════════════════════ -->
+<section class="block" style="background:var(--bg2);" id="get-started">
+  <div class="container">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:start; max-width:960px; margin:0 auto;">
+
+      <div>
+        <div class="section-label">Ready to build?</div>
+        <h2 class="section-title">Tell us about <em>your domain</em></h2>
+        <p style="font-size:0.9rem; color:var(--fg2); line-height:1.8; margin-bottom:1.5rem;">Send us a brief and we'll come back with a tailored proposal — matched contributors, scope, timeline, and pricing — within one business day.</p>
+        <div style="display:flex; flex-direction:column; gap:0.75rem; font-size:0.875rem; color:var(--fg2);">
+          <div style="display:flex; align-items:center; gap:0.75rem;"><span style="color:var(--gold);">✉</span><a href="mailto:diraflowai@gmail.com" style="color:var(--fg2); text-decoration:none;">diraflowai@gmail.com</a></div>
+          <div style="display:flex; align-items:center; gap:0.75rem;"><span style="color:var(--gold);">⏱</span> Response within 1 business day</div>
+          <div style="display:flex; align-items:center; gap:0.75rem;"><span style="color:var(--gold);">🔒</span> NDAs signed before any project discussion</div>
+          <div style="display:flex; align-items:center; gap:0.75rem;"><span style="color:var(--gold);">👥</span> Dedicated project manager assigned from day one</div>
+        </div>
+      </div>
+
+      <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:2.25rem; box-shadow:var(--shadow);">
+        <h3 style="font-size:1.15rem; font-weight:700; color:var(--fg); margin-bottom:0.35rem; letter-spacing:-0.015em;">Send us a brief</h3>
+        <p style="font-size:0.85rem; color:var(--fg2); margin-bottom:1.5rem;">Include your industry, use case, and timeline.</p>
+        <form id="brief-form" action="https://formspree.io/f/xnjllewe" method="POST" style="display:flex; flex-direction:column; gap:0.875rem;">
+          <input type="hidden" name="_subject" value="Industries Page Enquiry — Diraflow">
+          <div>
+            <label style="font-size:.8rem; font-weight:600; display:block; margin-bottom:.4rem; color:var(--fg);">Name *</label>
+            <input type="text" name="name" required placeholder="Your full name" class="brief-field">
+          </div>
+          <div>
+            <label style="font-size:.8rem; font-weight:600; display:block; margin-bottom:.4rem; color:var(--fg);">Work email *</label>
+            <input type="email" name="email" required placeholder="you@company.com" class="brief-field">
+          </div>
+          <div>
+            <label style="font-size:.8rem; font-weight:600; display:block; margin-bottom:.4rem; color:var(--fg);">Your industry *</label>
+            <select name="industry" required class="brief-field">
+              <option value="" disabled selected>Select your industry…</option>
+              <option>Software Engineering AI</option>
+              <option>Healthcare &amp; Life Sciences</option>
+              <option>Legal &amp; Compliance</option>
+              <option>Finance &amp; Economics</option>
+              <option>Cybersecurity</option>
+              <option>Multilingual AI</option>
+              <option>Education &amp; EdTech</option>
+              <option>Autonomous Systems</option>
+              <option>AI Safety Research</option>
+              <option>Other / Not listed</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:.8rem; font-weight:600; display:block; margin-bottom:.4rem; color:var(--fg);">Project brief *</label>
+            <textarea name="brief" required rows="4" placeholder="Describe your data challenge, use case, volume, and timeline…" class="brief-field"></textarea>
+          </div>
+          <button type="submit" id="brief-submit-btn" class="btn" style="width:100%; justify-content:center; cursor:pointer;">
+            Send enquiry →
+          </button>
+          <p id="brief-success" style="display:none; font-size:.85rem; color:#7ecb8f; text-align:center; margin:0;">✓ Brief received! We'll be in touch within one business day.</p>
+          <p id="brief-error"   style="display:none; font-size:.85rem; color:#e07070; text-align:center; margin:0;">Something went wrong — please email diraflowai@gmail.com</p>
+          <p style="font-size:.72rem; color:var(--subtle); text-align:center; margin:0;">No commitment required. We respond within one business day.</p>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     FOOTER
+════════════════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="brand" style="margin-bottom:0.875rem; display:inline-flex;">
+          <img src="assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+        </a>
+        <p>Premium training data for AI agents and LLMs. Built by experts, trusted by frontier AI teams worldwide.</p>
+        <div style="display:flex; gap:0.6rem; align-items:center; margin-top:1.25rem; flex-wrap:wrap;">
+          <a href="https://linkedin.com/company/diraflow" target="_blank" rel="noopener" aria-label="LinkedIn" style="width:38px;height:38px;border-radius:9px;background:#0A66C2;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+          <a href="https://x.com/diraflow_" target="_blank" rel="noopener" aria-label="X" style="width:38px;height:38px;border-radius:9px;background:#000;border:1px solid #333;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+          <a href="https://facebook.com/diraflow" target="_blank" rel="noopener" aria-label="Facebook" style="width:38px;height:38px;border-radius:9px;background:#1877F2;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+          <a href="https://www.instagram.com/diraflow_?utm_source=qr&igsh=MTVkdHRwem92dHQ4cQ==" target="_blank" rel="noopener" aria-label="Instagram" style="width:38px;height:38px;border-radius:9px;background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%);display:flex;align-items:center;justify-content:center;transition:transform 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col"><h4>Solutions</h4><ul><li><a href="solutions.html#environment">Environment Generation</a></li><li><a href="solutions.html#agentic">Agentic Datasets</a></li><li><a href="solutions.html#redteaming">Red-Teaming</a></li><li><a href="solutions.html#rlhf">RLHF &amp; Preference</a></li><li><a href="solutions.html#stem">STEM Data</a></li><li><a href="solutions.html#custom">Custom Projects</a></li></ul></div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a href="blog/index.html">Blog</a></li><li><a href="careers/index.html">Careers</a></li><li><a href="index.html#faq">FAQ</a></li><li><a href="industries.html">Industries</a></li><li><a href="contact.html">Contact Us</a></li></ul></div>
+      <div class="footer-col"><h4>Connect</h4><ul><li><a href="mailto:diraflowai@gmail.com">diraflowai@gmail.com</a></li><li><a href="https://linkedin.com/company/diraflow" target="_blank" rel="noopener">LinkedIn</a></li><li><a href="https://x.com/diraflow_" target="_blank" rel="noopener">Twitter / X</a></li><li><a href="#">Newsletter</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+        <p>© 2026 Diraflow AI. All rights reserved.</p>
+        <span style="color:var(--subtle); font-size:.8125rem;">·</span>
+        <a href="code-of-conduct.html" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
+        <span style="color:var(--subtle); font-size:.8125rem;">·</span>
+        <a href="privacy-policy.html" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
+      </div>
+      <div style="display:flex; align-items:center; gap:1.5rem;">
+        <p style="font-size:.8125rem; color:var(--subtle);">Made with care for the AI community.</p>
+        <button class="theme-toggle" aria-label="Toggle dark mode" style="flex-shrink:0;">
+          <span class="icon-sun">☀</span><span class="icon-moon">☾</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/main.js" defer></script>
+<script>
+/* ── Sidebar scroll-spy ── */
+const sectionIds = ['software','healthcare','legal','finance','cybersecurity','multilingual','education','autonomous','research','custom'];
+const navLinks   = document.querySelectorAll('#industries-nav a');
+window.addEventListener('scroll', () => {
+  let current = sectionIds[0];
+  sectionIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 140) current = id;
+  });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}, { passive: true });
+
+/* ── Theme toggle ── */
+document.querySelectorAll('.theme-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('diraflow-theme', next);
+  });
+});
+
+/* ── Brief form ── */
+const briefForm = document.getElementById('brief-form');
+if (briefForm) {
+  briefForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('brief-submit-btn');
+    const ok  = document.getElementById('brief-success');
+    const err = document.getElementById('brief-error');
+    btn.textContent = 'Sending…'; btn.disabled = true; err.style.display = 'none';
+    try {
+      const res = await fetch(briefForm.action, {
+        method: 'POST', body: new FormData(briefForm),
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        briefForm.reset(); btn.style.display = 'none'; ok.style.display = 'block';
+        setTimeout(() => { ok.style.display='none'; btn.style.display='block'; btn.textContent='Send enquiry →'; btn.disabled=false; }, 5000);
+      } else { throw new Error(); }
+    } catch {
+      err.style.display = 'block'; btn.textContent = 'Send enquiry →'; btn.disabled = false;
+    }
+  });
+}
+</script>
+</body>
+</html>
