@@ -1582,3 +1582,190 @@ footer {
 .card {
   position: relative;
 }
+
+/* ════════════════════════════════
+   HAMBURGER BUTTON
+════════════════════════════════ */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 38px;
+  height: 38px;
+  background: var(--bg2, #eeecea);
+  border: 1px solid var(--border, #d8d6d0);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.hamburger:hover {
+  border-color: #c8922a;
+  background: rgba(200,146,42,0.08);
+}
+.hamburger span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--fg, #111);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+/* Animate to X when open */
+.hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Hide desktop nav on mobile */
+@media (max-width: 860px) {
+  .nav-links    { display: none !important; }
+  .desktop-only { display: none !important; }
+  .hamburger    { display: flex !important; }
+}
+
+/* ════════════════════════════════
+   DRAWER OVERLAY
+════════════════════════════════ */
+.drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(3px);
+  z-index: 998;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+.drawer-overlay.open {
+  display: block;
+  opacity: 1;
+}
+
+/* ════════════════════════════════
+   SLIDE-OUT DRAWER
+════════════════════════════════ */
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;                          /* slides in from RIGHT */
+  bottom: 0;
+  width: 300px;
+  max-width: 85vw;
+  background: var(--bg, #f7f6f2);
+  border-left: 1px solid var(--border, #d8d6d0);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);       /* hidden off-screen */
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: -8px 0 40px rgba(0,0,0,0.15);
+}
+.drawer.open {
+  transform: translateX(0);          /* slides in */
+}
+
+/* Drawer header */
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border, #d8d6d0);
+}
+.drawer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--fg, #111);
+}
+.drawer-close {
+  width: 32px;
+  height: 32px;
+  background: var(--bg2, #eee);
+  border: 1px solid var(--border, #d8d6d0);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg2, #888);
+  transition: all 0.2s ease;
+}
+.drawer-close:hover {
+  background: var(--fg, #111);
+  color: var(--bg, #fff);
+  border-color: var(--fg, #111);
+}
+
+/* Drawer nav links */
+.drawer-nav {
+  flex: 1;
+  padding: 1rem 0.875rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--fg2, #666);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+.drawer-link:hover,
+.drawer-link.active {
+  background: rgba(200,146,42,0.08);
+  border-color: rgba(200,146,42,0.2);
+  color: #c8922a;
+}
+.drawer-icon {
+  font-size: 1.1rem;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg2, #eee);
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Drawer footer */
+.drawer-footer {
+  padding: 1.25rem;
+  border-top: 1px solid var(--border, #d8d6d0);
+}
+.drawer-cta {
+  display: block;
+  text-align: center;
+  background: #c8922a;
+  color: #fff;
+  padding: 0.8rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+  margin-bottom: 1rem;
+  transition: background 0.2s ease;
+}
+.drawer-cta:hover { background: #a8771e; }
+.drawer-socials {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+/* Prevent body scroll when drawer open */
+body.drawer-open { overflow: hidden; }

@@ -1,4 +1,31 @@
 /* ── Diraflow main.js v3 ── */
+/* ── Mobile drawer ── */
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawer-overlay').classList.add('open');
+  document.getElementById('hamburger-btn').classList.add('open');
+  document.body.classList.add('drawer-open');
+}
+
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.getElementById('hamburger-btn').classList.remove('open');
+  document.body.classList.remove('drawer-open');
+}
+
+/* Close on Escape key */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeDrawer();
+});
+
+/* Highlight active page in drawer */
+const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+document.querySelectorAll('.drawer-link').forEach(link => {
+  if (link.getAttribute('href') === currentPage) {
+    link.classList.add('active');
+  }
+});
 
 (function () {
   'use strict';
