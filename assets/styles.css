@@ -1767,5 +1767,136 @@ footer {
   gap: 0.6rem;
 }
 
+/* ════════════════════════════════
+   CASE STUDIES GRID — FULLY RESPONSIVE
+════════════════════════════════ */
+.case-studies-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 1.25rem;
+}
+
+/* Featured card spans full height on left */
+.cs-card-featured {
+  grid-row: span 2;
+}
+
+/* All cards */
+.cs-card {
+  border-radius: 1.25rem;
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+/* Featured card image */
+.cs-card-img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+}
+.cs-card-img img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+
+/* Card bodies */
+.cs-card-body {
+  padding: 1.75rem;
+}
+.cs-card-body-dark {
+  background: var(--fg);
+}
+
+/* Eyebrow labels */
+.cs-eyebrow {
+  font-size: 0.6875rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--gold); margin-bottom: 0.875rem;
+}
+.cs-eyebrow-subtle {
+  color: var(--subtle);
+}
+
+/* Headings */
+.cs-card-body-dark h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.35rem; font-weight: 400;
+  letter-spacing: -0.025em; line-height: 1.25;
+  color: var(--bg); margin-bottom: 0.875rem;
+}
+.cs-card-small h3 {
+  font-size: 1rem; font-weight: 600;
+  color: var(--fg); letter-spacing: -0.015em;
+  line-height: 1.35; margin-bottom: 0.625rem;
+}
+
+/* Body text */
+.cs-card-body-dark p {
+  color: rgba(247,246,242,0.55);
+  font-size: 0.9rem; line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+.cs-card-small p {
+  font-size: 0.875rem; color: var(--fg2);
+  line-height: 1.65; margin-bottom: 1.25rem;
+}
+
+/* Stats row */
+.cs-stats {
+  display: flex; gap: 2rem; flex-wrap: wrap;
+}
+.cs-stat-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.875rem; letter-spacing: -0.03em;
+  color: var(--gold); line-height: 1;
+  margin-bottom: 0.2rem;
+}
+.cs-stat-dark { color: var(--fg); }
+.cs-stat-lbl  { font-size: 0.72rem; color: var(--subtle); }
+
+/* ════════════════════════════════
+   MOBILE — stack everything
+════════════════════════════════ */
+@media (max-width: 700px) {
+  .case-studies-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+  }
+
+  /* Remove span so featured card doesn't stretch */
+  .cs-card-featured {
+    grid-row: span 1 !important;
+  }
+
+  /* Tighter padding on small screens */
+  .cs-card-body {
+    padding: 1.25rem !important;
+  }
+
+  .cs-card-body-dark h3 {
+    font-size: 1.1rem !important;
+  }
+
+  /* Reduce gap between stats */
+  .cs-stats {
+    gap: 1.25rem !important;
+  }
+
+  .cs-stat-num {
+    font-size: 1.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .cs-card-body {
+    padding: 1rem !important;
+  }
+  .cs-card-body-dark h3 {
+    font-size: 1rem !important;
+  }
+}
+
 /* Prevent body scroll when drawer open */
 body.drawer-open { overflow: hidden; }
