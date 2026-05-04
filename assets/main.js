@@ -1,5 +1,9 @@
 /* ── Diraflow main.js v3 ── */
 /* ── Mobile drawer ── */
+import { inject } from "@vercel/analytics";
+import { Analytics } from "@vercel/analytics/react"
+import { injectAnalytics } from "@vercel/analytics/sveltekit";
+
 function openDrawer() {
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawer-overlay').classList.add('open');
@@ -358,3 +362,5 @@ if (conversationForm) {
     }
   });
 }
+
+injectAnalytics();
