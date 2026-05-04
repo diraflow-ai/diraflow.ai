@@ -13,18 +13,73 @@
 
 <style>
   /* ── Contact layout ── */
+  /* ── Contact grid — fix mobile overlap ── */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 4rem;
+  align-items: start;
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 6rem;
+}
+
+/* ── THIS IS THE FIX — stack on mobile/tablet ── */
+@media (max-width: 820px) {
   .contact-grid {
-    display: grid;
-    grid-template-columns: 1fr 1.1fr;
-    gap: 4rem;
-    align-items: start;
-    max-width: 1060px;
-    margin: 0 auto;
-    padding: 4rem 1.5rem 6rem;
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+    padding: 2rem 1.25rem 4rem !important;
   }
-  @media (max-width: 820px) {
-    .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+
+  /* Stop the info panel from being sticky on mobile */
+  .contact-info {
+    position: static !important;
   }
+
+  /* Make form full width */
+  .contact-form-wrap {
+    width: 100% !important;
+    padding: 1.5rem !important;
+  }
+
+  /* Shrink tab buttons on small screens */
+  .form-tabs {
+    gap: 0.25rem !important;
+  }
+  .form-tab {
+    font-size: 0.72rem !important;
+    padding: 0.5rem 0.5rem !important;
+  }
+
+  /* Stack name fields vertically */
+  .field-row {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+
+  /* Info cards full width */
+  .info-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  /* Shrink the heading on mobile */
+  .contact-info h2 {
+    font-size: 1.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-grid {
+    padding: 1.5rem 1rem 3rem !important;
+  }
+  .contact-form-wrap {
+    padding: 1.25rem !important;
+    border-radius: 1rem !important;
+  }
+}
 
   /* ── Left info panel ── */
   .contact-info { position: sticky; top: 6rem; }
