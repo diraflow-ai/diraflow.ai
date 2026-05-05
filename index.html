@@ -20,6 +20,34 @@
     document.documentElement.setAttribute('data-theme', t || (d ? 'dark' : 'light'));
   })();
 </script>
+
+<script>
+  // These MUST be global — no wrapping, no DOMContentLoaded
+  function openDrawer() {
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawer-overlay').classList.add('open');
+    document.getElementById('hamburger-btn').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawer-overlay').classList.remove('open');
+    document.getElementById('hamburger-btn').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeDrawer();
+  });
+
+  // Highlight active page in drawer
+  var current = window.location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.drawer-link').forEach(function(a) {
+    if (a.getAttribute('href') === current) a.classList.add('active');
+  });
+</script>
+
 </head>
 <body>
 
