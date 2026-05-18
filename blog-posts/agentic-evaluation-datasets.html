@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agentic AI Evaluation Datasets for LLM Agents | Diraflow AI</title>
+<meta name="description" content="Learn how to build agentic AI evaluation datasets for LLM agents, autonomous AI systems, and multi-step reasoning workflows.">
+<meta property="og:title" content="Agentic AI Evaluation Datasets for LLM Agents | Diraflow">
+<meta property="og:description" content="Deep dive into AI agent evaluation, trajectory-level annotation, multi-step reasoning datasets, and tool-use fidelity for autonomous AI agents.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://diraflowai.com/blog-posts/agentic-evaluation-datasets.html">
+<link rel="canonical" href="https://diraflowai.com/blog-posts/agentic-evaluation-datasets.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f7f6f2;--bg2:#eeecea;--fg:#111110;--fg2:#666460;
+  --border:#d8d6d0;--card:#ffffff;--subtle:#999690;
+  --gold:#c8922a;--radius:0.75rem;--radius-lg:1.25rem;
+  --transition:0.2s ease;--shadow:0 4px 24px rgba(0,0,0,0.07);
+}
+[data-theme="dark"]{
+  --bg:#111110;--bg2:#1a1918;--fg:#f7f6f2;--fg2:#999690;
+  --border:#2a2826;--card:#1e1c1b;--subtle:#666460;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;}
+.container{max: width 1160px;;margin:0 auto;padding:0 1.5rem;}
+.container-narrow{max: width 860px;;margin:0 auto;padding:0 1rem;}
+/* nav styles (same as main site) */
+nav.top{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);height:68px;display:flex;align-items:center;}
+nav.top .container.inner{max-width:1160px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;gap:2rem;width:100%;}
+.brand{display:inline-flex;align-items:center;gap:0.625rem;text-decoration:none;font-weight:700;color:var(--fg);white-space:nowrap;flex-shrink:0;}
+.nav-logo-img{width:36px;height:36px;border-radius:8px;object-fit:contain;}
+.brand-text{display:flex;flex-direction:column;}
+.brand-name{font-size:1rem;font-weight:700;line-height:1.1;}
+.brand-tagline{font-size:0.65rem;font-weight:400;color:var(--fg2);}
+nav.top ul{display:flex;gap:0;list-style:none;margin:0;padding:0;flex:1;}
+nav.top ul li a{text-decoration:none;font-size:0.875rem;font-weight:500;color:var(--fg2);padding:0.5rem 0.875rem;border-radius:0.5rem;}
+nav.top ul li a:hover,nav.top ul li a.active{color:var(--fg);background:var(--bg2);}
+.nav-right{display:flex;align-items:center;gap:0.75rem;margin-left:auto;flex-shrink:0;}
+.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.25rem;border-radius:2rem;font-weight:600;font-size:0.875rem;background:var(--fg);color:var(--bg);text-decoration:none;}
+.theme-toggle{background:var(--bg2);border:1px solid var(--border);border-radius:2rem;padding:0.35rem 0.75rem;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;gap:0.4rem;}
+.hb-btn{display:none;flex-direction:column;justify-content:center;align-items:center;width:42px;height:42px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;gap:5px;flex-shrink:0;}
+.hb-btn span{display:block;width:20px;height:2.5px;background:var(--fg);border-radius:3px;}
+@media(max-width:860px){.hb-btn{display:flex!important;}nav.top ul{display:none!important;}.btn.btn-sm{display:none!important;}}
+.hb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);z-index:9997;}
+.hb-overlay.is-open{display:block;}
+.hb-drawer{position:fixed;top:0;right:0;bottom:0;width:290px;background:var(--bg);border-left:1px solid var(--border);z-index:9998;transform:translateX(110%);transition:transform 0.35s ease;}
+.hb-drawer.is-open{transform:translateX(0);}
+.hb-nav a{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1rem;border-radius:0.75rem;color:var(--fg2);text-decoration:none;}
+.hb-footer{padding:1.25rem;border-top:1px solid var(--border);}
+.hb-cta{background:#c8922a;color:#fff;padding:0.8rem 1rem;border-radius:2rem;display:block;text-align:center;font-weight:700;}
+/* blog post styling */
+.post-header{padding:3rem 0 2rem;border-bottom:1px solid var(--border);}
+.post-header h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:400;line-height:1.2;}
+.post-meta-large{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;margin:1.5rem 0 1rem;color:var(--fg2);}
+.author-badge{display:flex;align-items:center;gap:0.7rem;}
+.author-badge img{width:44px;height:44px;border-radius:50%;}
+.post-content{font-size:1rem;line-height:1.75;color:var(--fg);margin:2rem auto;}
+.post-content h2{font-family:'DM Serif Display',serif;font-size:1.8rem;margin:2rem 0 1rem;font-weight:400;}
+.post-content h3{font-weight:600;margin:1.5rem 0 0.75rem;font-size:1.25rem;}
+.post-content p{margin-bottom:1.25rem;}
+.post-content ul, .post-content ol{margin:1rem 0 1.5rem 2rem;}
+.post-content li{margin:0.5rem 0;}
+blockquote{border-left:4px solid var(--gold);background:var(--bg2);padding:1rem 1.8rem;margin:1.5rem 0;font-style:italic;}
+code{font-family:'DM Mono',monospace;background:var(--bg2);padding:0.2rem 0.4rem;border-radius:6px;font-size:0.85rem;}
+pre{background:var(--bg2);padding:1rem;border-radius:12px;overflow-x:auto;}
+.related-posts{border-top:1px solid var(--border);margin:3rem 0 2rem;padding-top:2rem;}
+.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:1.5rem;}
+@media(max-width:700px){.related-grid{grid-template-columns:1fr;}}
+.related-card{
+  padding:1.25rem;
+  border:1px solid var(--border);
+  border-radius:1rem;
+  background:var(--card);
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    border-color 0.28s ease,
+    background 0.28s ease;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+
+.related-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 12px 32px rgba(0,0,0,0.12);
+  border-color:var(--gold);
+  background:linear-gradient(
+    180deg,
+    var(--card) 0%,
+    rgba(200,146,42,0.04) 100%
+  );
+}
+
+.related-card::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-120%;
+  width:120%;
+  height:100%;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.08),
+    transparent
+  );
+  transition:left 0.7s ease;
+}
+
+.related-card:hover::before{
+  left:120%;
+}
+
+.related-card a{
+  text-decoration:none;
+  transition:color 0.25s ease;
+}
+
+.related-card:hover a{
+  color:var(--gold);
+}
+
+.related-card p{
+  margin-top:0.5rem;
+  color:var(--fg2);
+  transition:color 0.25s ease;
+}
+
+.related-card:hover p{
+  color:var(--fg);
+}
+
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 0 1.5rem;margin-top:2rem;}
+</style>
+</head>
+<body>
+
+<nav class="top"><div class="container inner"><a href="../index.html" class="brand"><img src="../assets/logo.jpg" alt="Diraflow" class="nav-logo-img"><span class="brand-text"><span class="brand-name">Diraflow</span><span class="brand-tagline">Training data for frontier AI</span></span></a><ul><li><a href="../index.html">Home</a></li><li><a href="../solutions.html">Solutions</a></li><li><a href="../industries.html">Industries</a></li><li><a href="../blog.html" class="active">Blog</a></li><li><a href="../careers.html">Careers</a></li><li><a href="../contact.html">Contact Us</a></li></ul><div class="nav-right"><button class="theme-toggle" id="themeToggle"><span class="icon-sun">☀️</span><span class="icon-moon">🌙</span></button><button class="hb-btn" id="hb-btn"><span></span><span></span><span></span></button></div></div></nav>
+<div class="hb-overlay" id="hb-overlay"></div><div class="hb-drawer" id="hb-drawer"><div class="hb-drawer-head" style="display:flex;justify-content:space-between;padding:1rem;"><span>Menu</span><button id="hb-close" style="background:none;border:none;font-size:1.5rem;">✕</button></div><nav class="hb-nav"><a href="../index.html">Home</a><a href="../solutions.html">Solutions</a><a href="../industries.html">Industries</a><a href="../blog.html">Blog</a><a href="../careers.html">Careers</a><a href="../contact.html">Contact</a></nav><div class="hb-footer"><a href="../contact.html" class="hb-cta">Talk to an expert →</a></div></div>
+
+<div class="container-narrow">
+  <div class="post-header">
+    <a href="../blog.html" style="display:inline-block;margin-bottom:1rem;color:var(--gold);">← Back to blog</a>
+    <h1>How to Build Agentic AI Evaluation Datasets for LLM Agents</h1>
+    <div class="post-meta-large">
+      <div class="author-badge"><img src="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=100&q=80&auto=format&fit=crop&crop=face" alt="Dembe"><div><strong>Dembe J.</strong><br>Lead Research Engineer</div></div>
+      <span>Apr 14, 2026 · 8 min read</span>
+    </div>
+  </div>
+  <div class="post-content">
+    <p>Agentic AI systems are redefining what’s possible with large language models (LLMs). From autonomous AI agents that write and debug code to enterprise AI workflows that call APIs and use external tools, modern AI agents operate across multi-step environments. But evaluating these systems requires a fundamentally different type of AI training dataset. Traditional NLP benchmarks fail because they ignore sequential reasoning, tool usage, state transitions, and trajectory-level decision making. Over the last two years, Diraflow has built agentic AI datasets and evaluation pipelines for frontier AI labs developing advanced LLM agents.</p>
+    <h2>Why AI Agent Evaluation Requires Multi-Step Reasoning Datasets</h2>
+    <p>Traditional supervised fine-tuning (SFT) and RLHF datasets are designed around isolated prompt-response pairs. AI agents behave differently. An autonomous AI agent may browse files, execute tools, retry failed actions, interpret logs, and adapt its strategy across multiple steps. Because of this, agentic AI evaluation requires trajectory-based datasets that measure reasoning quality, tool-use fidelity, and long-horizon task completion.</p>
+    <h3>Where single-turn datasets mislead</h3>
+    <p>Suppose you’re building a dataset for a coding agent. A standard “code generation” dataset would provide a docstring and expect a final function. But in reality, agents run code, see error messages, debug, and iterate. If an evaluation dataset doesn’t capture whether the agent correctly interprets a stack trace and reverts a bad edit, it won’t measure real-world competence. That’s why we’ve moved to <strong>sandboxed environment snapshots</strong> and step-wise metrics like “cost-to-success” or “action efficiency”.</p>
+    <h2>Core Components of High-Quality Agentic AI Datasets</h2>
+    <ul>
+      <li><strong>Environment fidelity:</strong> Simulate realistic tools (bash, REST APIs, browsers). Low-fidelity mocks train brittle policies.</li>
+      <li><strong>Partial credit & reward modeling:</strong> Subgoal completion should be scored even when the final answer is wrong.</li>
+      <li><strong>Diversity of strategies:</strong> Two expert annotators might solve the same task using entirely different tool sequences; both must be accepted as positive examples.</li>
+      <li><strong>Anti-hacking measures:</strong> Agents find shortcuts. Dataset environments need to be adversarially validated.</li>
+    </ul>
+    <pre><code># Example trajectory annotation format (simplified)
+{
+  "task": "Fix the failing test in auth_service.py",
+  "initial_state": "hash_of_snapshot",
+  "expected_final_state": "all_tests_pass",
+  "positive_trajectories": [
+    ["ls -la", "cat auth_service.py", "sed ...", "pytest"],
+    ["find . -name '*.py'", "python -m pytest -k auth", "git diff"]
+  ],
+  "reward_structure": {"test_pass":1.0, "edit_cleanliness":0.3}
+}</code></pre>
+    <h2>How Diraflow Builds AI Agent Evaluation Datasets</h2>
+    <p>We combine expert annotators (former software engineers, security researchers) with programmatic sandbox tracing. Annotators interact inside instrumented environments; we record every keystroke, tool call, and environmental observation. We then cluster successful trajectories, identify common failure modes, and use those to generate synthetic variations. The result: agentic benchmarks that correlate with real-world deployment success, not just static leaderboard scores.</p>
+    <blockquote>“The first time we evaluated our agent on Diraflow’s dataset, we discovered it was blindly retrying failed API calls — a behaviour that never appeared in static unit tests. That changed our entire training strategy.” — ML Lead, major AI lab</blockquote>
+    <h2>Practical recommendations for agentic data projects</h2>
+    <p>If you're building your own agentic evaluation suite, start with these steps: (1) define a state transition model for your environment; (2) collect raw trajectory logs from human experts; (3) design a rubric for partial success; (4) use inter-annotator agreement on trajectory quality, not just final outcomes; (5) iterate with red-team style adversarial agents to find blind spots.</p>
+    <p>The era of single-turn benchmarks is ending. Agentic evaluation is the new frontier — and it starts with data that captures the richness of real, multi-step reasoning.</p>
+    <h2>Common Use Cases for Agentic AI Evaluation</h2>
+
+<p>Organizations building advanced AI agents use agentic evaluation datasets for:</p>
+
+<ul>
+  <li>Code generation and software engineering agents</li>
+  <li>Browser automation agents</li>
+  <li>Research and retrieval AI systems</li>
+  <li>Multi-agent orchestration workflows</li>
+  <li>Autonomous customer support systems</li>
+  <li>Tool-using LLM applications</li>
+</ul>
+
+<p>As AI systems become increasingly autonomous, trajectory-level evaluation is becoming one of the most important challenges in AI safety, reliability, and performance measurement.</p>
+
+  </div>
+  <div class="related-posts"><h3>Related reads</h3><div class="related-grid"><div class="related-card"><a href="red-teaming-at-scale.html" style="font-weight:bold;">Red-teaming at scale →</a><p style="font-size:0.8rem;">Lessons from 5k adversarial prompts</p></div><div class="related-card"><a href="coding-task-environments.html" style="font-weight:bold;">Coding task environments →</a><p style="font-size:0.8rem;">How to test agent capability</p></div></div></div>
+</div>
+
+<footer><div class="container"><div class="footer-bottom"><p>© 2026 Diraflow AI. All rights reserved.</p><a href="../code-of-conduct.html" style="color:var(--subtle);">Code of Conduct</a></div></div></footer>
+
+<script>(function(){let toggle=document.getElementById('themeToggle');if(toggle){let root=document.documentElement;toggle.addEventListener('click',()=>{let cur=root.getAttribute('data-theme');let next=cur==='light'?'dark':'light';root.setAttribute('data-theme',next);localStorage.setItem('diraflow-theme',next);});}
+let hbBtn=document.getElementById('hb-btn');let overlay=document.getElementById('hb-overlay');let drawer=document.getElementById('hb-drawer');let closeHb=document.getElementById('hb-close');function openDrawer(){drawer.classList.add('is-open');overlay.classList.add('is-open');}function closeDrawer(){drawer.classList.remove('is-open');overlay.classList.remove('is-open');}hbBtn?.addEventListener('click',openDrawer);closeHb?.addEventListener('click',closeDrawer);overlay?.addEventListener('click',closeDrawer);})();</script>
+</body>
+</html>

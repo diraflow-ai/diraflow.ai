@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hidden complexity of mathematical reasoning datasets — Diraflow AI</title>
+<meta name="description" content="Building useful math training data requires careful attention to notation, proof style, error taxonomy, and solution diversity.">
+<meta property="og:title" content="The hidden complexity of mathematical reasoning datasets | Diraflow">
+<meta property="og:description" content="Why math datasets for LLMs are harder than they seem: notation variance, proof granularity, and the challenge of representing mathematical truth.">
+<meta property="og:type" content="article">
+<link rel="canonical" href="https://diraflowai.com/blog-posts/hidden-complexity-math-datasets.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f7f6f2;--bg2:#eeecea;--fg:#111110;--fg2:#666460;
+  --border:#d8d6d0;--card:#ffffff;--subtle:#999690;
+  --gold:#c8922a;--radius:0.75rem;--radius-lg:1.25rem;
+}
+[data-theme="dark"]{
+  --bg:#111110;--bg2:#1a1918;--fg:#f7f6f2;--fg2:#999690;
+  --border:#2a2826;--card:#1e1c1b;--subtle:#666460;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--fg);}
+.container{max-width:1160px;margin:0 auto;padding:0 1.5rem;}
+.container-narrow{max: width 100px;;margin:0 auto;padding:0 1.5rem;}
+nav.top{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);height:68px;display:flex;align-items:center;}
+nav.top .container.inner{max-width:1160px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;gap:2rem;width:100%;}
+.brand{display:inline-flex;align-items:center;gap:0.625rem;text-decoration:none;font-weight:700;color:var(--fg);white-space:nowrap;}
+.nav-logo-img{width:36px;height:36px;border-radius:8px;object-fit:contain;}
+.brand-text{display:flex;flex-direction:column;}
+.brand-name{font-size:1rem;font-weight:700;}
+.brand-tagline{font-size:0.65rem;font-weight:400;color:var(--fg2);}
+nav.top ul{display:flex;gap:0;list-style:none;margin:0;padding:0;flex:1;}
+nav.top ul li a{text-decoration:none;font-size:0.875rem;font-weight:500;color:var(--fg2);padding:0.5rem 0.875rem;border-radius:0.5rem;}
+nav.top ul li a:hover,nav.top ul li a.active{color:var(--fg);background:var(--bg2);}
+.nav-right{display:flex;align-items:center;gap:0.75rem;margin-left:auto;}
+.btn{display:inline-flex;gap:0.4rem;padding:0.6rem 1.25rem;border-radius:2rem;font-weight:600;font-size:0.875rem;background:var(--fg);color:var(--bg);text-decoration:none;}
+.theme-toggle{background:var(--bg2);border:1px solid var(--border);border-radius:2rem;padding:0.35rem 0.75rem;cursor:pointer;}
+.hb-btn{display:none;flex-direction:column;width:42px;height:42px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;gap:5px;}
+.hb-btn span{display:block;width:20px;height:2.5px;background:var(--fg);}
+@media(max-width:860px){.hb-btn{display:flex!important;}nav.top ul{display:none!important;}}
+.hb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);z-index:9997;}
+.hb-overlay.is-open{display:block;}
+.hb-drawer{position:fixed;top:0;right:0;bottom:0;width:290px;background:var(--bg);border-left:1px solid var(--border);z-index:9998;transform:translateX(110%);transition:transform 0.35s ease;}
+.hb-drawer.is-open{transform:translateX(0);}
+.hb-nav a{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1rem;border-radius:0.75rem;color:var(--fg2);text-decoration:none;}
+.hb-footer{padding:1.25rem;border-top:1px solid var(--border);}
+.hb-cta{background:#c8922a;color:#fff;padding:0.8rem 1rem;border-radius:2rem;display:block;text-align:center;font-weight:700;}
+.post-header{padding:3rem 0 2rem;border-bottom:1px solid var(--border);}
+.post-header h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:400;line-height:1.2;}
+.post-meta-large{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;margin:1.5rem 0 1rem;color:var(--fg2);}
+.author-badge{display:flex;align-items:center;gap:0.7rem;}
+.author-badge img{width:44px;height:44px;border-radius:50%;}
+.post-content{font-size:1rem;line-height:1.75;margin:2rem auto;}
+.post-content h2{font-family:'DM Serif Display',serif;font-size:1.8rem;margin:2rem 0 1rem;}
+.post-content h3{font-weight:600;margin:1.5rem 0 0.75rem;}
+.post-content p{margin-bottom:1.25rem;}
+.post-content ul{margin:1rem 0 1.5rem 2rem;}
+.post-content li{margin:0.3rem 0;}
+blockquote{border-left:4px solid var(--gold);background:var(--bg2);padding:1rem 1.8rem;margin:1.5rem 0;font-style:italic;}
+pre{background:var(--bg2);padding:1rem;border-radius:12px;overflow-x:auto;font-family:'DM Mono',monospace;font-size:0.85rem;}
+.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:1.5rem;}
+@media(max-width:700px){.related-grid{grid-template-columns:1fr;}}
+.related-card{
+  padding:1.25rem;
+  border:1px solid var(--border);
+  border-radius:1rem;
+  background:var(--card);
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    border-color 0.28s ease,
+    background 0.28s ease;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+
+.related-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 12px 32px rgba(0,0,0,0.12);
+  border-color:var(--gold);
+  background:linear-gradient(
+    180deg,
+    var(--card) 0%,
+    rgba(200,146,42,0.04) 100%
+  );
+}
+
+.related-card::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-120%;
+  width:120%;
+  height:100%;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.08),
+    transparent
+  );
+  transition:left 0.7s ease;
+}
+
+.related-card:hover::before{
+  left:120%;
+}
+
+.related-card a{
+  text-decoration:none;
+  transition:color 0.25s ease;
+}
+
+.related-card:hover a{
+  color:var(--gold);
+}
+
+.related-card p{
+  margin-top:0.5rem;
+  color:var(--fg2);
+  transition:color 0.25s ease;
+}
+
+.related-card:hover p{
+  color:var(--fg);
+}
+
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 0 1.5rem;margin-top:2rem;}
+</style>
+</head>
+<body>
+<nav class="top"><div class="container inner"><a href="../index.html" class="brand"><img src="../assets/logo.jpg" alt="Diraflow" class="nav-logo-img"><span class="brand-text"><span class="brand-name">Diraflow</span><span class="brand-tagline">Training data for frontier AI</span></span></a><ul><li><a href="../index.html">Home</a></li><li><a href="../solutions.html">Solutions</a></li><li><a href="../industries.html">Industries</a></li><li><a href="../blog.html" class="active">Blog</a></li><li><a href="../careers.html">Careers</a></li><li><a href="../contact.html">Contact Us</a></li></ul><div class="nav-right"><button class="theme-toggle" id="themeToggle"><span class="icon-sun">☀️</span><span class="icon-moon">🌙</span></button><button class="hb-btn" id="hb-btn"><span></span><span></span><span></span></button></div></div></nav>
+<div class="hb-overlay" id="hb-overlay"></div><div class="hb-drawer" id="hb-drawer"><div class="hb-drawer-head" style="display:flex;justify-content:space-between;padding:1rem;"><span>Menu</span><button id="hb-close" style="background:none;border:none;font-size:1.5rem;">✕</button></div><nav class="hb-nav"><a href="../index.html">Home</a><a href="../solutions.html">Solutions</a><a href="../industries.html">Industries</a><a href="../blog.html">Blog</a><a href="../careers.html">Careers</a><a href="../contact.html">Contact</a></nav><div class="hb-footer"><a href="../contact.html" class="hb-cta">Talk to an expert →</a></div></div>
+
+<div class="container-narrow">
+  <div class="post-header">
+    <a href="../blog.html" style="display:inline-block;margin-bottom:1rem;color:var(--gold);">← Back to blog</a>
+    <h1>The hidden complexity of mathematical reasoning datasets</h1>
+    <div class="post-meta-large">
+      <div class="author-badge"><img src="https://images.unsplash.com/photo-1463453091185-61582044d556?w=100&q=80&auto=format&fit=crop&crop=face" alt="Rafael Santos"><div><strong>Rafael Santos</strong><br>Lead Data Scientist, STEM</div></div>
+      <span>Mar 28, 2026 · 5 min read</span>
+    </div>
+  </div>
+  <div class="post-content">
+    <p>At first glance, building datasets for mathematical reasoning seems straightforward: collect math problems and their solutions. But as soon as you try to train a model that can <em>truly reason</em> – not just pattern-match – you hit a wall of hidden complexity. Over the last two years, Diraflow has constructed over 200,000 annotated math examples spanning algebra, number theory, calculus, and proof-based contest problems. Here’s what we learned about the messy reality behind “math data”.</p>
+    
+    <h2>Notation is not neutral</h2>
+    <p>A single mathematical concept can be expressed in dozens of notationally distinct ways. \( \frac{dy}{dx} \) vs \( f'(x) \) vs \( \dot{y} \). \( \binom{n}{k} \) vs \( C(n,k) \) vs \( {}_nC_k \). Models trained on one notation family often fail to generalise to others, even though the underlying mathematics is identical. In one experiment, we found that a model fine-tuned on Leibniz notation for derivatives scored 89% accuracy on test questions using the same notation, but only 61% on identical problems written with prime notation. That’s not reasoning — that’s overfitting to typography.</p>
+    <p>Our solution: we built a systematic notation augmentation pipeline. Each seed problem is rewritten in 3–5 equivalent notational variants by expert mathematicians, then verified for semantic equivalence. This increased dataset size and dramatically improved cross-notation generalisation during fine-tuning.</p>
+    
+    <h3>Proof granularity: the missing layer</h3>
+    <p>Most math datasets are question–answer pairs: the model outputs a final numeric answer or a short expression. But real mathematical reasoning is about chains of justification. A model that outputs “42” might have guessed, or might have derived it correctly. To train genuine reasoning, we need <strong>step-level annotations</strong>. We developed a proof-step taxonomy that labels each inference line as “definition application”, “algebraic manipulation”, “inductive hypothesis”, “contradiction” etc. Using this, we built datasets where the target is not just the answer but a structured proof sketch. Models trained on this data show much stronger performance on out-of-distribution proof problems and can explain their reasoning when asked.</p>
+    
+    <pre><code># Example of a step-annotated math problem (simplified JSON)
+{
+  "problem": "Prove that the sum of two even integers is even.",
+  "proof_steps": [
+    {"text": "Let a = 2k, b = 2m for some integers k,m", "type": "definition"},
+    {"text": "Then a + b = 2k + 2m", "type": "substitution"},
+    {"text": "= 2(k + m)", "type": "factorisation"},
+    {"text": "Since k+m is integer, a+b is divisible by 2", "type": "definition"}
+  ],
+  "final_answer": "a+b is even"
+}</code></pre>
+
+    <h2>Error taxonomies: why wrong answers matter</h2>
+    <p>One of the most valuable parts of a math dataset is the negative examples – but not all errors are equal. A student (or model) might make a slip in arithmetic, confuse a sign, misapply a theorem, or commit a logical fallacy. Each of these error types requires a different pedagogical or training intervention. We built an error taxonomy with 18 categories and had annotators label not only whether a model’s output was correct, but <em>why</em> it was wrong. This turned out to be critical for RLHF: we could give partial credit for correct reasoning despite a numeric mistake, and strongly penalise logical leaps.</p>
+    
+    <blockquote>“Using Diraflow’s error-annotated dataset, we reduced the rate of algebraic sign errors in our model by 42% in three weeks of fine-tuning, while keeping final-answer accuracy high.” – Head of Research, AI math tutoring startup</blockquote>
+    
+    <h2>Diversity of solution strategies</h2>
+    <p>A common mistake in math dataset collection is to assume there is one “canonical” solution per problem. In reality, many problems can be solved in multiple ways – analytic vs. combinatorial, forward vs. backward, using different theorems. If your training data only contains one solution path, the model learns that path as a rigid template. When it encounters a novel problem that would benefit from an alternative approach, it gets stuck. We therefore intentionally collect multiple solution strategies for at least 30% of our problems, often by using different expert annotators and then reconciling. This multi-strategy data has been shown to improve model robustness and creativity.</p>
+    
+    <h2>Operational best practices for math datasets</h2>
+    <ul>
+      <li><strong>Use LaTeX normalization.</strong> Before any comparison, canonicalize LaTeX: convert \( \frac{a}{b} \) to \frac{a}{b}, unify spacing, etc. This reduces false negatives during evaluation.</li>
+      <li><strong>Include non-numeric answers.</strong> Proofs, derivations, and “no solution” responses are underrepresented. Build separate evaluation rubrics for these.</li>
+      <li><strong>Beware of data leakage.</strong> Many widely-used math problem sets are already in common pre-training corpora. We verify originality using n-gram overlap with GPT-4’s training data (as far as we can) and create original variants when needed.</li>
+      <li><strong>Annotator domain expertise is non-negotiable.</strong> We only hire annotators with at least a Bachelor’s in mathematics or a related field, and we calibrate them weekly with gold-standard problems.</li>
+    </ul>
+    
+    <h2>Beyond benchmarks: reasoning as a process</h2>
+    <p>Ultimately, math datasets should not just measure whether a model can spit out the right number. They should teach and evaluate the process of reasoning: forming hypotheses, checking edge cases, constructing counterexamples. At Diraflow, we are now working on interactive proof environments where models can request verification of sub-steps – a form of agentic evaluation applied to mathematics. The hidden complexity we uncovered is not a bug; it’s a feature of how rich mathematical thinking really is. Embracing that complexity is the only way to build AI that truly understands math.</p>
+  </div>
+  <div class="related-posts" style="border-top:1px solid var(--border);margin:3rem 0 2rem;padding-top:2rem;"><h3>Further reading</h3><div class="related-grid"><div class="related-card"><a href="coding-task-environments.html" style="font-weight:bold;">Coding task environments →</a><p style="font-size:0.8rem;">Realistic evaluation for software agents</p></div><div class="related-card"><a href="great-preference-annotator.html" style="font-weight:bold;">What makes a great preference annotator →</a><p style="font-size:0.8rem;">RLHF insights</p></div><div class="related-card"><a href="agentic-evaluation-datasets.html" style="font-weight:bold;">Agentic evaluation datasets →</a><p style="font-size:0.8rem;">Multi-step data design</p></div></div></div>
+</div>
+
+<footer><div class="container"><div class="footer-bottom" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;"><p>© 2026 Diraflow AI. All rights reserved.</p><a href="../code-of-conduct.html" style="color:var(--subtle);">Code of Conduct</a></div></div></footer>
+
+<script>(function(){let toggle=document.getElementById('themeToggle');if(toggle){let root=document.documentElement;toggle.addEventListener('click',()=>{let cur=root.getAttribute('data-theme');let next=cur==='light'?'dark':'light';root.setAttribute('data-theme',next);localStorage.setItem('diraflow-theme',next);});}
+let hbBtn=document.getElementById('hb-btn');let overlay=document.getElementById('hb-overlay');let drawer=document.getElementById('hb-drawer');let closeHb=document.getElementById('hb-close');function openDrawer(){drawer.classList.add('is-open');overlay.classList.add('is-open');}function closeDrawer(){drawer.classList.remove('is-open');overlay.classList.remove('is-open');}hbBtn?.addEventListener('click',openDrawer);closeHb?.addEventListener('click',closeDrawer);overlay?.addEventListener('click',closeDrawer);})();</script>
+</body>
+</html>

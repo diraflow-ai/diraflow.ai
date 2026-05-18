@@ -3,746 +3,407 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Blog — Diraflow</title>
-<meta name="description" content="Insights on AI training data, agentic systems, and the future of human-AI collaboration from the Diraflow team.">
+<title>Blog — AI Training Data Insights | Diraflow</title>
+<meta name="description" content="Thinking on AI training data, agentic evaluation, RLHF, red-teaming, and the evolving landscape of human-AI collaboration from the Diraflow team.">
+<meta property="og:title" content="Blog — Diraflow AI">
+<meta property="og:description" content="Insights on AI training data, agentic evaluation, and the future of human-AI collaboration.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://diraflowai.com/blog">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@diraflow_">
+<link rel="canonical" href="https://diraflowai.com/blog">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/styles.css">
-<link rel="icon" type="image/png" sizes="32x32" href="/assets/logo.jpg">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="icon" type="image/png" href="assets/logo.jpg">
 <script>(function(){var t=localStorage.getItem('diraflow-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.setAttribute('data-theme',t||(d?'dark':'light'));})();</script>
-
-<script>
-  // These MUST be global — no wrapping, no DOMContentLoaded
-  function openDrawer() {
-    document.getElementById('drawer').classList.add('open');
-    document.getElementById('drawer-overlay').classList.add('open');
-    document.getElementById('hamburger-btn').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeDrawer() {
-    document.getElementById('drawer').classList.remove('open');
-    document.getElementById('drawer-overlay').classList.remove('open');
-    document.getElementById('hamburger-btn').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeDrawer();
-  });
-
-  // Highlight active page in drawer
-  var current = window.location.pathname.split('/').pop() || 'index.html';
-  document.querySelectorAll('.drawer-link').forEach(function(a) {
-    if (a.getAttribute('href') === current) a.classList.add('active');
-  });
-</script>
-
+ 
 <style>
-  /* ── Read-more expand/collapse ── */
-  .post-image-link {
-    display: block;
-    overflow: hidden;
-    cursor: pointer;
-    width: 100%;
-    height: 100%;
-  }
-  .post-image-link img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.35s ease, opacity 0.25s ease;
-  }
-  .post-image-link:hover img {
-    transform: scale(1.04);
-    opacity: 0.88;
-  }
-
-  .extra-content {
-    display: none;
-    overflow: hidden;
-  }
-  .extra-content.open {
-    display: block;
-    animation: expandFade 0.35s ease forwards;
-  }
-  @keyframes expandFade {
-    from { opacity: 0; transform: translateY(-8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .extra-content p {
-    margin-top: 0.85rem;
-    line-height: 1.75;
-    color: var(--fg2, #888);
-    font-size: 0.9rem;
-  }
-  .extra-section-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1rem;
-    font-weight: 400;
-    color: var(--fg, #111);
-    margin-top: 1.25rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .read-more-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    margin-top: 1rem;
-    padding: 0.5rem 1.1rem;
-    background-color: #c8922a;
-    color: #fff;
-    border: none;
-    border-radius: 2rem;
-    font-size: 0.825rem;
-    font-weight: 600;
-    font-family: 'Sora', sans-serif;
-    letter-spacing: 0.01em;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.15s ease;
-  }
-  .read-more-btn:hover {
-    background-color: #a8771e;
-    transform: translateY(-1px);
-  }
-  .read-more-btn .btn-arrow {
-    transition: transform 0.25s ease;
-    display: inline-block;
-  }
-  .read-more-btn.open .btn-arrow {
-    transform: rotate(90deg);
-  }
-
-  div.post-card { cursor: default; }
+:root {
+  --bg:#f7f6f2;--bg2:#eeecea;--fg:#111110;--fg2:#666460;
+  --border:#d8d6d0;--card:#ffffff;--subtle:#999690;
+  --gold:#c8922a;--radius:0.75rem;--radius-lg:1.25rem;
+  --transition:0.2s ease;--shadow:0 4px 24px rgba(0,0,0,0.07);
+}
+[data-theme="dark"]{
+  --bg:#111110;--bg2:#1a1918;--fg:#f7f6f2;--fg2:#999690;
+  --border:#2a2826;--card:#1e1c1b;--subtle:#666460;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;}
+img{display:block;max-width:100%;}
+a{color:inherit;text-decoration:none;}
+ul{list-style:none;}
+button{font-family:inherit;}
+ 
+.container{max: width 100px;px;margin:0 auto;padding:0 1.5rem;}
+.container-narrow{max: width 100px;;margin:0 auto;padding:0 1.5rem;}
+ 
+/* NAV */
+nav.top{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);height:68px;display:flex;align-items:center;}
+nav.top .container.inner{max-width:1160px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;gap:2rem;width:100%;}
+.brand{display:inline-flex;align-items:center;gap:0.625rem;text-decoration:none;font-weight:700;color:var(--fg);white-space:nowrap;flex-shrink:0;}
+.nav-logo-img{width:36px;height:36px;border-radius:8px;object-fit:contain;}
+.brand-text{display:flex;flex-direction:column;}
+.brand-name{font-size:1rem;font-weight:700;line-height:1.1;color:var(--fg);}
+.brand-tagline{font-size:0.65rem;font-weight:400;color:var(--fg2);letter-spacing:0.02em;}
+nav.top ul{display:flex;gap:0;list-style:none;margin:0;padding:0;flex:1;}
+nav.top ul li a{text-decoration:none;font-size:0.875rem;font-weight:500;color:var(--fg2);padding:0.5rem 0.875rem;border-radius:0.5rem;transition:color var(--transition),background var(--transition);white-space:nowrap;display:block;}
+nav.top ul li a:hover,nav.top ul li a.active{color:var(--fg);background:var(--bg2);}
+.nav-right{display:flex;align-items:center;gap:0.75rem;margin-left:auto;flex-shrink:0;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:0.4rem;padding:0.6rem 1.25rem;border-radius:2rem;font-weight:600;font-size:0.875rem;font-family:'Sora',sans-serif;cursor:pointer;text-decoration:none;border:none;transition:all var(--transition);white-space:nowrap;background:var(--fg);color:var(--bg);}
+.btn:hover{opacity:0.85;transform:translateY(-1px);}
+.btn-sm{padding:0.45rem 1rem;font-size:0.8rem;}
+.theme-toggle{background:var(--bg2);border:1px solid var(--border);border-radius:2rem;padding:0.35rem 0.75rem;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;gap:0.4rem;transition:all var(--transition);}
+.theme-toggle:hover{border-color:var(--gold);}
+[data-theme="dark"] .icon-sun{display:none;}
+[data-theme="light"] .icon-moon{display:none;}
+.hb-btn{display:none;flex-direction:column;justify-content:center;align-items:center;width:42px;height:42px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;gap:5px;z-index:9999;position:relative;flex-shrink:0;}
+.hb-btn span{display:block;width:20px;height:2.5px;background:var(--fg);border-radius:3px;transition:transform 0.3s ease,opacity 0.3s ease;pointer-events:none;}
+.hb-btn.is-open span:nth-child(1){transform:translateY(7.5px) rotate(45deg);}
+.hb-btn.is-open span:nth-child(2){opacity:0;}
+.hb-btn.is-open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg);}
+@media(max-width:860px){.hb-btn{display:flex!important;}nav.top ul{display:none!important;}.btn.btn-sm{display:none!important;}}
+ 
+/* DRAWER */
+.hb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);z-index:9997;}
+.hb-overlay.is-open{display:block;}
+.hb-drawer{position:fixed;top:0;right:0;bottom:0;width:290px;max-width:88vw;background:var(--bg);border-left:1px solid var(--border);z-index:9998;display:flex;flex-direction:column;transform:translateX(110%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);box-shadow:-12px 0 50px rgba(0,0,0,0.18);}
+.hb-drawer.is-open{transform:translateX(0);}
+.hb-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);}
+.hb-drawer-head .brand-area{display:flex;align-items:center;gap:0.5rem;}
+.hb-drawer-head .brand-area span{font-weight:700;font-size:0.9rem;color:var(--fg);}
+.hb-close{width:32px;height:32px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;color:var(--fg2);transition:all 0.2s;}
+.hb-close:hover{background:#111;color:#fff;}
+.hb-nav{flex:1;padding:1rem 0.875rem;overflow-y:auto;display:flex;flex-direction:column;gap:0.2rem;}
+.hb-link{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1rem;border-radius:0.75rem;font-size:0.9rem;font-weight:500;color:var(--fg2);text-decoration:none;border:1px solid transparent;transition:all 0.18s ease;}
+.hb-link:hover,.hb-link.hb-active{background:rgba(200,146,42,0.09);border-color:rgba(200,146,42,0.22);color:#c8922a;}
+.hb-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border-radius:0.5rem;font-size:1rem;flex-shrink:0;}
+.hb-footer{padding:1.25rem;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:0.875rem;}
+.hb-cta{display:block;text-align:center;background:#c8922a;color:#fff;padding:0.8rem 1rem;border-radius:2rem;font-size:0.875rem;font-weight:700;text-decoration:none;}
+ 
+/* PAGE HEADER */
+.blog-head{padding:4rem 0 3.5rem;border-bottom:1px solid var(--border);background:var(--bg2);}
+.blog-head .section-label{display:flex;align-items:center;gap:0.625rem;font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--gold);margin-bottom:0.75rem;}
+.blog-head .section-label::before{content:'';display:block;width:1.5rem;height:1.5px;background:var(--gold);}
+.blog-head h1{font-family:'DM Serif Display',serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:400;line-height:1.1;letter-spacing:-0.035em;margin-bottom:0.875rem;color:var(--fg);}
+.blog-head h1 em{color:var(--gold);font-style:italic;}
+.blog-head p{font-size:1rem;color:var(--fg2);max-width:520px;line-height:1.75;}
+ 
+/* FILTER TAGS */
+.filter-row{display:flex;flex-wrap:wrap;gap:0.5rem;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:2.5rem;}
+.filter-tag{padding:0.35rem 1rem;border-radius:2rem;font-size:0.78rem;font-weight:600;border:1.5px solid var(--border);color:var(--fg2);background:transparent;cursor:pointer;transition:all 0.18s;font-family:'Sora',sans-serif;}
+.filter-tag:hover,.filter-tag.active{background:var(--gold);border-color:var(--gold);color:#fff;}
+ 
+/* ════ FEATURED POST ════ */
+.featured-post{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border);margin-bottom:3rem;text-decoration:none;transition:box-shadow 0.25s ease,border-color 0.25s ease;background:var(--card);}
+.featured-post:hover{box-shadow:0 12px 48px rgba(0,0,0,0.12);border-color:rgba(200,146,42,0.4);}
+.featured-post-img{aspect-ratio:auto;min-height:400px;overflow:hidden;position:relative;}
+.featured-post-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.5s ease;}
+.featured-post:hover .featured-post-img img{transform:scale(1.03);}
+.featured-badge{position:absolute;top:1.25rem;left:1.25rem;background:var(--gold);color:#fff;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:0.3rem 0.75rem;border-radius:2rem;}
+.featured-post-body{padding:2.5rem;display:flex;flex-direction:column;justify-content:center;gap:0;}
+.post-cat-badge{display:inline-flex;align-items:center;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:1rem;}
+.post-cat-badge::before{content:'';width:1.25rem;height:1.5px;background:var(--gold);display:inline-block;margin-right:0.5rem;}
+.featured-post-body h2{font-family:'DM Serif Display',serif;font-size:1.75rem;font-weight:400;line-height:1.2;letter-spacing:-0.025em;color:var(--fg);margin-bottom:1rem;}
+.featured-post-body p{font-size:0.9rem;color:var(--fg2);line-height:1.8;margin-bottom:1.75rem;flex:1;}
+.post-meta-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.post-author-info{display:flex;align-items:center;gap:0.625rem;}
+.post-author-info img{width:34px;height:34px;border-radius:50%;object-fit:cover;}
+.post-author-info .author-name{font-size:0.8rem;font-weight:600;color:var(--fg);}
+.post-author-info .post-date{font-size:0.72rem;color:var(--fg2);}
+.post-read-time{font-size:0.72rem;color:var(--fg2);background:var(--bg2);padding:0.25rem 0.625rem;border-radius:2rem;border:1px solid var(--border);}
+.read-more-link{display:inline-flex;align-items:center;gap:0.4rem;font-size:0.82rem;font-weight:700;color:var(--gold);transition:gap 0.2s ease;}
+.read-more-link:hover{gap:0.7rem;}
+.read-more-arrow{display:inline-block;transition:transform 0.2s;}
+.read-more-link:hover .read-more-arrow{transform:translateX(3px);}
+ 
+/* ════ GRID OF POSTS ════ */
+.posts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+@media(max-width:900px){.posts-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:560px){.posts-grid{grid-template-columns:1fr;}}
+ 
+.post-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;display:flex;flex-direction:column;text-decoration:none;transition:transform 0.25s ease,box-shadow 0.25s ease,border-color 0.25s ease;}
+.post-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.1);border-color:rgba(200,146,42,0.35);}
+.post-card-img{aspect-ratio:16/9;overflow:hidden;}
+.post-card-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.45s ease;}
+.post-card:hover .post-card-img img{transform:scale(1.05);}
+.post-card-body{padding:1.5rem;display:flex;flex-direction:column;flex:1;}
+.post-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.875rem;}
+.post-card-top .date{font-size:0.72rem;color:var(--fg2);}
+.post-card-top .cat{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold);background:rgba(200,146,42,0.1);border:1px solid rgba(200,146,42,0.2);padding:0.15rem 0.5rem;border-radius:2rem;}
+.post-card-body h3{font-family:'DM Serif Display',serif;font-size:1.1rem;font-weight:400;line-height:1.3;letter-spacing:-0.015em;color:var(--fg);margin-bottom:0.625rem;}
+.post-card-body p{font-size:0.82rem;color:var(--fg2);line-height:1.7;margin-bottom:1.25rem;flex:1;}
+.post-card-footer{display:flex;align-items:center;justify-content:space-between;padding-top:1rem;border-top:1px solid var(--border);margin-top:auto;}
+.post-card-footer .author-mini{display:flex;align-items:center;gap:0.5rem;}
+.post-card-footer .author-mini img{width:26px;height:26px;border-radius:50%;object-fit:cover;}
+.post-card-footer .author-mini span{font-size:0.72rem;font-weight:600;color:var(--fg2);}
+.post-card-footer .read-min{font-size:0.68rem;color:var(--subtle);}
+.post-card-read-more{display:inline-flex;align-items:center;gap:0.35rem;font-size:0.78rem;font-weight:700;color:var(--gold);margin-top:0.75rem;transition:gap 0.2s;}
+.post-card-read-more:hover{gap:0.6rem;}
+ 
+/* LOAD MORE */
+.load-more-wrap{text-align:center;margin:3rem 0 2rem;}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--fg);}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+ 
+/* FOOTER */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:4rem 0 0;}
+.footer-grid{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem;}
+@media(max-width:860px){.footer-grid{grid-template-columns:1fr 1fr;gap:2rem;}}
+@media(max-width:500px){.footer-grid{grid-template-columns:1fr;}}
+.footer-brand p{font-size:0.875rem;color:var(--fg2);line-height:1.7;margin-top:0.75rem;}
+.footer-col h4{font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--fg2);margin-bottom:1.25rem;}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:0.625rem;}
+.footer-col ul li a{font-size:0.875rem;color:var(--fg2);text-decoration:none;transition:color var(--transition);}
+.footer-col ul li a:hover{color:var(--gold);}
+.footer-bottom{border-top:1px solid var(--border);padding:1.5rem 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.footer-bottom p{font-size:0.8125rem;color:var(--subtle);}
+ 
+/* RESPONSIVE */
+@media(max-width:768px){
+  .featured-post{grid-template-columns:1fr;}
+  .featured-post-img{min-height:240px;}
+  .featured-post-body{padding:1.5rem;}
+  .featured-post-body h2{font-size:1.35rem;}
+}
 </style>
 </head>
 <body>
-
+ 
+<!-- NAV -->
 <nav class="top">
   <div class="container inner">
     <a href="/" class="brand">
-      <img src="/assets/logo.jpg" alt="Diraflow" class="nav-logo-img nav-logo-transparent">
-      <span class="brand-text">
-        <span class="brand-name">Diraflow</span>
-        <span class="brand-tagline">Training data for frontier AI</span>
-      </span>
+      <img src="assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+      <span class="brand-text"><span class="brand-name">Diraflow</span><span class="brand-tagline">Training data for frontier AI</span></span>
     </a>
     <ul>
-      <li><a href="/">Home</a></li>
+      <li><a href="index.html">Home</a></li>
       <li><a href="solutions.html">Solutions</a></li>
       <li><a href="industries.html">Industries</a></li>
-      <li><a href="blog.html" class="active">Blog</a></li>
+      <li><a href="/blog" class="active">Blog</a></li>
       <li><a href="careers.html">Careers</a></li>
       <li><a href="contact.html">Contact Us</a></li>
-      <li><a href="report.html">Report Concerns</a></li>
     </ul>
     <div class="nav-right">
-      <button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
-        <span class="icon-sun">☀</span>
-        <span class="icon-moon">☾</span>
-        
-      </button>
       <a href="contact.html" class="btn btn-sm">Talk to us</a>
-      <button class="hamburger" id="hamburger-btn" aria-label="Open menu" onclick="openDrawer()">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <button class="hb-btn" id="hb-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
     </div>
   </div>
 </nav>
-
-<!-- ════════════════════════════════
-     MOBILE DRAWER
-════════════════════════════════ -->
-<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
-<div class="drawer" id="drawer">
-
-  <!-- Drawer header -->
-  <div class="drawer-header">
-    <div class="drawer-brand">
-      <img src="assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
-      <span style="font-weight:700; font-size:0.95rem;">Diraflow</span>
-    </div>
-    <button class="drawer-close" onclick="closeDrawer()" aria-label="Close menu">✕</button>
-  </div>
-
-  <!-- Drawer nav links -->
-  <nav class="drawer-nav">
-    <a href="index.html" class="drawer-link">
-      <span class="drawer-icon">🏠</span> Home
-    </a>
-    <a href="solutions.html" class="drawer-link">
-      <span class="drawer-icon">⚙️</span> Solutions
-    </a>
-    <a href="industries.html" class="drawer-link">
-      <span class="drawer-icon">🏭</span> Industries
-    </a>
-    <a href="blog.html" class="drawer-link">
-      <span class="drawer-icon">✍️</span> Blog
-    </a>
-    <a href="careers.html" class="drawer-link">
-      <span class="drawer-icon">💼</span> Careers
-    </a>
-    <a href="contact.html" class="drawer-link">
-      <span class="drawer-icon">✉️</span> Contact Us
-    </a>
-    <a href="report.html" class="drawer-link">
-      <span class="drawer-icon">🛡️</span> Report Concerns
-    </a>
+<div class="hb-overlay" id="hb-overlay"></div>
+<div class="hb-drawer" id="hb-drawer">
+  <div class="hb-drawer-head"><div class="brand-area"><img src="assets/logo.jpg" alt="Diraflow" class="nav-logo-img"><span>Diraflow</span></div><button class="hb-close" id="hb-close">✕</button></div>
+  <nav class="hb-nav">
+    <a href="/" class="hb-link"><span class="hb-icon">🏠</span>Home</a>
+    <a href="solutions.html" class="hb-link"><span class="hb-icon">⚙️</span>Solutions</a>
+    <a href="industries.html" class="hb-link"><span class="hb-icon">🏭</span>Industries</a>
+    <a href="blog.html" class="hb-link hb-active"><span class="hb-icon">✍️</span>Blog</a>
+    <a href="careers.html" class="hb-link"><span class="hb-icon">💼</span>Careers</a>
+    <a href="contact.html" class="hb-link"><span class="hb-icon">✉️</span>Contact Us</a>
+    <a href="report.html" class="hb-link"><span class="hb-icon">🛡️</span>Report Concerns</a>
   </nav>
-
-  <!-- Drawer footer -->
-  <div class="drawer-footer">
-    <a href="contact.html" class="drawer-cta">
-      Talk to an expert →
-    </a>
-    <div class="drawer-socials">
-      <a href="https://www.linkedin.com/company/diraflow/" target="_blank" aria-label="LinkedIn"
-        style="width:36px;height:36px;border-radius:8px;background:#0A66C2;display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-      </a>
-      <a href="https://x.com/diraflow_" target="_blank" aria-label="X"
-        style="width:36px;height:36px;border-radius:8px;background:#000;border:1px solid #333;display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-      </a>
-      <a href="https://www.instagram.com/diraflow_?utm_source=qr&igsh=MTVkdHRwem92dHQ4cQ==" target="_blank" aria-label="Instagram"
-        style="width:36px;height:36px;border-radius:8px;background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%);display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-      </a>
-    </div>
-    <p style="font-size:0.7rem; color:var(--fg2, #888); text-align:center; margin-top:0.75rem;">
-      © 2026 Diraflow AI. All rights reserved.
-    </p>
-  </div>
+  <div class="hb-footer"><a href="contact.html" class="hb-cta">Talk to an expert →</a></div>
 </div>
-
-<section class="page-head">
-  <div class="page-head-bg"></div>
+ 
+<!-- PAGE HEADER -->
+<section class="blog-head">
   <div class="container">
-    <div class="section-label fade-up fade-up-1">Insights &amp; perspectives</div>
-    <h1 class="fade-up fade-up-2">The <em>Diraflow</em> blog</h1>
-    <p class="fade-up fade-up-3">Thinking on AI training data, agentic evaluation, and the evolving landscape of human-AI collaboration.</p>
+    <div class="section-label">Insights &amp; perspectives</div>
+    <h1>The <em>Diraflow</em> Blog</h1>
+    <p>Thinking on AI training data, agentic evaluation, and the evolving landscape of human-AI collaboration.</p>
   </div>
 </section>
-
-
-
-<section class="block">
+ 
+<!-- MAIN CONTENT -->
+<section style="padding:3rem 0 5rem;">
   <div class="container">
-
-    <!-- ══════════════════════════════════════════
-         FEATURED POST — Dembe J.
-    ══════════════════════════════════════════ -->
-    <div class="post-card" style="display:grid; grid-template-columns:1fr 1fr; margin-bottom:1.5rem; border-radius:var(--radius-lg); overflow:hidden;">
-      <div class="post-cover" style="aspect-ratio:auto; min-height:340px;">
-        <span class="post-image-link" onclick="togglePost('dembe1')" role="button" tabindex="0" aria-expanded="false" aria-controls="dembe1-extra" title="Click to read more">
-          <img src="https://images.unsplash.com/photo-1744640326166-433469d102f2?q=80&w=876&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="AI reasoning" loading="lazy" style="height:100%;">
-        </span>
-      </div>
-      <div class="post-body" style="padding:3rem; display:flex; flex-direction:column; justify-content:center;">
-        <div class="post-meta">
-          <span class="post-cat">Deep Dive</span>
-          <span class="post-date">Apr 14, 2026</span>
-        </div>
-        <h3 style="font-size:1.625rem; font-family:'DM Serif Display',serif; font-weight:400; line-height:1.2; margin-bottom:1rem; letter-spacing:-.025em; color:var(--fg);">
-          Why agentic evaluation datasets are fundamentally different — and how to build them right
-        </h3>
-        <p>Multi-step agent evaluation requires a new approach to data design. We break down the key differences from single-turn annotation and share lessons from dozens of agentic training projects.</p>
-
-        <div class="extra-content" id="dembe1-extra">
-          <p class="extra-section-title">Single-turn vs. multi-step: a different game entirely</p>
-          <p>Single-turn annotation is well-understood: show a model a prompt, evaluate the response, done. Agentic evaluation is different because the model makes sequential decisions across many steps, with each choice affecting what comes next. A single wrong tool call five steps in can derail an entire task chain.</p>
-
-          <p class="extra-section-title">The challenge of partial credit</p>
-          <p>In single-turn tasks, scoring is relatively binary — correct or not, helpful or not. In agentic tasks, a model may complete 8 of 10 sub-goals correctly. Building rubrics that meaningfully award partial credit without inflating scores for fundamentally flawed trajectories is one of the hardest problems we've had to solve.</p>
-
-          <p class="extra-section-title">Designing tasks that expose real failure modes</p>
-          <p>Most synthetic agentic benchmarks are too clean. Real-world agent tasks involve ambiguous instructions, missing context, and tools that sometimes fail. Our dataset design deliberately introduces these messiness factors because a model that only works in sterile environments isn't ready for production.</p>
-
-          <p class="extra-section-title">Lessons from the field</p>
-          <p>After dozens of agentic annotation projects, the single biggest lesson is this: invest heavily in task design before you touch annotation. The quality of your evaluation is bounded by the quality of your task specification. Weak tasks produce misleading data no matter how skilled your annotators are.</p>
-        </div>
-
-        <div class="post-author" style="margin-top:1.75rem;">
-          <img src="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=80&q=80&auto=format&fit=crop&crop=face" alt="Dembe J">
-          <span>Dembe J. · 8 min read</span>
-        </div>
-        <button class="read-more-btn" id="dembe1-btn" onclick="togglePost('dembe1')" aria-expanded="false" aria-controls="dembe1-extra">
-          Read More <span class="btn-arrow">→</span>
-        </button>
-      </div>
+ 
+    <!-- Filter tags -->
+    <div class="filter-row">
+      <button class="filter-tag active" onclick="filterPosts('all',this)">All posts</button>
     </div>
-
-    <div class="grid-3">
-
-      <!-- ══════════════════════════════════════════
-           CARD 1 — Amara Diallo · Safety
-      ══════════════════════════════════════════ -->
-      <div class="post-card">
-        <div class="post-cover">
-          <span class="post-image-link" onclick="togglePost('amara1')" role="button" tabindex="0" aria-expanded="false" aria-controls="amara1-extra" title="Click to read more">
-            <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=700&q=80&auto=format&fit=crop" alt="AI safety" loading="lazy">
-          </span>
-        </div>
-        <div class="post-body">
-          <div class="post-meta">
-            <span class="post-cat">Safety</span>
-            <span class="post-date">Apr 7, 2026</span>
+ 
+    <!-- FEATURED POST -->
+    <a href="blog-posts/agentic-evaluation-datasets.html" class="featured-post" data-cat="Agentic">
+      <div class="featured-post-img">
+        <img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=900&q=85&auto=format&fit=crop" alt="Agentic evaluation datasets" loading="lazy">
+        <span class="featured-badge">✦ Featured</span>
+      </div>
+      <div class="featured-post-body">
+        <span class="post-cat-badge">Deep Dive</span>
+        <h2>Why agentic evaluation datasets are fundamentally different — and how to build them right</h2>
+        <p>Multi-step agent evaluation requires a new approach to data design. We break down the key differences from single-turn annotation and share lessons from dozens of agentic training projects.</p>
+        <div class="post-meta-row">
+          <div class="post-author-info">
+            <img src="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=80&q=80&auto=format&fit=crop&crop=face" alt="Dembe J.">
+            <div><div class="author-name">Dembe J.</div><div class="post-date">Apr 14, 2026</div></div>
           </div>
+          <span class="post-read-time">8 min read</span>
+        </div>
+        <span class="read-more-link" style="margin-top:1.5rem;">Read More <span class="read-more-arrow">→</span></span>
+      </div>
+    </a>
+ 
+    <!-- POSTS GRID -->
+    <div class="posts-grid" id="posts-grid">
+ 
+      <!-- Post 1 — Amara / Safety -->
+      <a href="blog-posts/red-teaming-at-scale.html" class="post-card" data-cat="Safety">
+        <div class="post-card-img">
+          <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=700&q=80&auto=format&fit=crop" alt="Red-teaming at scale" loading="lazy">
+        </div>
+        <div class="post-card-body">
+          <div class="post-card-top"><span class="date">Apr 7, 2026</span><span class="cat">Safety</span></div>
           <h3>Red-teaming at scale: lessons from 50,000 adversarial prompts</h3>
           <p>Building effective safety datasets means understanding what makes an adversarial prompt genuinely dangerous — not merely surprising.</p>
-
-          <div class="extra-content" id="amara1-extra">
-            <p class="extra-section-title">What red-teaming actually involves</p>
-            <p>Red-teaming is the practice of deliberately stress-testing an AI system by crafting inputs designed to expose weaknesses, bypass safety guardrails, or elicit harmful outputs. Unlike standard QA testing, it requires an adversarial mindset — thinking like someone who actively wants the model to fail.</p>
-
-            <p class="extra-section-title">Why scale changes everything</p>
-            <p>At small volumes, a skilled human reviewer can catch most dangerous prompts by intuition. At 50,000 prompts, intuition breaks down. Patterns that look dangerous on the surface often aren't, while genuinely harmful inputs can be deceptively mundane in phrasing. You need systematic taxonomies and calibrated reviewers, not just sharp eyes.</p>
-
-            <p class="extra-section-title">The key distinction: dangerous vs. surprising</p>
-            <p>Our biggest insight was separating "adversarial" from "harmful." A prompt can be creative, unexpected, and technically adversarial — without posing real-world risk. The prompts that matter are the ones that could cause concrete harm if acted upon. That distinction shapes every labelling decision we make.</p>
-
-            <p class="extra-section-title">What we learned about annotator calibration</p>
-            <p>Annotators naturally cluster around surface features — aggressive language, taboo topics, unusual formatting. Training them to evaluate downstream risk rather than surface shock value was the hardest, most important part of this project. It required multiple calibration rounds and detailed rubrics that we're still refining.</p>
+          <span class="post-card-read-more">Read More <span>→</span></span>
+          <div class="post-card-footer">
+            <div class="author-mini">
+              <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=80&q=80&auto=format&fit=crop&crop=face" alt="Amara Diallo">
+              <span>Amara Diallo</span>
+            </div>
+            <span class="read-min">6 min</span>
           </div>
-
-          <div class="post-author">
-            <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=80&q=80&auto=format&fit=crop&crop=face" alt="Amara Diallo">
-            <span>Amara Diallo · 6 min read</span>
-          </div>
-          <button class="read-more-btn" id="amara1-btn" onclick="togglePost('amara1')" aria-expanded="false" aria-controls="amara1-extra">
-            Read More <span class="btn-arrow">→</span>
-          </button>
         </div>
-      </div>
-
-      <!-- ══════════════════════════════════════════
-           CARD 2 — Rafael Santos · STEM Data
-      ══════════════════════════════════════════ -->
-      <div class="post-card">
-        <div class="post-cover">
-          <span class="post-image-link" onclick="togglePost('rafael1')" role="button" tabindex="0" aria-expanded="false" aria-controls="rafael1-extra" title="Click to read more">
-            <img src="https://images.unsplash.com/photo-1509228468518-180dd4864904?w=700&q=80&auto=format&fit=crop" alt="Math" loading="lazy">
-          </span>
+      </a>
+ 
+      <!-- Post 2 — Rafael / STEM -->
+      <a href="blog-posts/hidden-complexity-math-datasets.html" class="post-card" data-cat="STEM">
+        <div class="post-card-img">
+          <img src="https://images.unsplash.com/photo-1509228468518-180dd4864904?w=700&q=80&auto=format&fit=crop" alt="Mathematical reasoning datasets" loading="lazy">
         </div>
-        <div class="post-body">
-          <div class="post-meta">
-            <span class="post-cat">STEM Data</span>
-            <span class="post-date">Mar 28, 2026</span>
-          </div>
+        <div class="post-card-body">
+          <div class="post-card-top"><span class="date">Mar 28, 2026</span><span class="cat">STEM Data</span></div>
           <h3>The hidden complexity of mathematical reasoning datasets</h3>
           <p>Building useful math training data requires careful attention to notation, proof style, error taxonomy, and solution diversity.</p>
-
-          <div class="extra-content" id="rafael1-extra">
-            <p class="extra-section-title">Notation is not neutral</p>
-            <p>The same mathematical concept can be expressed in dozens of notational styles — LaTeX, natural language, symbolic, step-by-step prose. A model trained predominantly on one style will struggle with others. Diverse notation isn't a nice-to-have in math datasets; it's a core requirement for robust generalisation.</p>
-
-            <p class="extra-section-title">Proof style diversity matters too</p>
-            <p>Formal proofs, informal proofs, and worked examples are cognitively distinct. Models trained on a healthy mixture of all three develop more flexible reasoning than those trained on a single style — even if that style is rigorous and high-quality.</p>
-
-            <p class="extra-section-title">Building a useful error taxonomy</p>
-            <p>Not all math errors are equal. Arithmetic slips, logical gaps, incorrect theorem applications, and sign errors each reflect different failure modes and require different correction signals. Without a principled error taxonomy, you can't tell whether a model is improving at the right things.</p>
-
-            <p class="extra-section-title">Why solution diversity is undervalued</p>
-            <p>Many benchmark problems have a single canonical solution path. But real mathematical competence includes knowing multiple routes to the same answer. When we include diverse correct solutions in training data, models become measurably better at novel problem-solving — not just pattern-matching to memorised paths.</p>
+          <span class="post-card-read-more">Read More <span>→</span></span>
+          <div class="post-card-footer">
+            <div class="author-mini">
+              <img src="https://images.unsplash.com/photo-1463453091185-61582044d556?w=80&q=80&auto=format&fit=crop&crop=face" alt="Rafael Santos">
+              <span>Rafael Santos</span>
+            </div>
+            <span class="read-min">5 min</span>
           </div>
-
-          <div class="post-author">
-            <img src="https://images.unsplash.com/photo-1463453091185-61582044d556?w=80&q=80&auto=format&fit=crop&crop=face" alt="Rafael Santos">
-            <span>Rafael Santos · 5 min read</span>
-          </div>
-          <button class="read-more-btn" id="rafael1-btn" onclick="togglePost('rafael1')" aria-expanded="false" aria-controls="rafael1-extra">
-            Read More <span class="btn-arrow">→</span>
-          </button>
         </div>
-      </div>
-
-      <!-- ══════════════════════════════════════════
-           CARD 3 — Yuki Tanaka · Operations
-      ══════════════════════════════════════════ -->
-      <div class="post-card">
-        <div class="post-cover">
-          <span class="post-image-link" onclick="togglePost('yuki1')" role="button" tabindex="0" aria-expanded="false" aria-controls="yuki1-extra" title="Click to read more">
-            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=700&q=80&auto=format&fit=crop" alt="Data quality" loading="lazy">
-          </span>
+      </a>
+ 
+      <!-- Post 3 — Yuki / Operations -->
+      <a href="blog-posts/inter-annotator-agreement.html" class="post-card" data-cat="Operations">
+        <div class="post-card-img">
+          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=700&q=80&auto=format&fit=crop" alt="Inter-annotator agreement" loading="lazy">
         </div>
-        <div class="post-body">
-          <div class="post-meta">
-            <span class="post-cat">Operations</span>
-            <span class="post-date">Mar 19, 2026</span>
-          </div>
+        <div class="post-card-body">
+          <div class="post-card-top"><span class="date">Mar 19, 2026</span><span class="cat">Operations</span></div>
           <h3>Inter-annotator agreement: what it really tells you about data quality</h3>
           <p>IAA scores are widely cited but poorly understood. We explain what Cohen's κ measures — and what it misses in complex annotation tasks.</p>
-
-          <div class="extra-content" id="yuki1-extra">
-            <p class="extra-section-title">What Cohen's κ actually measures</p>
-            <p>Cohen's kappa corrects for chance agreement between two annotators — which is more meaningful than raw percentage agreement. If two annotators agree 80% of the time but the task only has two labels, that agreement could largely be random. Kappa tells you how much real signal exists above chance.</p>
-
-            <p class="extra-section-title">Where kappa breaks down</p>
-            <p>Kappa assumes all disagreements are equally bad, which is rarely true in complex annotation. A disagreement between "helpful" and "slightly unhelpful" is not the same as a disagreement between "helpful" and "harmful." For nuanced tasks, weighted kappa or task-specific rubrics are far more informative than a single κ score.</p>
-
-            <p class="extra-section-title">The multi-annotator problem</p>
-            <p>Most IAA metrics were designed for two annotators. Scale to five or ten and you need Fleiss' kappa or Krippendorff's alpha — but these aggregate signal in ways that can mask systematic disagreements between annotator subgroups, which are often the most important disagreements to understand.</p>
-
-            <p class="extra-section-title">What we use instead — and why</p>
-            <p>At Diraflow, we treat IAA as a diagnostic tool rather than a quality gate. Low agreement tells us to investigate — is the rubric unclear? Is the task inherently ambiguous? Are certain annotators outliers? The number itself matters far less than the pattern of disagreements it reveals.</p>
+          <span class="post-card-read-more">Read More <span>→</span></span>
+          <div class="post-card-footer">
+            <div class="author-mini">
+              <img src="https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?w=80&q=80&auto=format&fit=crop&crop=face" alt="Yuki Tanaka">
+              <span>Yuki Tanaka</span>
+            </div>
+            <span class="read-min">7 min</span>
           </div>
-
-          <div class="post-author">
-            <img src="https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?w=80&q=80&auto=format&fit=crop&crop=face" alt="Yuki Tanaka">
-            <span>Yuki Tanaka · 7 min read</span>
-          </div>
-          <button class="read-more-btn" id="yuki1-btn" onclick="togglePost('yuki1')" aria-expanded="false" aria-controls="yuki1-extra">
-            Read More <span class="btn-arrow">→</span>
-          </button>
         </div>
-      </div>
-
-      <!-- ══════════════════════════════════════════
-           CARD 4 — Dembe J. · RLHF
-      ══════════════════════════════════════════ -->
-      <div class="post-card">
-        <div class="post-cover">
-          <span class="post-image-link" onclick="togglePost('dembe2')" role="button" tabindex="0" aria-expanded="false" aria-controls="dembe2-extra" title="Click to read more">
-            <img src="https://images.unsplash.com/photo-1645839057098-5ea8761a6b09?q=80&w=1032&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="LLM" loading="lazy">
-          </span>
+      </a>
+ 
+      <!-- Post 4 — Dembe / RLHF -->
+      <a href="blog-posts/great-preference-annotator.html" class="post-card" data-cat="RLHF">
+        <div class="post-card-img">
+          <img src="https://images.unsplash.com/photo-1700081744390-53ac7df645ac?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8NEQlMjBsaWRhcnxlbnwwfHwwfHx8MA%3D%3D" alt="Preference annotator" loading="lazy">
         </div>
-        <div class="post-body">
-          <div class="post-meta">
-            <span class="post-cat">RLHF</span>
-            <span class="post-date">Mar 10, 2026</span>
-          </div>
+        <div class="post-card-body">
+          <div class="post-card-top"><span class="date">Mar 10, 2026</span><span class="cat">RLHF</span></div>
           <h3>What makes a great preference annotator? Insights from 1,000 calibration tasks</h3>
           <p>We analysed calibration data from over a thousand annotators to identify what predicts high-quality RLHF feedback.</p>
-
-          <div class="extra-content" id="dembe2-extra">
-            <p class="extra-section-title">Why preference annotation is harder than it looks</p>
-            <p>Choosing between two AI responses sounds simple. In practice, annotators must weigh factual accuracy, tone, helpfulness, safety, and often domain-specific nuance — simultaneously, at speed, across hundreds of tasks. The cognitive load is significant, and annotator fatigue is a real and underreported source of data degradation.</p>
-
-            <p class="extra-section-title">What our calibration data revealed</p>
-            <p>The strongest predictor of annotation quality wasn't domain expertise or educational background — it was the ability to articulate disagreement. Annotators who could explain why they found one response preferable produced dramatically more consistent and useful feedback than those who relied on gut instinct alone.</p>
-
-            <p class="extra-section-title">The consistency-confidence trap</p>
-            <p>Some annotators are highly consistent but systematically biased — preferring longer responses, or responses that sound confident, regardless of correctness. High internal consistency can look great on IAA metrics while still producing misleading training signals. We now screen specifically for these bias patterns during onboarding.</p>
-
-            <p class="extra-section-title">Building better annotator pipelines</p>
-            <p>Invest in your calibration phase. A well-designed calibration set — with known-correct answers and clear edge cases — will tell you more about an annotator's suitability in 50 tasks than weeks of production annotation. It also gives annotators a chance to learn your rubrics before they affect real data.</p>
+          <span class="post-card-read-more">Read More <span>→</span></span>
+          <div class="post-card-footer">
+            <div class="author-mini">
+              <img src="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=80&q=80&auto=format&fit=crop&crop=face" alt="Dembe J.">
+              <span>Dembe J.</span>
+            </div>
+            <span class="read-min">9 min</span>
           </div>
-
-          <div class="post-author">
-            <img src="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=80&q=80&auto=format&fit=crop&crop=face" alt="Dembe J">
-            <span>Dembe J. · 9 min read</span>
-          </div>
-          <button class="read-more-btn" id="dembe2-btn" onclick="togglePost('dembe2')" aria-expanded="false" aria-controls="dembe2-extra">
-            Read More <span class="btn-arrow">→</span>
-          </button>
         </div>
-      </div>
-
-      <!-- ══════════════════════════════════════════
-           CARD 5 — Amara Diallo · Industry
-      ══════════════════════════════════════════ -->
-      <div class="post-card">
-        <div class="post-cover">
-          <span class="post-image-link" onclick="togglePost('amara2')" role="button" tabindex="0" aria-expanded="false" aria-controls="amara2-extra" title="Click to read more">
-            <img src="https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=700&q=80&auto=format&fit=crop" alt="Industry" loading="lazy">
-          </span>
+      </a>
+ 
+      <!-- Post 5 — Amara / Industry -->
+      <a href="blog-posts/data-flywheel.html" class="post-card" data-cat="Industry">
+        <div class="post-card-img">
+          <img src="https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=700&q=80&auto=format&fit=crop" alt="Data flywheel" loading="lazy">
         </div>
-        <div class="post-body">
-          <div class="post-meta">
-            <span class="post-cat">Industry</span>
-            <span class="post-date">Feb 26, 2026</span>
-          </div>
+        <div class="post-card-body">
+          <div class="post-card-top"><span class="date">Feb 26, 2026</span><span class="cat">Industry</span></div>
           <h3>The data flywheel: how training data quality compounds over model generations</h3>
           <p>The quality of data you build today shapes the capabilities of models trained years from now. We explore the long-term flywheel.</p>
-
-          <div class="extra-content" id="amara2-extra">
-            <p class="extra-section-title">What the flywheel actually is</p>
-            <p>The data flywheel describes a compounding loop: better training data produces better models, better models generate better synthetic data and identify better edge cases, which in turn produces even better training data. Each revolution of the wheel compounds the gains of the previous one — but it also compounds the errors.</p>
-
-            <p class="extra-section-title">How quality degrades across generations</p>
-            <p>When synthetic data is used to train models that then generate more synthetic data, small quality gaps amplify with each cycle. A dataset that is 95% accurate today might anchor a model that produces 91% accurate data, which trains a model producing 86% accurate data. The slope looks gentle early on, and catastrophic later.</p>
-
-            <p class="extra-section-title">The compounding advantage of early investment</p>
-            <p>The inverse is also true. An organisation that invests heavily in human-verified, high-diversity data today will benefit from that investment across multiple model generations. The quality premium doesn't just persist — it multiplies. This is why the best AI labs treat training data as a long-term strategic asset, not a short-term cost.</p>
-
-            <p class="extra-section-title">What this means for data strategy</p>
-            <p>The decisions you make about data quality, coverage, and diversity in the next 12 months will shape model capabilities in 2028 and beyond. Cutting corners now is not saving money — it is borrowing against future model performance at a very unfavourable rate.</p>
+          <span class="post-card-read-more">Read More <span>→</span></span>
+          <div class="post-card-footer">
+            <div class="author-mini">
+              <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=80&q=80&auto=format&fit=crop&crop=face" alt="Amara Diallo">
+              <span>Amara Diallo</span>
+            </div>
+            <span class="read-min">6 min</span>
           </div>
-
-          <div class="post-author">
-            <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=80&q=80&auto=format&fit=crop&crop=face" alt="Amara Diallo">
-            <span>Amara Diallo · 6 min read</span>
-          </div>
-          <button class="read-more-btn" id="amara2-btn" onclick="togglePost('amara2')" aria-expanded="false" aria-controls="amara2-extra">
-            Read More <span class="btn-arrow">→</span>
-          </button>
         </div>
-      </div>
-
-      <!-- ══════════════════════════════════════════
-           CARD 6 — Rafael Santos · Engineering
-      ══════════════════════════════════════════ -->
-      <div class="post-card">
-        <div class="post-cover">
-          <span class="post-image-link" onclick="togglePost('rafael2')" role="button" tabindex="0" aria-expanded="false" aria-controls="rafael2-extra" title="Click to read more">
-            <img src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=700&q=80&auto=format&fit=crop" alt="Code" loading="lazy">
-          </span>
+      </a>
+ 
+      <!-- Post 6 — Rafael / Engineering -->
+      <a href="blog-posts/coding-task-environments.html" class="post-card" data-cat="Engineering">
+        <div class="post-card-img">
+          <img src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=700&q=80&auto=format&fit=crop" alt="Coding task environments" loading="lazy">
         </div>
-        <div class="post-body">
-          <div class="post-meta">
-            <span class="post-cat">Engineering</span>
-            <span class="post-date">Feb 12, 2026</span>
-          </div>
+        <div class="post-card-body">
+          <div class="post-card-top"><span class="date">Feb 12, 2026</span><span class="cat">Engineering</span></div>
           <h3>Building coding task environments that actually test agent capability</h3>
           <p>Most code evaluation environments are too clean. Real software engineering tasks are messy and ambiguous. Here's how we design for that.</p>
-
-          <div class="extra-content" id="rafael2-extra">
-            <p class="extra-section-title">The sterile environment problem</p>
-            <p>Most code benchmarks present isolated functions, clear specifications, and passing test suites. Real software engineering is nothing like this. Codebases are large, dependencies break, requirements shift mid-task, and documentation is outdated. An agent that aces HumanEval can still fail completely in a real repo environment.</p>
-
-            <p class="extra-section-title">How we introduce controlled messiness</p>
-            <p>Our task design process deliberately injects ambiguity: underspecified requirements that require clarifying questions, intentionally broken dependencies, conflicting comments in existing code, and test suites with known gaps. The goal isn't to confuse agents — it's to ensure our evaluation surfaces the same failure modes they'll encounter in production.</p>
-
-            <p class="extra-section-title">Scoring beyond pass/fail</p>
-            <p>Pass/fail test outcomes are a floor, not a ceiling, for code evaluation. We also score for code clarity, error handling, appropriate use of existing utilities, and whether the agent asks good clarifying questions before diving into implementation. These dimensions predict real-world engineering quality far better than unit test outcomes alone.</p>
-
-            <p class="extra-section-title">The role of human evaluation</p>
-            <p>For complex multi-file tasks, automated scoring misses too much. We use a hybrid approach: automated tests catch regressions and obvious failures, while experienced engineers score the harder dimensions. The combination is more expensive but produces evaluation data that is meaningfully better than either approach alone.</p>
+          <span class="post-card-read-more">Read More <span>→</span></span>
+          <div class="post-card-footer">
+            <div class="author-mini">
+              <img src="https://images.unsplash.com/photo-1463453091185-61582044d556?w=80&q=80&auto=format&fit=crop&crop=face" alt="Rafael Santos">
+              <span>Rafael Santos</span>
+            </div>
+            <span class="read-min">8 min</span>
           </div>
-
-          <div class="post-author">
-            <img src="https://images.unsplash.com/photo-1463453091185-61582044d556?w=80&q=80&auto=format&fit=crop&crop=face" alt="Rafael Santos">
-            <span>Rafael Santos · 8 min read</span>
-          </div>
-          <button class="read-more-btn" id="rafael2-btn" onclick="togglePost('rafael2')" aria-expanded="false" aria-controls="rafael2-extra">
-            Read More <span class="btn-arrow">→</span>
-          </button>
         </div>
-      </div>
-
+      </a>
+ 
+    </div><!-- end posts-grid -->
+ 
+    <div class="load-more-wrap">
+      <a href="/contact" class="btn btn-outline btn-sm">Want to write for us? Get in touch →</a>
     </div>
+ 
   </div>
 </section>
-
-
-
-<!-- Newsletter -->
-<section class="block">
-  <div class="container-narrow" style="text-align:center;">
-    <div class="section-label" style="justify-content:center;">Stay informed</div>
-    <h2 class="section-title">Get our latest <em>writing</em></h2>
-    <p style="margin-bottom:2.5rem;">New posts on AI data, evaluation, and the industry — delivered to your inbox, no more than twice a month. No spam, ever.</p>
-
-    <!-- SUBSCRIPTION FORM -->
-    <form id="subscribe-form" action="https://formspree.io/f/mwvaawzz" method="POST" style="display:flex; gap:.75rem; justify-content:center; flex-wrap:wrap;">
-      <input
-        type="email"
-        name="email"
-        placeholder="Enter your email address"
-        required
-        style="
-          padding: .75rem 1.25rem;
-          border-radius: 2rem;
-          border: 1.5px solid var(--border, #333);
-          background: var(--bg, #111);
-          color: var(--fg, #fff);
-          font-family: 'Sora', sans-serif;
-          font-size: .9rem;
-          width: 100%;
-          max-width: 320px;
-          outline: none;
-          transition: border-color 0.2s ease;
-        "
-        onfocus="this.style.borderColor='#c8922a'"
-        onblur="this.style.borderColor='var(--border, #333)'"
-      >
-      <input type="hidden" name="_subject" value="New Diraflow newsletter subscriber">
-      <button type="submit" class="btn btn-lg" id="subscribe-btn">
-        Subscribe →
-      </button>
-    </form>
-
-    <!-- Success / error messages -->
-    <p id="form-success" style="display:none; margin-top:1.25rem; color:#7ecb8f; font-size:.9rem;">
-      ✓ You're subscribed! We'll be in touch.
-    </p>
-    <p id="form-error" style="display:none; margin-top:1.25rem; color:#e07070; font-size:.9rem;">
-      Something went wrong — please try again.
-    </p>
-  </div>
-</section>
-
-<!-- CTA -->
-<section class="block">
-  <div class="cta-band">
-    <p class="eyebrow"><span>✦</span> Work with us</p>
-    <h2>Ready to build <em>better AI data?</em></h2>
-    <p>Our team is ready to scope your project and get started fast.</p>
-    <button class="btn btn-lg" onclick="openExpertModal()">Talk to an expert →</button>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════
-     EXPERT MODAL
-══════════════════════════════════════════ -->
-<div id="expert-modal" style="
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(4px);
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-" onclick="handleModalBackdropClick(event)">
-
-  <div style="
-    background: var(--bg, #1a1a1a);
-    border: 1px solid var(--border, #2e2e2e);
-    border-radius: 1.25rem;
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 520px;
-    position: relative;
-    max-height: 90vh;
-    overflow-y: auto;
-  ">
-
-    <!-- Close button -->
-    <button onclick="closeExpertModal()" style="
-      position: absolute;
-      top: 1.25rem;
-      right: 1.25rem;
-      background: none;
-      border: none;
-      color: var(--fg2, #888);
-      font-size: 1.4rem;
-      cursor: pointer;
-      line-height: 1;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.5rem;
-      transition: color 0.2s;
-    " onmouseover="this.style.color='var(--fg,#fff)'" onmouseout="this.style.color='var(--fg2,#888)'">✕</button>
-
-    <!-- Header -->
-    <div style="margin-bottom:2rem;">
-      <p style="color:#c8922a; font-size:0.75rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.5rem;">✦ Book a session</p>
-      <h3 style="font-family:'DM Serif Display',serif; font-size:1.6rem; font-weight:400; color:var(--fg,#fff); margin:0 0 0.5rem;">Talk to an expert</h3>
-      <p style="color:var(--fg2,#888); font-size:0.875rem; margin:0;">Tell us about your project and we'll match you with the right team member for a 1-on-1 session.</p>
-    </div>
-
-    <!-- Form -->
-    <form id="expert-form" action="https://formspree.io/f/xwvaawga" method="POST">
-      <input type="hidden" name="_subject" value="New Expert Session Request — Diraflow">
-
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
-        <div>
-          <label style="display:block; font-size:0.8rem; font-weight:600; color:var(--fg2,#888); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.06em;">First name *</label>
-          <input type="text" name="first_name" required placeholder="Ada" style="width:100%; padding:.65rem 1rem; border-radius:.75rem; border:1.5px solid var(--border,#333); background:var(--bg2,#111); color:var(--fg,#fff); font-family:'Sora',sans-serif; font-size:.875rem; box-sizing:border-box; outline:none; transition:border-color 0.2s;" onfocus="this.style.borderColor='#c8922a'" onblur="this.style.borderColor='var(--border,#333)'">
-        </div>
-        <div>
-          <label style="display:block; font-size:0.8rem; font-weight:600; color:var(--fg2,#888); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.06em;">Last name *</label>
-          <input type="text" name="last_name" required placeholder="Lovelace" style="width:100%; padding:.65rem 1rem; border-radius:.75rem; border:1.5px solid var(--border,#333); background:var(--bg2,#111); color:var(--fg,#fff); font-family:'Sora',sans-serif; font-size:.875rem; box-sizing:border-box; outline:none; transition:border-color 0.2s;" onfocus="this.style.borderColor='#c8922a'" onblur="this.style.borderColor='var(--border,#333)'">
-        </div>
-      </div>
-
-      <div style="margin-bottom:1rem;">
-        <label style="display:block; font-size:0.8rem; font-weight:600; color:var(--fg2,#888); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.06em;">Work email *</label>
-        <input type="email" name="email" required placeholder="ada@company.com" style="width:100%; padding:.65rem 1rem; border-radius:.75rem; border:1.5px solid var(--border,#333); background:var(--bg2,#111); color:var(--fg,#fff); font-family:'Sora',sans-serif; font-size:.875rem; box-sizing:border-box; outline:none; transition:border-color 0.2s;" onfocus="this.style.borderColor='#c8922a'" onblur="this.style.borderColor='var(--border,#333)'">
-      </div>
-
-      <div style="margin-bottom:1rem;">
-        <label style="display:block; font-size:0.8rem; font-weight:600; color:var(--fg2,#888); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.06em;">Company / Organisation</label>
-        <input type="text" name="company" placeholder="Acme AI" style="width:100%; padding:.65rem 1rem; border-radius:.75rem; border:1.5px solid var(--border,#333); background:var(--bg2,#111); color:var(--fg,#fff); font-family:'Sora',sans-serif; font-size:.875rem; box-sizing:border-box; outline:none; transition:border-color 0.2s;" onfocus="this.style.borderColor='#c8922a'" onblur="this.style.borderColor='var(--border,#333)'">
-      </div>
-
-      <div style="margin-bottom:1rem;">
-        <label style="display:block; font-size:0.8rem; font-weight:600; color:var(--fg2,#888); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.06em;">What are you working on? *</label>
-        <select name="project_type" required style="width:100%; padding:.65rem 1rem; border-radius:.75rem; border:1.5px solid var(--border,#333); background:var(--bg2,#111); color:var(--fg,#fff); font-family:'Sora',sans-serif; font-size:.875rem; box-sizing:border-box; outline:none; cursor:pointer; transition:border-color 0.2s;" onfocus="this.style.borderColor='#c8922a'" onblur="this.style.borderColor='var(--border,#333)'">
-          <option value="" disabled selected>Select a project type…</option>
-          <option value="Agentic Datasets">Agentic Datasets</option>
-          <option value="RLHF & Preference Data">RLHF &amp; Preference Data</option>
-          <option value="Red-Teaming / Safety">Red-Teaming / Safety</option>
-          <option value="STEM Data">STEM Data</option>
-          <option value="Multilingual AI">Multilingual AI</option>
-          <option value="Environment Generation">Environment Generation</option>
-          <option value="Other">Other / Not sure yet</option>
-        </select>
-      </div>
-
-      <div style="margin-bottom:1.75rem;">
-        <label style="display:block; font-size:0.8rem; font-weight:600; color:var(--fg2,#888); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.06em;">Tell us more</label>
-        <textarea name="message" rows="4" placeholder="Describe your project, timeline, data volumes, or any specific requirements…" style="width:100%; padding:.65rem 1rem; border-radius:.75rem; border:1.5px solid var(--border,#333); background:var(--bg2,#111); color:var(--fg,#fff); font-family:'Sora',sans-serif; font-size:.875rem; box-sizing:border-box; outline:none; resize:vertical; transition:border-color 0.2s;" onfocus="this.style.borderColor='#c8922a'" onblur="this.style.borderColor='var(--border,#333)'"></textarea>
-      </div>
-
-      <button type="submit" id="expert-submit-btn" class="btn btn-lg" style="width:100%; justify-content:center;">
-        Send request →
-      </button>
-
-      <!-- Success -->
-      <p id="expert-success" style="display:none; margin-top:1.25rem; text-align:center; color:#7ecb8f; font-size:.9rem;">
-        ✓ Request sent! We'll reach out within 1 business day.
-      </p>
-      <!-- Error -->
-      <p id="expert-error" style="display:none; margin-top:1.25rem; text-align:center; color:#e07070; font-size:.9rem;">
-        Something went wrong — please try again or email us directly at diraflow.ai@gmail.com
-      </p>
-    </form>
-
-  </div>
-</div>
-
-<!-- ── Footer ── -->
+ 
+<!-- FOOTER -->
 <footer>
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a href="/" class="brand" style="display:inline-flex; gap:.625rem; align-items:center; font-weight:700; font-size:1.125rem; letter-spacing:-.025em; margin-bottom:1rem;">
-          <img src="/assets/logo.jpg" alt="Diraflow" class="nav-logo-img nav-logo-transparent">
+        <a href="/" class="brand" style="margin-bottom:0.875rem;display:inline-flex;">
+          <img src="assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
         </a>
         <p>Premium training data for AI agents and LLMs. Built by experts, trusted by frontier AI teams worldwide.</p>
-        <div style="display:flex; gap:0.6rem; align-items:center; margin-top:1.25rem; flex-wrap:wrap;">
-          <a href="https://www.linkedin.com/company/diraflow/" target="_blank" rel="noopener" aria-label="LinkedIn"
-            style="width:38px; height:38px; border-radius:9px; background:#0A66C2; display:flex; align-items:center; justify-content:center; transition:transform 0.2s, opacity 0.2s; text-decoration:none; flex-shrink:0;"
-            onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-          </a>
-          <a href="https://x.com/diraflow_" target="_blank" rel="noopener" aria-label="X"
-            style="width:38px; height:38px; border-radius:9px; background:#000; border:1px solid #333; display:flex; align-items:center; justify-content:center; transition:transform 0.2s; text-decoration:none; flex-shrink:0;"
-            onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-          </a>
-          <a href="https://www.facebook.com/share/1HHQD7LH2U/" target="_blank" rel="noopener" aria-label="Facebook"
-            style="width:38px; height:38px; border-radius:9px; background:#1877F2; display:flex; align-items:center; justify-content:center; transition:transform 0.2s; text-decoration:none; flex-shrink:0;"
-            onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-          </a>
-          <a href="https://www.instagram.com/diraflow_?utm_source=qr&igsh=MTVkdHRwem92dHQ4cQ==" target="_blank" rel="noopener" aria-label="Instagram"
-            style="width:38px; height:38px; border-radius:9px; background:radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); display:flex; align-items:center; justify-content:center; transition:transform 0.2s; text-decoration:none; flex-shrink:0;"
-            onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-          </a>
-        </div>
       </div>
-      <div class="footer-col"><h4>Solutions</h4><ul><li><a href="/#solutions">Environment Generation</a></li><li><a href="/#solutions">Agentic Datasets</a></li><li><a href="/#solutions">Red-Teaming</a></li><li><a href="/#solutions">RLHF &amp; Preference</a></li><li><a href="/#solutions">STEM Data</a></li><li><a href="/#solutions">Custom Projects</a></li></ul></div>
-      <div class="footer-col"><h4>Company</h4><ul><li><a href="/blog/">Blog</a></li><li><a href="/careers/">Careers</a></li><li><a href="/#faq">FAQ</a></li><li><a href="/#industries">Industries</a></li><li><a href="/#contact">Contact</a></li></ul></div>
-    
+      <div class="footer-col"><h4>Solutions</h4><ul><li><a href="/solutions">Environment Generation</a></li><li><a href="/solutions">Agentic Datasets</a></li><li><a href="/solutions">Red-Teaming</a></li><li><a href="/solutions">RLHF &amp; Preference</a></li></ul></div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a href="/blog">Blog</a></li><li><a href="/careers">Careers</a></li><li><a href="/industries">Industries</a></li><li><a href="/contact">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Connect</h4><ul><li><a href="mailto:diraflowai@gmail.com">diraflowai@gmail.com</a></li><li><a href="https://linkedin.com/company/diraflow" target="_blank">LinkedIn</a></li><li><a href="https://x.com/diraflow_" target="_blank">Twitter / X</a></li></ul></div>
     </div>
     <div class="footer-bottom">
-      <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
         <p>© 2026 Diraflow AI. All rights reserved.</p>
-        <span style="color:var(--subtle); font-size:.8125rem;">·</span>
-        <a href="/code-of-conduct/" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
-        <span style="color:var(--subtle); font-size:.8125rem;">·</span>
-        <a href="/privacy/" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="/code-of-conduct" style="font-size:.8125rem;color:var(--subtle);text-decoration:none;" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="/privacy-policy" style="font-size:.8125rem;color:var(--subtle);text-decoration:none;" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
       </div>
-      <div style="display:flex; align-items:center; gap:1.5rem;">
-        <p style="font-size:.8125rem; color:var(--subtle);">Made with care for the AI community.</p>
-        <button class="theme-toggle" aria-label="Toggle dark mode" style="flex-shrink:0;"><span class="icon-sun">☀</span><span class="icon-moon">☾</span></button>
+      <div style="display:flex;align-items:center;gap:1.5rem;">
+        <p style="font-size:.8125rem;color:var(--subtle);">Made with care for the AI community.</p>
+        
       </div>
     </div>
   </div>

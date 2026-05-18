@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inter‑annotator agreement — Diraflow AI</title>
+<meta name="description" content="IAA scores are widely cited but poorly understood. We explain what Cohen's κ measures — and what it misses in complex annotation tasks.">
+<meta property="og:title" content="Inter‑annotator agreement: what it really tells you about data quality | Diraflow">
+<meta property="og:description" content="Why high IAA isn't always good, and low IAA isn't always bad. A practical guide to measuring and interpreting annotation consistency.">
+<meta property="og:type" content="article">
+<link rel="canonical" href="https://diraflowai.com/blog-posts/inter-annotator-agreement.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ----------------------------------------------
+     GLOBAL VARIABLES & RESET
+  ----------------------------------------------- */
+  :root {
+    --bg:#f7f6f2;
+    --bg2:#eeecea;
+    --fg:#111110;
+    --fg2:#666460;
+    --border:#d8d6d0;
+    --card:#ffffff;
+    --subtle:#999690;
+    --gold:#c8922a;
+    --radius:0.75rem;
+    --radius-lg:1.25rem;
+  }
+
+  [data-theme="dark"]{
+    --bg:#111110;
+    --bg2:#1a1918;
+    --fg:#f7f6f2;
+    --fg2:#999690;
+    --border:#2a2826;
+    --card:#1e1c1b;
+    --subtle:#666460;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ----------------------------------------------
+     PROFESSIONAL BLOG LAYOUT (full width + side margins)
+  ----------------------------------------------- */
+  .blog-container {
+    max-width: 1600px;       /* max width for ultra-wide screens */
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 2rem;         /* comfortable side margins (left + right) */
+  }
+
+  /* Slightly larger margins on very big screens */
+  @media (min-width: 1920px) {
+    .blog-container {
+      padding: 0 4rem;
+    }
+  }
+
+  /* Smaller devices: reduce side margins */
+  @media (max-width: 768px) {
+    .blog-container {
+      padding: 0 1.25rem;
+    }
+  }
+
+  /* ----------------------------------------------
+     POST HEADER
+  ----------------------------------------------- */
+  .post-header {
+    padding: 3rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .post-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.2rem, 6vw, 3.8rem);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    max-width: 1100px;
+    margin-top: 0.5rem;
+  }
+
+  .post-meta-large {
+    display: flex;
+    gap: 1.8rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 1.8rem 0 0.5rem;
+    color: var(--fg2);
+    font-size: 0.9rem;
+  }
+
+  .author-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .author-badge img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border);
+  }
+
+  /* ----------------------------------------------
+     POST CONTENT — READABILITY FIRST
+  ----------------------------------------------- */
+  .post-content {
+    width: 100%;
+    margin: 2.5rem auto;
+    font-size: 1.05rem;
+    line-height: 1.8;
+  }
+
+  /* Text elements get a comfortable max-width (optimal reading length) */
+  .post-content p,
+  .post-content h2,
+  .post-content h3,
+  .post-content h4,
+  .post-content ul,
+  .post-content ol,
+  .post-content blockquote {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Spacing for paragraphs */
+  .post-content p {
+  max-width: 1400px; /* slightly narrower for better readability */
+    margin-bottom: 1.6rem;
+  }
+
+  /* Headings */
+  .post-content h2 {
+    font-size: 2rem;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    font-family: 'DM Serif Display', serif;
+    font-weight: 400;
+  }
+
+  .post-content h3 {
+    font-size: 1.45rem;
+    margin-top: 2rem;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+  }
+
+  /* Lists */
+  .post-content ul,
+  .post-content ol {
+    padding-left: 1.8rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .post-content li {
+    margin-bottom: 0.4rem;
+  }
+
+  /* Blockquotes */
+  .post-content blockquote {
+    border-left: 4px solid var(--gold);
+    background: var(--bg2);
+    padding: 1.25rem 2rem;
+    margin: 2rem auto;
+    font-style: italic;
+    border-radius: 12px;
+    color: var(--fg2);
+  }
+
+  /* Code & pre – can be wider, but stay inside container */
+  .post-content pre,
+  .post-content .code-block {
+    background: var(--bg2);
+    padding: 1.2rem;
+    border-radius: 14px;
+    overflow-x: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    margin: 2rem auto;
+    max-width: 100%;
+    width: 100%;
+    border: 1px solid var(--border);
+  }
+
+  code {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg2);
+    padding: 0.2rem 0.4rem;
+    border-radius: 6px;
+    font-size: 0.85em;
+  }
+
+  /* Images and media – responsive */
+  .post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 16px;
+    margin: 1.8rem auto;
+    display: block;
+  }
+
+  /* ----------------------------------------------
+     RELATED POSTS GRID
+  ----------------------------------------------- */
+  .related-posts {
+    width: 100%;
+    border-top: 1px solid var(--border);
+    margin: 4rem 0 2rem;
+    padding-top: 2.5rem;
+  }
+
+  .related-posts h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.8rem;
+    width: 100%;
+  }
+
+  @media (max-width: 900px) {
+    .related-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .related-card {
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--card);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    cursor: pointer;
+  }
+
+  .related-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    border-color: var(--gold);
+  }
+
+  .related-card a {
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--gold);
+    font-size: 1rem;
+  }
+
+  .related-card p {
+    margin-top: 0.5rem;
+    color: var(--fg2);
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  /* ----------------------------------------------
+     NAVIGATION (sticky, full width background)
+  ----------------------------------------------- */
+  nav.top {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    height: 68px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  nav.top .container.inner {
+    max-width: 1600px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    text-decoration: none;
+    font-weight: 700;
+    color: var(--fg);
+    white-space: nowrap;
+  }
+
+  .nav-logo-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    object-fit: contain;
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand-name {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .brand-tagline {
+    font-size: 0.65rem;
+    font-weight: 400;
+    color: var(--fg2);
+  }
+
+  nav.top ul {
+    display: flex;
+    gap: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+  }
+
+  nav.top ul li a {
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--fg2);
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+  }
+
+  nav.top ul li a:hover,
+  nav.top ul li a.active {
+    color: var(--fg);
+    background: var(--bg2);
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: auto;
+  }
+
+  .theme-toggle {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 2rem;
+    padding: 0.35rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+
+  .hb-btn {
+    display: none;
+    flex-direction: column;
+    width: 42px;
+    height: 42px;
+    background: var(--bg2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .hb-btn span {
+    display: block;
+    width: 20px;
+    height: 2.5px;
+    background: var(--fg);
+    border-radius: 3px;
+  }
+
+  @media (max-width: 860px) {
+    .hb-btn {
+      display: flex !important;
+    }
+    nav.top ul {
+      display: none !important;
+    }
+  }
+
+  /* Mobile Drawer */
+  .hb-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(3px);
+    z-index: 9997;
+  }
+  .hb-overlay.is-open {
+    display: block;
+  }
+  .hb-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 290px;
+    background: var(--bg);
+    border-left: 1px solid var(--border);
+    z-index: 9998;
+    transform: translateX(110%);
+    transition: transform 0.35s ease;
+  }
+  .hb-drawer.is-open {
+    transform: translateX(0);
+  }
+  .hb-nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 1rem;
+    border-radius: 0.75rem;
+    color: var(--fg2);
+    text-decoration: none;
+  }
+  .hb-footer {
+    padding: 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+  .hb-cta {
+    background: #c8922a;
+    color: #fff;
+    padding: 0.8rem 1rem;
+    border-radius: 2rem;
+    display: block;
+    text-align: center;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  /* ----------------------------------------------
+     FOOTER (full width background, inner aligned)
+  ----------------------------------------------- */
+  footer {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 3rem 0 1.5rem;
+    margin-top: 3rem;
+    width: 100%;
+  }
+
+  .footer-inner {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .footer-inner {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+  }
+
+  .footer-inner p,
+  .footer-inner a {
+    font-size: 0.85rem;
+    color: var(--subtle);
+    text-decoration: none;
+  }
+
+  .footer-inner a:hover {
+    color: var(--gold);
+  }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="container inner">
+    <a href="../index.html" class="brand">
+      <img src="../assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+      <span class="brand-text">
+        <span class="brand-name">Diraflow</span>
+        <span class="brand-tagline">Training data for frontier AI</span>
+      </span>
+    </a>
+    <ul>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="../solutions.html">Solutions</a></li>
+      <li><a href="../industries.html">Industries</a></li>
+      <li><a href="../blog.html" class="active">Blog</a></li>
+      <li><a href="../careers.html">Careers</a></li>
+      <li><a href="../contact.html">Contact Us</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle">
+        <span class="icon-sun">☀️</span>
+        <span class="icon-moon">🌙</span>
+      </button>
+      <button class="hb-btn" id="hb-btn" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="hb-overlay" id="hb-overlay"></div>
+<div class="hb-drawer" id="hb-drawer">
+  <div class="hb-drawer-head" style="display:flex; justify-content:space-between; padding:1rem;">
+    <span style="font-weight:600;">Menu</span>
+    <button id="hb-close" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
+  </div>
+  <nav class="hb-nav">
+    <a href="../index.html">Home</a>
+    <a href="../solutions.html">Solutions</a>
+    <a href="../industries.html">Industries</a>
+    <a href="../blog.html">Blog</a>
+    <a href="../careers.html">Careers</a>
+    <a href="../contact.html">Contact</a>
+  </nav>
+  <div class="hb-footer">
+    <a href="../contact.html" class="hb-cta">Talk to an expert →</a>
+  </div>
+</div>
+
+<main class="blog-container">
+  <div class="post-header">
+    <a href="../blog.html" style="display:inline-block; margin-bottom:1rem; color:var(--gold); font-weight:500;">← Back to blog</a>
+    <h1>Inter-annotator agreement: what it really tells you about data quality</h1>
+    <div class="post-meta-large">
+      <div class="author-badge">
+        <img src="https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?w=100&q=80&auto=format&fit=crop&crop=face" alt="Yuki Tanaka">
+        <div>
+          <strong>Yuki Tanaka</strong><br>
+          Head of Data Operations
+        </div>
+      </div>
+      <span>Mar 19, 2026 · 7 min read</span>
+    </div>
+  </div>
+
+  <div class="post-content">
+    <p>Inter-annotator agreement (IAA) is one of the most cited metrics in data annotation projects. A high Cohen’s κ or Fleiss’ κ is seen as a stamp of quality; a low IAA triggers panic and rework. But after managing millions of annotations for RLHF, preference ranking, and safety classification, I’ve learned that IAA is both overused and misunderstood. Let me walk you through what IAA actually measures, where it fails, and how to use it as a diagnostic tool — not a final verdict.</p>
+
+    <h2>The basic math: beyond percent agreement</h2>
+    <p>Percent agreement is simple: if two annotators label 100 items the same way 90 times, that’s 90% agreement. But that metric ignores chance. Cohen’s κ adjusts for the possibility that annotators might agree randomly just because one category is very common. For example, if 95% of items are “safe”, two annotators could agree 90% of the time by simply always choosing “safe” — but κ would reveal that agreement barely exceeds chance. That’s the theory. In practice, however, κ has serious limitations.</p>
+    
+    <h3>When high κ is misleading</h3>
+    <p>We once ran a study on a binary classification task: “Is this prompt harmful?” The data was heavily imbalanced (85% harmless). We achieved κ = 0.82, which is considered “almost perfect”. But when we examined disagreements, they were on the most subtle, borderline cases — exactly the examples that matter most for safety fine-tuning. Because κ is prevalence-dependent, a high score can mask the fact that annotators disagree on the minority class where you need the most signal. We’ve since learned to always report per‑category agreement and look at confusion matrices.</p>
+
+
+    <h2>Low κ isn’t always bad — sometimes it reveals richness</h2>
+    <p>In tasks with inherent subjectivity — like “rank these two responses by helpfulness” or “rate the creativity of this story” — a κ of 0.4 to 0.6 might be perfectly acceptable. Human experts simply disagree on aesthetic or nuanced judgments. Forcing an artificially high IAA through overly constrained rubrics can strip away the diversity of valid perspectives, which is harmful if you’re training a model to align with a range of human preferences. In our RLHF projects, we deliberately allow moderate IAA on preference pairs and instead measure <strong>consistency of ranking direction</strong> (e.g., transitivity) rather than strict label agreement.</p>
+    
+    <blockquote>“After switching from chasing κ > 0.8 to focusing on edge-case consistency and annotator calibration, our model’s win rate in live A/B tests increased by 12% — because we stopped over‑constraining our annotators.” — Data lead, large e‑commerce LLM team</blockquote>
+
+    <h2>What IAA misses: task clarity and annotator skill</h2>
+    <p>IAA is a property of the <em>combination</em> of task, guidelines, and annotator pool. A low score could mean: (a) the task is ambiguous, (b) the guidelines are unclear, (c) annotators are poorly trained, or (d) the phenomenon itself is inherently variable. A high score could mean: (a) the task is trivial, (b) annotators are colluding, or (c) the guidelines are so rigid that they force artificial consensus. We’ve seen all of these in real projects. The solution is to supplement IAA with other metrics: per‑annotator agreement with gold standards, response time analysis, and qualitative reviews of disagreement cases.</p>
+    
+    <h3>A practical framework for using IAA</h3>
+    <ul>
+      <li><strong>Before annotation:</strong> Run a pilot with 100 examples. Compute per‑category κ and percent agreement. If κ is below 0.3, refine guidelines or split the task. If κ is above 0.8 but the task is non‑trivial, check for annotator bias (e.g., always picking the first option).</li>
+      <li><strong>During production:</strong> Track weekly IAA on a held‑out set of 50–100 examples. Use moving averages to detect drift. If κ drops significantly, re‑calibrate with a team meeting.</li>
+      <li><strong>After completion:</strong> Don’t just report average κ. Report agreement per label, per annotator pair, and per difficulty cohort (e.g., easy vs. edge cases). Use the disagreement items as a separate “challenge set” for model evaluation.</li>
+    </ul>
+
+    <h2>Alternatives and complements to Cohen’s κ</h2>
+    <p>Depending on your annotation type, consider these metrics:</p>
+    <ul>
+      <li><strong>Krippendorff’s α</strong> – Handles missing data, any number of annotators, and nominal/ordinal/interval scales. More flexible than κ.</li>
+      <li><strong>Gwet’s AC1</strong> – Less sensitive to prevalence and marginal imbalance. Often preferred for imbalanced datasets.</li>
+      <li><strong>F1 score for pairwise agreement</strong> – Especially useful when one class is rare (e.g., harmful content).</li>
+      <li><strong>Correlation (Pearson/Spearman)</strong> – For continuous ratings (e.g., 1–5 Likert scales).</li>
+    </ul>
+    <p>We’ve adopted a dashboard that shows multiple metrics simultaneously because no single number captures the full story.</p>
+
+    <h2>Case study: improving IAA without dumbing down the task</h2>
+    <p>One of our clients wanted to increase IAA on a complex legal summarisation task from 0.55 to 0.75. Instead of simplifying the rubric, we introduced two changes: (1) a 30‑minute daily calibration session where annotators discussed edge cases, and (2) a “disagree‑and‑explain” workflow where any item with initial disagreement went to a third senior annotator who wrote a clarifying guideline. Within three weeks, IAA rose to 0.72, and the quality of the final dataset (measured by downstream model performance) improved significantly. The key was not removing subjectivity but institutionalising the resolution process.</p>
+    
+    <h2>Conclusion: don’t worship the kappa</h2>
+    <p>Inter-annotator agreement is a useful diagnostic, not a quality certificate. A dataset with perfect IAA might be useless if it avoids all the interesting, ambiguous examples. A dataset with moderate IAA might be perfect if the ambiguity is inherent and the data captures that diversity. At Diraflow, we use IAA as one of many signals — alongside expert reviews, model‑based validation, and real‑world task performance — to judge data quality. Next time someone tells you “our IAA is 0.85”, ask them: what about the hard cases?</p>
+  </div>
+
+  <div class="related-posts">
+    <h3>More on data operations</h3>
+    <div class="related-grid">
+      <div class="related-card">
+        <a href="great-preference-annotator.html">What makes a great preference annotator →</a>
+        <p>Insights from 1,000 calibration tasks</p>
+      </div>
+      <div class="related-card">
+        <a href="red-teaming-at-scale.html">Red-teaming at scale →</a>
+        <p>Lessons from 50,000 adversarial prompts</p>
+      </div>
+      <div class="related-card">
+        <a href="data-flywheel.html">The data flywheel →</a>
+        <p>How data quality compounds over generations</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <p>© 2026 Diraflow AI. All rights reserved.</p>
+    <a href="../code-of-conduct.html">Code of Conduct</a>
+  </div>
+</footer>
+
+<script>
+  (function() {
+    // Theme toggle (light/dark)
+    let toggle = document.getElementById('themeToggle');
+    if (toggle) {
+      let root = document.documentElement;
+      toggle.addEventListener('click', () => {
+        let cur = root.getAttribute('data-theme');
+        let next = cur === 'light' ? 'dark' : 'light';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem('diraflow-theme', next);
+      });
+    }
+
+    // Mobile drawer logic
+    let hbBtn = document.getElementById('hb-btn');
+    let overlay = document.getElementById('hb-overlay');
+    let drawer = document.getElementById('hb-drawer');
+    let closeHb = document.getElementById('hb-close');
+
+    function openDrawer() {
+      if (drawer) drawer.classList.add('is-open');
+      if (overlay) overlay.classList.add('is-open');
+    }
+    function closeDrawer() {
+      if (drawer) drawer.classList.remove('is-open');
+      if (overlay) overlay.classList.remove('is-open');
+    }
+    if (hbBtn) hbBtn.addEventListener('click', openDrawer);
+    if (closeHb) closeHb.addEventListener('click', closeDrawer);
+    if (overlay) overlay.addEventListener('click', closeDrawer);
+  })();
+</script>
+</body>
+</html>
