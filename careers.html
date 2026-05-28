@@ -9,7 +9,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/styles.css">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo.jpg">
-<script>(function(){var t=localStorage.getItem('diraflow-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.setAttribute('data-theme',t||(d?'dark':'light'));})();</script>
+<script>
+  /* One-time clear of saved theme preference */
+  localStorage.removeItem('diraflow-theme');
+  document.documentElement.setAttribute('data-theme', 'light');
+</script>
 
 <script>
   // These MUST be global — no wrapping, no DOMContentLoaded
@@ -322,11 +326,7 @@
       onmouseover="this.style.color='#c8922a'"
       onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
   </div>
-  <div style="display:flex; align-items:center; gap:1.5rem;">
-    <p style="font-size:.8125rem; color:var(--subtle);">Made with care for the AI community.</p>
-    
-    </button>
-  </div>
+  
 </div>
   </div>
 </footer>

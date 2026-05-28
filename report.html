@@ -9,12 +9,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/styles.css">
 <link rel="icon" type="image/png" href="assets/logo.jpg">
+
 <script>
-  (function(){
-    var t = localStorage.getItem('diraflow-theme');
-    var d = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.documentElement.setAttribute('data-theme', t || (d ? 'dark' : 'light'));
-  })();
+  /* One-time clear of saved theme preference */
+  localStorage.removeItem('diraflow-theme');
+  document.documentElement.setAttribute('data-theme', 'light');
 </script>
 
 <script>
@@ -971,9 +970,7 @@ footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 4
         <span style="color:var(--subtle); font-size:.8125rem;">·</span>
         <a href="privacy-policy.html" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
       </div>
-      <div style="display:flex; align-items:center; gap:1.5rem;">
-        <p style="font-size:.8125rem; color:var(--subtle);">Made with care for the AI community.</p>
-      </div>
+      
     </div>
   </div>
 </footer>
