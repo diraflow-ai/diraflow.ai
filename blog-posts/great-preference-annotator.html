@@ -1,199 +1,647 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>What makes a great preference annotator? — Diraflow AI</title>
-<meta name="description" content="We analysed calibration data from over a thousand annotators to identify what predicts high-quality RLHF feedback. Insights for building better preference datasets.">
-<meta property="og:title" content="What makes a great preference annotator? Insights from 1,000 calibration tasks">
-<meta property="og:description" content="RLHF depends on human preference data. Here's what we learned about annotator consistency, bias, and calibration from analysing 1,000+ tasks.">
-<meta property="og:type" content="article">
-<link rel="canonical" href="https://diraflowai.com/blog-posts/great-preference-annotator.html">
+<title>What makes a great preference annotator? Insights from 1,000 calibration tasks — Diraflow</title>
+<meta name="description" content="We ran 1,000 calibration tasks across our annotator network to figure out what actually predicts high-quality RLHF feedback. The results weren't what we expected.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 <style>
 :root {
-  --bg:#f7f6f2;--bg2:#eeecea;--fg:#111110;--fg2:#666460;
-  --border:#d8d6d0;--card:#ffffff;--subtle:#999690;
-  --gold:#c8922a;--radius:0.75rem;--radius-lg:1.25rem;
+  --bg:#f7f6f2; --bg2:#eeecea; --fg:#111110; --fg2:#555250;
+  --border:#d8d6d0; --card:#ffffff; --subtle:#999690;
+  --gold:#c8922a; --green:#4a9e5c; --red:#dc3c3c;
+  --radius:0.75rem; --radius-lg:1.25rem;
+  --transition:0.2s ease; --shadow:0 4px 24px rgba(0,0,0,0.07);
 }
-[data-theme="dark"]{
-  --bg:#111110;--bg2:#1a1918;--fg:#f7f6f2;--fg2:#999690;
-  --border:#2a2826;--card:#1e1c1b;--subtle:#666460;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--fg);line-height:1.5;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+img{display:block;max-width:100%;height:auto;}
+a{color:inherit;text-decoration:none;}
+ul{list-style:none;}
+button{font-family:inherit;}
 
-/* FULL WIDTH LAYOUT – edge to edge */
-.container-full{
-  width:100%;
-  max-width:1400px;
-  margin:0 auto;
-  padding-left:48px;
-  padding-right:48px;
+/* ── Layout ── */
+/* The article column is capped at 780px and horizontally centered */
+.container-wide   {max-width:1160px;margin:0 auto;padding:0 4rem;}
+.container-article{max: width 500px;px; margin:0 auto;padding:0 4rem;}
+@media(max-width:900px){
+  .container-wide   {padding:0 2.5rem;}
+  .container-article{padding:0 2.5rem;}
 }
-.post-content {
-  width: 100%;
-  max-width: 100%;
-  margin: 2rem 0 0 0;
+@media(max-width:600px){
+  .container-wide   {padding:0 1.25rem;}
+  .container-article{padding:0 1.25rem;}
 }
-.post-content p, 
-.post-content li,
-.post-content blockquote,
-.post-content h2, 
-.post-content h3, 
-.post-content h4 {
-  max-width: 100%;
-  margin-left: 0;
-  margin-right: 0;
-}
-@media (max-width: 640px) {
-  .container-full {
-    padding: 0 0.75rem;
-  }
-}
-pre {
-  background: var(--bg2);
-  padding: 1rem;
-  border-radius: 12px;
-  overflow-x: auto;
-  font-family: 'DM Mono', monospace;
-  font-size: 0.85rem;
-  margin: 1.5rem 0;
-}
-/* navigation */
+
+/* Progress bar */
+.progress-bar {position:fixed;top:68px;left:0;right:0;height:3px;background:var(--border);z-index:200;}
+.progress-fill{height:100%;background:var(--gold);width:0%;transition:width 0.1s linear;}
+
+/* Nav */
 nav.top{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);height:68px;display:flex;align-items:center;}
-nav.top .container.inner{max-width:1200px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;gap:2rem;width:100%;}
-.brand{display:inline-flex;align-items:center;gap:0.625rem;text-decoration:none;font-weight:700;color:var(--fg);white-space:nowrap;}
-.nav-logo-img{width:36px;height:36px;border-radius:8px;object-fit:contain;}
+nav.top .nav-inner{max-width:1160px;margin:0 auto;padding:0 4rem;display:flex;align-items:center;gap:2rem;width:100%;}
+@media(max-width:900px){nav.top .nav-inner{padding:0 2.5rem;}}
+@media(max-width:600px){nav.top .nav-inner{padding:0 1.25rem;}}
+.brand{display:inline-flex;align-items:center;gap:0.625rem;text-decoration:none;font-weight:700;color:var(--fg);white-space:nowrap;flex-shrink:0;}
+.nav-logo-img{width:36px;height:36px;border-radius:8px;object-fit:contain;background:#eee;}
 .brand-text{display:flex;flex-direction:column;}
-.brand-name{font-size:1rem;font-weight:700;}
-.brand-tagline{font-size:0.65rem;font-weight:400;color:var(--fg2);}
-nav.top ul{display:flex;gap:0;list-style:none;margin:0;padding:0;flex:1;}
-nav.top ul li a{text-decoration:none;font-size:0.875rem;font-weight:500;color:var(--fg2);padding:0.5rem 0.875rem;border-radius:0.5rem;}
+.brand-name   {font-size:1rem;font-weight:700;line-height:1.1;}
+.brand-tagline{font-size:0.65rem;color:var(--fg2);}
+nav.top ul{display:flex;list-style:none;flex:1;margin:0;padding:0;}
+nav.top ul li a{font-size:0.875rem;font-weight:500;color:var(--fg2);padding:0.5rem 0.875rem;border-radius:0.5rem;display:block;transition:color var(--transition),background var(--transition);}
 nav.top ul li a:hover,nav.top ul li a.active{color:var(--fg);background:var(--bg2);}
-.nav-right{display:flex;align-items:center;gap:0.75rem;margin-left:auto;}
-.btn{display:inline-flex;gap:0.4rem;padding:0.6rem 1.25rem;border-radius:2rem;font-weight:600;font-size:0.875rem;background:var(--fg);color:var(--bg);text-decoration:none;}
-.theme-toggle{background:var(--bg2);border:1px solid var(--border);border-radius:2rem;padding:0.35rem 0.75rem;cursor:pointer;font-size:0.9rem;}
-.hb-btn{display:none;flex-direction:column;width:42px;height:42px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;gap:5px;}
-.hb-btn span{display:block;width:20px;height:2.5px;background:var(--fg);border-radius:3px;}
-@media(max-width:860px){.hb-btn{display:flex!important;}nav.top ul{display:none!important;}}
-.hb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);z-index:9997;}
+.nav-right{display:flex;align-items:center;gap:0.75rem;margin-left:auto;flex-shrink:0;}
+.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.55rem 1.2rem;border-radius:2rem;font-weight:600;font-size:0.875rem;font-family:'Sora',sans-serif;cursor:pointer;border:none;background:var(--fg);color:var(--bg);text-decoration:none;transition:opacity 0.2s,transform 0.15s;}
+.btn:hover{opacity:0.85;transform:translateY(-1px);}
+.btn-sm{padding:0.45rem 1rem;font-size:0.8rem;}
+.hb-btn{display:none;flex-direction:column;justify-content:center;align-items:center;width:42px;height:42px;gap:5px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;flex-shrink:0;position:relative;z-index:9999;}
+.hb-btn span{display:block;width:20px;height:2.5px;background:var(--fg);border-radius:3px;transition:transform 0.3s ease,opacity 0.3s ease;pointer-events:none;}
+.hb-btn.is-open span:nth-child(1){transform:translateY(7.5px) rotate(45deg);}
+.hb-btn.is-open span:nth-child(2){opacity:0;}
+.hb-btn.is-open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg);}
+@media(max-width:860px){.hb-btn{display:flex!important;}nav.top ul{display:none!important;}.btn.btn-sm{display:none!important;}}
+.hb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(3px);z-index:9997;}
 .hb-overlay.is-open{display:block;}
-.hb-drawer{position:fixed;top:0;right:0;bottom:0;width:290px;background:var(--bg);border-left:1px solid var(--border);z-index:9998;transform:translateX(110%);transition:transform 0.35s ease;}
+.hb-drawer{position:fixed;top:0;right:0;bottom:0;width:290px;max-width:88vw;background:var(--bg);border-left:1px solid var(--border);z-index:9998;display:flex;flex-direction:column;transform:translateX(110%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);box-shadow:-12px 0 50px rgba(0,0,0,0.12);}
 .hb-drawer.is-open{transform:translateX(0);}
-.hb-nav a{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1rem;border-radius:0.75rem;color:var(--fg2);text-decoration:none;}
+.hb-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);}
+.hb-close{width:32px;height:32px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;color:var(--fg2);transition:all 0.2s;}
+.hb-close:hover{background:#111;color:#fff;}
+.hb-nav{flex:1;padding:1rem 0.875rem;overflow-y:auto;display:flex;flex-direction:column;gap:0.2rem;}
+.hb-link{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1rem;border-radius:0.75rem;font-size:0.9rem;font-weight:500;color:var(--fg2);text-decoration:none;border:1px solid transparent;transition:all 0.18s;}
+.hb-link:hover,.hb-link.hb-active{background:rgba(200,146,42,0.09);border-color:rgba(200,146,42,0.22);color:#c8922a;}
+.hb-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border-radius:0.5rem;font-size:1rem;flex-shrink:0;}
 .hb-footer{padding:1.25rem;border-top:1px solid var(--border);}
-.hb-cta{background:#c8922a;color:#fff;padding:0.8rem 1rem;border-radius:2rem;display:block;text-align:center;font-weight:700;}
-.post-header{padding:3rem 0 2rem;border-bottom:1px solid var(--border);}
-.post-header h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:400;line-height:1.2;}
-.post-meta-large{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;margin:1.5rem 0 1rem;color:var(--fg2);}
-.author-badge{display:flex;align-items:center;gap:0.7rem;}
-.author-badge img{width:44px;height:44px;border-radius:50%;object-fit:cover;}
-blockquote{border-left:4px solid var(--gold);background:var(--bg2);padding:1rem 1.8rem;margin:1.5rem 0;font-style:italic;}
-.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:1.5rem;}
-@media(max-width:700px){.related-grid{grid-template-columns:1fr;}}
-.related-card{padding:1.25rem;border:1px solid var(--border);border-radius:1rem;background:var(--card);transition:transform 0.28s ease,box-shadow 0.28s ease;cursor:pointer;}
-.related-card:hover{transform:translateY(-6px);box-shadow:0 12px 32px rgba(0,0,0,0.12);border-color:var(--gold);}
-.related-card a{font-weight:bold;text-decoration:none;color:var(--gold);}
-.related-card p{margin-top:0.5rem;color:var(--fg2);}
-footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 0 1.5rem;margin-top:2rem;}
+.hb-cta{display:block;text-align:center;background:var(--gold);color:#fff;padding:0.8rem 1rem;border-radius:2rem;font-size:0.875rem;font-weight:700;}
+
+/* ── HERO (image behind title) ── */
+.post-hero {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 21/9;
+  overflow: hidden;
+}
+.post-hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* dark gradient so text stays readable */
+.post-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.18) 0%,
+    rgba(0,0,0,0.52) 55%,
+    rgba(0,0,0,0.72) 100%
+  );
+}
+.post-hero-content {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 3rem 4rem;
+  max-width: 900px;
+}
+@media(max-width:900px){.post-hero-content{padding:2rem 2.5rem;}}
+@media(max-width:600px){
+  .post-hero{aspect-ratio:4/3;}
+  .post-hero-content{padding:1.5rem 1.25rem;}
+}
+.post-hero-cat-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.post-hero-cat {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #fff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 2rem;
+  background: #8b5cf6;
+}
+.post-hero-date {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.75);
+}
+.post-hero-read {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.15);
+  padding: 0.2rem 0.6rem;
+  border-radius: 2rem;
+  border: 1px solid rgba(255,255,255,0.25);
+}
+.post-hero-content h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(1.75rem, 4.5vw, 3.25rem);
+  font-weight: 400;
+  line-height: 1.18;
+  letter-spacing: -0.03em;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+  max-width: 820px;
+}
+
+/* Post sub-header (author + share, below hero) */
+.post-subheader {
+  padding: 1.75rem 0 2rem;
+  border-bottom: 1px solid var(--border);
+}
+.back-link{display:inline-flex;align-items:center;gap:0.4rem;font-size:0.82rem;font-weight:600;color:var(--gold);margin-bottom:1.25rem;transition:gap 0.2s;}
+.back-link:hover{gap:0.7rem;}
+.post-author-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.post-author{display:flex;align-items:center;gap:0.875rem;}
+.post-author img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;}
+.author-name {font-size:0.9rem;font-weight:700;color:var(--fg);}
+.author-title{font-size:0.75rem;color:var(--fg2);margin-top:0.1rem;}
+.share-row{display:flex;align-items:center;gap:0.5rem;}
+.share-label{font-size:0.72rem;color:var(--fg2);}
+.share-btn{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;background:var(--bg2);border:1px solid var(--border);cursor:pointer;color:var(--fg2);text-decoration:none;transition:all 0.2s;}
+.share-btn:hover{background:var(--gold);color:#fff;border-color:var(--gold);}
+
+/* Article body */
+.post-body{padding:1rem 0;font-size:1.0625rem;line-height:1.85;color:var(--fg2);}
+.post-body>*+*{margin-top:1.5rem;}
+.post-body h2{font-family:'DM Serif Display',serif;font-size:clamp(1.5rem,3vw,2rem);font-weight:400;line-height:1.25;letter-spacing:-0.025em;color:var(--fg);margin-top:3.5rem!important;margin-bottom:1rem;padding-top:2.5rem;border-top:1px solid var(--border);}
+.post-body h3{font-size:1.125rem;font-weight:700;color:var(--fg);margin-top:2.5rem!important;margin-bottom:0.75rem;letter-spacing:-0.01em;}
+.post-body p{color:var(--fg2);}
+.post-body strong{color:var(--fg);font-weight:700;}
+.post-body em{font-style:italic;color:var(--fg);}
+.post-body a{color:var(--gold);text-decoration:underline;text-underline-offset:3px;transition:opacity 0.2s;}
+.post-body a:hover{opacity:0.75;}
+.post-body ul{padding-left:0;margin:1.5rem 0;display:flex;flex-direction:column;gap:0.625rem;list-style:none;}
+.post-body ul li{display:flex;align-items:flex-start;gap:0.625rem;color:var(--fg2);line-height:1.75;}
+.post-body ul li::before{content:'→';color:var(--gold);font-weight:700;flex-shrink:0;margin-top:0.1rem;}
+.post-body ol{padding-left:0;margin:1.5rem 0;display:flex;flex-direction:column;gap:0.625rem;counter-reset:post-counter;list-style:none;}
+.post-body ol li{display:flex;align-items:flex-start;gap:0.875rem;color:var(--fg2);line-height:1.75;counter-increment:post-counter;}
+.post-body ol li::before{content:counter(post-counter);min-width:26px;height:26px;background:var(--gold);color:#fff;border-radius:50%;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0.1rem;}
+.post-body blockquote{border-left:3px solid var(--gold);background:var(--bg2);padding:1.35rem 1.5rem;margin:2.5rem 0;border-radius:0 var(--radius-lg) var(--radius-lg) 0;font-style:italic;color:var(--fg);font-size:1.05rem;line-height:1.75;}
+.post-body blockquote cite{display:block;margin-top:0.875rem;font-style:normal;font-size:0.82rem;color:var(--fg2);font-weight:600;}
+.post-body code{font-family:'DM Mono',monospace;font-size:0.875em;background:var(--bg2);color:var(--fg);padding:0.15em 0.45em;border-radius:4px;border:1px solid var(--border);}
+.post-body pre{background:#1a1918;border:1px solid #2a2826;border-radius:var(--radius-lg);padding:1.5rem;overflow-x:auto;margin:2rem 0;font-family:'DM Mono',monospace;font-size:0.875rem;line-height:1.65;color:#f7f6f2;}
+.post-body pre code{background:none;border:none;padding:0;color:#f7f6f2;}
+.post-body figure{margin:2.5rem 0;}
+.post-body figure img{width:100%;border-radius:var(--radius-lg);border:1px solid var(--border);}
+.post-body figcaption{font-size:0.8rem;color:var(--subtle);text-align:center;margin-top:0.625rem;font-style:italic;}
+.post-body table{width:100%;border-collapse:collapse;margin:2rem 0;font-size:0.875rem;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);}
+.post-body table th{background:var(--fg);color:var(--bg);padding:0.75rem 1rem;text-align:left;font-weight:700;font-size:0.78rem;letter-spacing:0.04em;}
+.post-body table td{padding:0.7rem 1rem;border-bottom:1px solid var(--border);color:var(--fg2);vertical-align:top;line-height:1.55;}
+.post-body table tr:last-child td{border-bottom:none;}
+.post-body table tr:nth-child(even) td{background:var(--bg2);}
+
+/* Components */
+.stat-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:2.5rem 0;}
+@media(max-width:500px){.stat-strip{grid-template-columns:1fr;}}
+.stat-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.35rem;text-align:center;}
+.stat-box .stat-num{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--gold);line-height:1;margin-bottom:0.3rem;}
+.stat-box .stat-lbl{font-size:0.75rem;color:var(--fg2);line-height:1.4;}
+.callout{background:rgba(200,146,42,0.07);border:1px solid rgba(200,146,42,0.25);border-left:3px solid var(--gold);border-radius:0 var(--radius-lg) var(--radius-lg) 0;padding:1.25rem 1.5rem;margin:2rem 0;}
+.callout-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.5rem;}
+.callout p{font-size:0.9rem;color:var(--fg);line-height:1.7;margin:0!important;}
+.callout-info{background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-left:3px solid #3b82f6;border-radius:0 var(--radius-lg) var(--radius-lg) 0;padding:1.25rem 1.5rem;margin:2rem 0;}
+.callout-info .callout-label{color:#3b82f6;}
+.callout-info p{font-size:0.9rem;color:var(--fg);line-height:1.7;margin:0!important;}
+.compare-cols{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:2rem 0;}
+@media(max-width:560px){.compare-cols{grid-template-columns:1fr;}}
+.compare-col{border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;}
+.compare-col-head{padding:0.875rem 1.25rem;border-bottom:1px solid var(--border);}
+.compare-col-head .col-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.25rem;}
+.compare-col-head h4{font-size:0.9rem;font-weight:700;color:var(--fg);}
+.col-bad{background:rgba(220,60,60,0.05);}
+.col-bad .col-label{color:var(--red);}
+.col-good{background:rgba(200,146,42,0.06);}
+.col-good .col-label{color:var(--gold);}
+.compare-col-body{padding:1.25rem;background:var(--card);}
+.compare-col-body ul{margin:0;gap:0.5rem;}
+.compare-col-body ul li{font-size:0.85rem;}
+.col-bad  .compare-col-body ul li::before{content:'✗';color:var(--red);}
+.col-good .compare-col-body ul li::before{content:'✓';color:var(--green);}
+
+/* Author card */
+.author-card{display:flex;gap:1.25rem;align-items:flex-start;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem;margin:3rem 0;}
+.author-card img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;}
+.author-card-name {font-size:1rem;font-weight:700;color:var(--fg);margin-bottom:0.2rem;}
+.author-card-title{font-size:0.78rem;color:var(--gold);font-weight:600;margin-bottom:0.625rem;}
+.author-card p{font-size:0.85rem;color:var(--fg2);line-height:1.7;margin:0!important;}
+@media(max-width:500px){.author-card{flex-direction:column;}}
+
+/* Related */
+.related-section{border-top:1px solid var(--border);padding-top:2.5rem;}
+.related-section>h3{font-family:'DM Serif Display',serif;font-size:1.35rem;font-weight:400;color:var(--fg);margin-bottom:1.5rem;}
+.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+@media(max-width:640px){.related-grid{grid-template-columns:1fr;}}
+.related-card{display:block;padding:1.25rem;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--card);text-decoration:none;transition:transform 0.25s ease,box-shadow 0.25s ease,border-color 0.25s ease;}
+.related-card:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(0,0,0,0.08);border-color:var(--gold);}
+.related-cat{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold);margin-bottom:0.5rem;}
+.related-card h4{font-size:0.875rem;font-weight:700;color:var(--fg);line-height:1.4;margin-bottom:0.4rem;}
+.related-card p{font-size:0.75rem;color:var(--fg2);line-height:1.5;margin:0;}
+
+/* Footer */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:4rem 0 0;margin-top:4rem;}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem;}
+@media(max-width:760px){.footer-grid{grid-template-columns:1fr 1fr;gap:2rem;}}
+@media(max-width:480px){.footer-grid{grid-template-columns:1fr;}}
+.footer-brand p{font-size:0.875rem;color:var(--fg2);line-height:1.7;margin-top:0.75rem;}
+.footer-col h4{font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--fg2);margin-bottom:1.25rem;}
+.footer-col ul{display:flex;flex-direction:column;gap:0.625rem;}
+.footer-col ul li a{font-size:0.875rem;color:var(--fg2);transition:color 0.2s;}
+.footer-col ul li a:hover{color:var(--gold);}
+.footer-bottom{border-top:1px solid var(--border);padding:1.5rem 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.footer-bottom p{font-size:0.8125rem;color:var(--subtle);}
 </style>
 </head>
 <body>
-<nav class="top"><div class="container inner"><a href="../index.html" class="brand"><img src="../assets/logo.jpg" alt="Diraflow" class="nav-logo-img"><span class="brand-text"><span class="brand-name">Diraflow</span><span class="brand-tagline">Training data for frontier AI</span></span></a><ul><li><a href="../index.html">Home</a></li><li><a href="../solutions.html">Solutions</a></li><li><a href="../industries.html">Industries</a></li><li><a href="../blog.html" class="active">Blog</a></li><li><a href="../careers.html">Careers</a></li><li><a href="../contact.html">Contact Us</a></li></ul><div class="nav-right"><button class="theme-toggle" id="themeToggle"><span class="icon-sun">☀️</span><span class="icon-moon">🌙</span></button><button class="hb-btn" id="hb-btn"><span></span><span></span><span></span></button></div></div></nav>
-<div class="hb-overlay" id="hb-overlay"></div><div class="hb-drawer" id="hb-drawer"><div class="hb-drawer-head" style="display:flex;justify-content:space-between;padding:1rem;"><span>Menu</span><button id="hb-close" style="background:none;border:none;font-size:1.5rem;cursor:pointer;">✕</button></div><nav class="hb-nav"><a href="../index.html">Home</a><a href="../solutions.html">Solutions</a><a href="../industries.html">Industries</a><a href="../blog.html">Blog</a><a href="../careers.html">Careers</a><a href="../contact.html">Contact</a></nav><div class="hb-footer"><a href="../contact.html" class="hb-cta">Talk to an expert →</a></div></div>
 
-<div class="container-full">
-  <div class="post-header">
-    <a href="../blog.html" style="display:inline-block;margin-bottom:1rem;color:var(--gold);font-weight:500;">← Back to blog</a>
-    <h1>What makes a great preference annotator? Insights from 1,000 calibration tasks</h1>
-    <div class="post-meta-large">
-      <div class="author-badge"><img src="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=100&q=80&auto=format&fit=crop&crop=face" alt="Dembe J."><div><strong>Dembe J.</strong><br>Lead Research Engineer</div></div>
-      <span>Mar 10, 2026 · 9 min read</span>
+<div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
+<nav class="top">
+  <div class="nav-inner">
+    <a href="../index.html" class="brand">
+      <img src="https://placehold.co/36x36/111/fff?text=D" alt="Diraflow" class="nav-logo-img">
+      <span class="brand-text"><span class="brand-name">Diraflow</span><span class="brand-tagline">Training data for frontier AI</span></span>
+    </a>
+    <ul>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="../solutions.html">Solutions</a></li>
+      <li><a href="../industries.html">Industries</a></li>
+      <li><a href="../blog.html" class="active">Blog</a></li>
+      <li><a href="../careers.html">Careers</a></li>
+      <li><a href="../contact.html">Contact Us</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="../contact.html" class="btn btn-sm">Talk to us</a>
+      <button class="hb-btn" id="hb-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
     </div>
   </div>
-  <div class="post-content">
-    <p>RLHF (Reinforcement Learning from Human Feedback) is the secret sauce behind many of today’s most capable LLMs. But the quality of the final model depends almost entirely on the quality of the preference data — and that means the people providing the feedback. Over the past year, Diraflow collected and analysed calibration data from over 1,000 preference annotators across dozens of projects. We measured everything: consistency, response time, preference direction, sensitivity to subtle differences, and drift over time. Here’s what we learned about what separates a great preference annotator from an average one.</p>
-
-    <h2>Calibration first: not all preferences are equal</h2>
-    <p>Before any annotator touches production data, we run a calibration suite of 50–100 gold‑standard preference pairs. These pairs are carefully curated to include clear winners, ties, and subtle trade‑offs (e.g., more helpful but less safe). By analysing performance on this calibration set, we can predict overall annotator quality with surprising accuracy. The single best predictor? <strong>Consistency on near‑tie examples.</strong> Annotators who can repeatedly pick the same side when the difference is small are also more reliable on ambiguous real‑world data.</p>
-    
-    <pre><code># Example calibration metric: preference stability
-For each annotator, present the same subtle preference pair twice, 3 days apart.
-Stability = % of pairs where the same side is chosen.
-Top annotators: >85% stability on subtle pairs.
-Average annotators: ≈55% (close to random).</code></pre>
-
-    <h2>The paradox of speed: faster is not worse</h2>
-    <p>Conventional wisdom says slower annotators are more careful. Our data shows a different story. The fastest quartile of annotators (median response time < 8 seconds per preference) had <em>higher</em> calibration accuracy than the slowest quartile (> 25 seconds). Why? Fast annotators often have more experience and rely on intuition honed by clear guidelines, while slow annotators might overthink or get distracted. However, extremely fast (< 3 seconds) correlates with random clicking. The sweet spot: 6–12 seconds per pair, with low variance.</p>
-    
-    <h2>Drift and fatigue: the hidden destroyers</h2>
-    <p>Annotator quality is not static. In long sessions (over 90 minutes), we observed a steady decline in preference consistency: the probability of reversing a previously seen pair increased by 18% after the 80th minute. Even worse, some annotators develop “position bias” — preferring the left response more often over time. Great annotators are aware of their own drift; they take breaks, request fresh calibration checks, and use keyboard shortcuts to avoid mouse‑induced side bias. Our most successful teams enforce mandatory 10‑minute breaks every 60 minutes and run a 10‑item recalibration after each break.</p>
-    
-    <blockquote>“We used to think that hiring domain experts was enough. But after analysing our annotator data, we realised that consistency on subtle pairs and self‑awareness of bias were more predictive of final model win rate than any credential.” — Head of Data, frontier LLM lab</blockquote>
-    
-    <h2>What about domain expertise?</h2>
-    <p>For general preference (e.g., “which response is more helpful?”), generic annotators with strong calibration scores performed as well as domain experts. But for specialised domains like medical advice or legal reasoning, subject‑matter expertise became critical — but only when paired with calibration. A brilliant doctor who is inconsistent on preference ties is worse than a moderately knowledgeable annotator with perfect stability. We now run a two‑stage filter: first calibrate on generic preference pairs, then test on a small set of domain‑specific gold standards.</p>
-    
-    <h2>Practical takeaways for building a preference annotation team</h2>
-    <ul>
-      <li><strong>Calibrate, calibrate, calibrate.</strong> Use a held‑out set of subtle pairs and reject annotators with stability < 70% on repeats.</li>
-      <li><strong>Monitor response time distributions.</strong> Flag anyone who consistently finishes in < 4 seconds or > 30 seconds for review.</li>
-      <li><strong>Bake in forced breaks and position‑randomisation.</strong> Swap left/right display order randomly to counter side bias.</li>
-      <li><strong>Use “attention checks”</strong> — obvious preference pairs (e.g., a helpful response vs. gibberish). Low performance on these is a red flag.</li>
-      <li><strong>Reward consistency, not speed.</strong> Bonus structures that encourage high stability often improve overall data quality more than volume bonuses.</li>
-    </ul>
-    
-    <h2>Case study: from average to elite in 4 weeks</h2>
-    <p>One of our clients had an annotator pool with mediocre calibration (average stability 62% on subtle pairs). We introduced weekly 30‑minute calibration sessions where annotators discussed disagreements on the same subtle pairs, plus a dashboard showing each person’s consistency trends. Within four weeks, average stability rose to 81%, and the downstream RLHF model showed a 9% improvement in win rate against a baseline. The key was turning calibration from a one‑time test into a continuous feedback loop.</p>
-    
-    <h2>The future: AI‑assisted preference annotation</h2>
-    <p>We are now experimenting with models that can pre‑label easy preference pairs and surface only the ambiguous ones for human annotators. This hybrid approach can increase annotator focus and reduce fatigue. But even with AI assistance, the core human traits we identified — consistency, bias awareness, and calibration stability — remain essential. A great preference annotator is not just a labeler; they are a key component of the RLHF system, and investing in their skills pays off directly in model performance.</p>
-    <p>If you’re building an RLHF pipeline, don’t treat annotators as interchangeable workers. Measure them, calibrate them, and learn from the best. The data will thank you — and so will your model.</p>
+</nav>
+<div class="hb-overlay" id="hb-overlay"></div>
+<div class="hb-drawer" id="hb-drawer">
+  <div class="hb-drawer-head">
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <img src="https://placehold.co/36x36/111/fff?text=D" alt="Diraflow" class="nav-logo-img">
+      <span style="font-weight:700;color:var(--fg);">Diraflow</span>
+    </div>
+    <button class="hb-close" id="hb-close">✕</button>
   </div>
+  <nav class="hb-nav">
+    <a href="../index.html"     class="hb-link"><span class="hb-icon">🏠</span>Home</a>
+    <a href="../solutions.html" class="hb-link"><span class="hb-icon">⚙️</span>Solutions</a>
+    <a href="../industries.html"class="hb-link"><span class="hb-icon">🏭</span>Industries</a>
+    <a href="../blog.html"      class="hb-link hb-active"><span class="hb-icon">✍️</span>Blog</a>
+    <a href="../careers.html"   class="hb-link"><span class="hb-icon">💼</span>Careers</a>
+    <a href="../contact.html"   class="hb-link"><span class="hb-icon">✉️</span>Contact Us</a>
+  </nav>
+  <div class="hb-footer"><a href="../contact.html" class="hb-cta">Talk to an expert →</a></div>
+</div>
 
-  <div class="related-posts" style="border-top:1px solid var(--border);margin:3rem 0 2rem;padding-top:2rem;">
-    <h3>More on RLHF & preference</h3>
-    <div class="related-grid">
-      <div class="related-card"><a href="inter-annotator-agreement.html">Inter-annotator agreement →</a><p>What IAA tells you (and what it hides)</p></div>
-      <div class="related-card"><a href="agentic-evaluation-datasets.html">Agentic evaluation datasets →</a><p>Why multi‑step data is different</p></div>
-      <div class="related-card"><a href="red-teaming-at-scale.html">Red-teaming at scale →</a><p>Lessons from 50k adversarial prompts</p></div>
+<!-- ── HERO: image behind title ── -->
+<div class="post-hero">
+  <img src="https://images.unsplash.com/photo-1744627049721-73c27008ad28?q=80&w=1400&auto=format&fit=crop"
+       alt="Two people reviewing AI model outputs side by side" loading="eager">
+  <div class="post-hero-content">
+    <div class="post-hero-cat-row">
+      <span class="post-hero-cat">RLHF</span>
+      <span class="post-hero-date">Mar 10, 2026</span>
+      <span class="post-hero-read">15 min read</span>
+    </div>
+    <h1>What makes a great preference annotator? Insights from 1,000 calibration tasks</h1>
+  </div>
+</div>
+
+<!-- ── Sub-header: author + share ── -->
+<div class="container-article">
+  <div class="post-subheader">
+    <a href="../blog.html" class="back-link">← Back to blog</a>
+    <div class="post-author-row">
+      <div class="post-author">
+        <img src="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=100&q=80&auto=format&fit=crop&crop=face" alt="Dembe J.">
+        <div>
+          <div class="author-name">Dembe J.</div>
+          <div class="author-title">Senior Data Operations Lead · Diraflow</div>
+        </div>
+      </div>
+      <div class="share-row">
+        <span class="share-label">Share</span>
+        <a href="https://twitter.com/intent/tweet?text=What+makes+a+great+preference+annotator%3F&url=https://diraflowai.com/blog-posts/great-preference-annotator"
+           target="_blank" rel="noopener" class="share-btn" title="Share on X">𝕏</a>
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://diraflowai.com/blog-posts/great-preference-annotator"
+           target="_blank" rel="noopener" class="share-btn" title="Share on LinkedIn">in</a>
+        <button class="share-btn" onclick="copyLink()" title="Copy link">🔗</button>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- Article -->
+<main class="container-article">
+  <article class="post-body">
+
+    <p>Here's what we expected to find: domain experts would outperform generalists, annotators with formal writing training would produce better rationales, and experience on previous RLHF projects would be the strongest predictor of quality. We ran 1,000 calibration tasks across our annotator network to check. All three were wrong.</p>
+
+    <p>The actual predictors were messier, more interesting, and in some cases genuinely surprising. This post is an attempt to share what we found without rounding the edges off.</p>
+
+    <div class="stat-strip">
+      <div class="stat-box"><div class="stat-num">1,047</div><div class="stat-lbl">Calibration tasks completed</div></div>
+      <div class="stat-box"><div class="stat-num">130</div><div class="stat-lbl">Annotators across 18 countries</div></div>
+      <div class="stat-box"><div class="stat-num">0.61</div><div class="stat-lbl">Average Cohen's κ across all tasks</div></div>
+    </div>
+
+    <h2>Why we ran this study</h2>
+
+    <p>Every RLHF project starts with the same assumption: that you can screen for quality upfront, run a calibration round, and then let annotators loose. In practice, this breaks down faster than most clients expect. Calibration scores don't hold. Annotators who perform brilliantly in the first week drift by week four. Some people who look weak in calibration turn out to be exactly the kind of careful thinker you want on ambiguous tasks.</p>
+
+    <p>We've run RLHF annotation at scale for three years. Our IAA numbers are good — our average Cohen's κ sits at 0.68 across completed projects, which puts us in the top tier of what's published. But we couldn't reliably explain <em>why</em> certain annotators outperformed others until we went looking for it properly.</p>
+
+    <p>So we designed a study. 1,047 calibration tasks, each completed by multiple annotators from our network, across four categories: helpfulness preference, factual accuracy, instruction-following, and safety. Each task had a gold-standard answer agreed by three senior reviewers. We then measured how closely each annotator tracked the gold standard and, more usefully, tried to figure out what distinguished the top quarter from the bottom quarter.</p>
+
+    <h2>What we screened for vs. what actually mattered</h2>
+
+    <p>Before the study, our screening process covered domain knowledge (verified through credential review and domain-specific tests), writing ability (evaluated through a short free-response exercise), and prior annotation experience (self-reported and reference-checked). These felt like reasonable proxies.</p>
+
+    <p>They weren't useless. Domain knowledge did predict performance — but only weakly, and only on tasks where the answer genuinely required specialist knowledge. For most preference annotation, it made almost no difference whether an annotator had an advanced degree in the relevant field. The PhD in linguistics performed about as well as the secondary school teacher on helpfulness preference tasks. Sometimes worse, because experts sometimes optimised for technical correctness in responses rather than actual usefulness to the person asking.</p>
+
+    <p>Writing ability predicted the quality of <em>rationales</em> — annotators who wrote better could explain their choices more clearly. But it didn't predict whether their choices were right. You can write a beautifully articulate explanation of a wrong answer.</p>
+
+    <p>Prior RLHF experience was the biggest surprise. It predicted almost nothing. Annotators who had completed thousands of tasks on other platforms were no more likely to track our gold standard than annotators who were new to preference annotation entirely. A few of the weakest performers in our study had the longest resumes.</p>
+
+    <blockquote>
+      "The annotators who'd done the most RLHF work elsewhere came in with strong opinions about what a 'good' response looks like. Sometimes those opinions aligned with ours. Often they didn't. The new annotators were more willing to sit with the task and think it through."
+      <cite>— Nadia, QA Lead, Diraflow</cite>
+    </blockquote>
+
+    <h2>The two things that actually predicted performance</h2>
+
+    <p>After running regressions on everything we could measure, two variables stood out. Neither is what we expected going in.</p>
+
+    <h3>1. Tolerance for ambiguity</h3>
+
+    <p>We measured this in two ways. First, through a short scenario test we added to our intake process three years ago — nothing fancy, just five situations where the right answer genuinely isn't clear and we ask the applicant to explain their reasoning. Second, through behaviour on our calibration tasks: specifically, whether annotators changed their answer when they were asked to re-evaluate a task they'd already completed, shown with different context.</p>
+
+    <p>Annotators who scored high on tolerance for ambiguity were more likely to notice when a task was genuinely hard, more likely to write honest rationales that acknowledged uncertainty, and significantly more likely to track the gold standard on the tasks that our reviewers also found difficult. They were also more likely to flag tasks they felt unqualified to judge, which sounds like a weakness but is actually exactly what you want.</p>
+
+    <p>Annotators who scored low tended to resolve ambiguity quickly by defaulting to a rule. Not a bad rule, usually. Just a rule that didn't account for the specific situation in front of them. They were faster. They were also wrong more often on edge cases.</p>
+
+    <h3>2. Intellectual curiosity about the subject matter</h3>
+
+    <p>This one is harder to screen for but was consistently visible in the data. Annotators who read around the topics they were annotating — who asked questions in team channels, who raised flags when they spotted inconsistencies in the rubric, who seemed genuinely interested in the problem — produced better preference labels and substantially better rationales.</p>
+
+    <p>We're not talking about people who read academic papers in their spare time. We're talking about a more basic orientation toward the work: whether the annotator was trying to understand what a good response actually is, or whether they were trying to complete tasks efficiently. Both groups can produce high throughput. Only one produces reliable signal.</p>
+
+    <div class="callout">
+      <div class="callout-label">What this means for screening</div>
+      <p>You can't screen for intellectual curiosity with a test. What you can do is design your onboarding and calibration to select for it. Annotators who are curious show up differently in how they handle the first week. They ask more questions. They complete calibration tasks more slowly. They're more likely to flag inconsistencies. Those are signals worth tracking.</p>
+    </div>
+
+    <h2>The consistency problem</h2>
+
+    <p>One finding we didn't expect at all: annotation consistency within a single annotator dropped substantially over time. Not because annotators got worse at the task — their calibration scores stayed stable. But when we presented the same task to the same annotator one month apart, they chose differently about 23% of the time.</p>
+
+    <p>This is a known issue in annotation generally, but the scale surprised us. And the breakdown by task type was uneven. On factual accuracy tasks, within-annotator consistency was high — around 89% agreement with their own prior answers. On helpfulness preference tasks, it dropped to 71%. On safety tasks, it dropped further: 64%.</p>
+
+    <p>The implication is uncomfortable. When we report IAA scores for a project, we're measuring cross-annotator agreement at a point in time. But if that same group of annotators completed the same tasks six weeks later, the scores would look different — not because the gold standard changed, but because human preference judgement has genuine variance built in. Any RLHF dataset reflects not just what people think about responses, but what they thought at the specific moment they were annotating.</p>
+
+    <figure>
+      <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&q=80&auto=format&fit=crop"
+           alt="Bar chart showing within-annotator consistency across task types" loading="lazy">
+      <figcaption>Within-annotator consistency varied from 64% on safety tasks to 89% on factual accuracy. Each bar represents the average re-agreement rate across annotators when shown the same task four weeks later.</figcaption>
+    </figure>
+
+    <p>We're not sure what to do about this yet. Our current approach is to flag tasks where within-annotator consistency has historically been low and require additional review on those items. It slows things down. It's probably worth it.</p>
+
+    <h2>Where domain expertise actually helps</h2>
+
+    <p>Earlier I said domain knowledge predicted performance only weakly. That's true on average. But there are specific task types where it matters a lot, and I want to be clear about what those are.</p>
+
+    <p>For factual accuracy tasks — evaluating whether a response contains true statements — domain expertise was the single strongest predictor. A cardiologist reviewing a response about treatment protocols will catch errors that a generalist annotator misses entirely. Not because they're a better annotator, but because they know things the generalist doesn't.</p>
+
+    <p>For tasks where the evaluation criterion is something like "is this response actually useful to someone asking this question," expertise had almost no edge over well-calibrated generalists, and in some cases was a disadvantage. Experts know what <em>should</em> be useful. Non-experts know what is useful, to someone like them.</p>
+
+    <p>The practical upshot is that task-type matching matters more than blanket credential requirements. Helpfulness preference tasks don't need PhDs. Factual accuracy tasks in medicine, law, or quantitative finance do. Most RLHF projects contain both types, and treating them the same in annotator selection wastes money and dilutes data quality simultaneously.</p>
+
+    <table>
+      <thead>
+        <tr><th>Task type</th><th>Domain expertise effect</th><th>Curiosity effect</th><th>Ambiguity tolerance</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Factual accuracy (specialist domain)</td><td>Strong positive</td><td>Moderate</td><td>Weak</td></tr>
+        <tr><td>Helpfulness preference</td><td>Neutral / slight negative</td><td>Strong positive</td><td>Strong positive</td></tr>
+        <tr><td>Instruction-following</td><td>Weak positive</td><td>Moderate</td><td>Moderate</td></tr>
+        <tr><td>Safety evaluation</td><td>Weak positive</td><td>Strong positive</td><td>Strong positive</td></tr>
+      </tbody>
+    </table>
+
+    <h2>The rationale problem</h2>
+
+    <p>Most RLHF pipelines ask annotators to provide a written rationale alongside their preference label. The idea is that rationales make data more useful for reward model training and provide a paper trail for QA review. This is correct. What's less discussed is how badly rationale quality varies, and what drives it.</p>
+
+    <p>We coded 3,200 rationales from our calibration tasks across four dimensions: specificity (does it reference something concrete about the responses?), accuracy (does the rationale correctly explain the label?), usefulness (would this rationale help a model learn something generalisable?), and honesty (does it acknowledge when the choice was close?).</p>
+
+    <p>The average rationale scored poorly on all four. Most were short justifications that restated the preference rather than explaining it. "Response A is better because it's more helpful" tells a reward model almost nothing. "Response A addresses the user's actual question directly while Response B starts with an unnecessary preamble that buries the answer" is useful.</p>
+
+    <div class="compare-cols">
+      <div class="compare-col">
+        <div class="compare-col-head col-bad">
+          <div class="col-label">❌ Weak rationale</div>
+          <h4>Common in most RLHF pipelines</h4>
+        </div>
+        <div class="compare-col-body">
+          <ul>
+            <li>Restates the preference label without explanation</li>
+            <li>Uses generic terms like "more helpful" or "better written"</li>
+            <li>Doesn't reference specific parts of either response</li>
+            <li>Doesn't acknowledge when the choice was close</li>
+            <li>Could have been written without reading either response</li>
+          </ul>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="compare-col-head col-good">
+          <div class="col-label">✓ Strong rationale</div>
+          <h4>What we train our annotators toward</h4>
+        </div>
+        <div class="compare-col-body">
+          <ul>
+            <li>Cites a specific sentence, structure, or claim from each response</li>
+            <li>Explains why that feature matters for this particular request</li>
+            <li>Notes what would have made the non-preferred response better</li>
+            <li>Flags when the two responses are genuinely close in quality</li>
+            <li>Distinguishes between "better overall" and "better for this user"</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <p>The annotators who consistently wrote strong rationales were, without exception, the ones who scored high on our intellectual curiosity measure. They were interested in articulating <em>why</em> something worked, not just recording that it did. You can't train that in a rubric session. But you can select for it, and you can design feedback loops that reward it.</p>
+
+    <h2>The calibration trap</h2>
+
+    <p>There's a pattern we've started calling the calibration trap, and it happens on almost every long-running project. Annotators come in, do calibration, perform well, get admitted to production. Then, over four to six weeks, their scores drift — sometimes up, sometimes down, but almost never flat. When we track the drift carefully, the downward cases cluster around annotators who optimised for the calibration rubric rather than internalising the underlying quality criteria.</p>
+
+    <p>These annotators pass calibration by learning the rules. That's different from understanding what the rules are trying to measure. When the tasks in production differ from the calibration set — which they always do — the rule-followers drift, because their rules don't transfer. The annotators who internalised the goal maintain consistency even on novel task formats.</p>
+
+    <p>The fix isn't more calibration. It's ongoing calibration — a rolling set of gold-standard tasks seeded into the production queue at regular intervals, with individual-level tracking of how each annotator's accuracy changes over time. This is operationally harder to run. It's the only thing we've found that actually catches drift before it contaminates the dataset.</p>
+
+    <div class="callout-info">
+      <div class="callout-label">ℹ️ How we implement rolling calibration</div>
+      <p>We seed 3–5% of each annotator's weekly task queue with gold-standard items — tasks where we have a verified answer. These aren't flagged as calibration tasks. Annotators don't know which tasks have gold answers. We track each annotator's rolling accuracy over the last 50 gold items and flag anyone whose score drops more than 8 percentage points from their baseline for a sync with their team lead.</p>
+    </div>
+
+    <h2>What we still don't understand</h2>
+
+    <p>There are things in this data I genuinely can't explain yet. The most persistent: annotators who perform excellently on all four task types for several weeks and then, with no detectable change in context, start producing inconsistent results. Not gradually — abruptly. Their per-task time stays the same. Their rationale length stays the same. Their IAA drops by 15 points in a week.</p>
+
+    <p>We've talked to annotators this has happened to. The explanations are varied: personal stress, a change in how they were reading the rubric after a team discussion, boredom, a new interpretation of a criterion. All plausible. None conclusive. The honest answer is that human annotation quality is noisier than we'd like, in ways that don't always have clean explanations.</p>
+
+    <p>I find this somewhat uncomfortable to write, because the whole pitch of premium annotation services is that you get better signal. We do. But "better" is a relative term, and anyone who tells you that human preference annotation is a clean, reliable process is smoothing over a lot of real variance. The appropriate response to that variance is systematic monitoring, not pretending it doesn't exist.</p>
+
+    <h2>Practical recommendations</h2>
+
+    <p>If you're running RLHF annotation — whether through a partner like us or internally — here's what our data actually supports doing differently.</p>
+
+    <ol>
+      <li><strong>Screen for ambiguity tolerance, not experience.</strong> Add scenario-based questions to your intake that don't have clean answers. Watch how applicants reason, not what conclusion they reach.</li>
+      <li><strong>Match annotator type to task type.</strong> Helpfulness preference tasks don't require domain experts. Factual accuracy in specialist domains does. Paying for expertise you don't need doesn't buy you quality.</li>
+      <li><strong>Make rolling calibration non-negotiable.</strong> Seed gold-standard tasks into production queues continuously. Track per-annotator accuracy over rolling windows, not just at onboarding.</li>
+      <li><strong>Train on rationale quality specifically.</strong> Preference labels without good rationales are less useful than they look. Show annotators examples of weak and strong rationales and explain what distinguishes them. Do this repeatedly, not once.</li>
+      <li><strong>Track within-annotator consistency.</strong> Re-presenting the same task to the same annotator weeks apart is time-consuming and worth it. 23% within-annotator inconsistency on helpfulness tasks means your dataset has meaningful noise baked in. You should know where it is.</li>
+      <li><strong>Build flagging into your culture, not just your rubric.</strong> The annotators we most want on hard projects are the ones who say "I'm not sure I'm qualified to judge this." That behaviour has to be rewarded, not penalised, or it won't happen.</li>
+    </ol>
+
+    <h2>What this means for the models trained on this data</h2>
+
+    <p>Most of the literature on RLHF focuses on what happens to the model. What reward signal do you get? How does KL divergence behave? Does the model overfit to the annotator population? These are the right questions to ask. They're also downstream of the annotation quality questions, and annotation quality questions get less attention than they deserve.</p>
+
+    <p>If your annotators are inconsistent, your reward model is learning noise. If your annotators are optimising for speed over accuracy, your reward model is learning a proxy for quality rather than quality itself. If your annotators are resolving ambiguous cases with personal heuristics that weren't designed into the rubric, your reward model is learning those heuristics — and they will show up in the model's behaviour in ways that are hard to diagnose, because nobody documented what the heuristics were.</p>
+
+    <p>The preference data question and the model behaviour question are the same question at different stages of the pipeline. We run preference annotation projects. We think about it from the data side. But every conversation we have with model developers confirms that annotation quality variance is one of the main things they're flying blind on, because they receive the dataset without visibility into how it was produced.</p>
+
+    <p>We're working on improving that transparency. More on that in a future post.</p>
+
+    <div class="callout">
+      <div class="callout-label">Work with us</div>
+      <p>Diraflow builds RLHF and preference annotation datasets with rolling calibration, rationale quality training, and per-annotator consistency tracking built in. <a href="../contact.html">Get in touch</a> if you're planning a preference data project — we'll come back with a concrete proposal within one business day.</p>
+    </div>
+
+  </article>
+
+  </div>
+
+  <!-- Related posts -->
+  <section class="related-section">
+    <h3>More from the blog</h3>
+    <div class="related-grid">
+      <a href="inter-annotator-agreement.html" class="related-card">
+        <div class="related-cat">Operations</div>
+        <h4>Inter-annotator agreement: what it really tells you about data quality</h4>
+        <p>What Cohen's κ measures — and what it misses in complex annotation tasks.</p>
+      </a>
+      <a href="red-teaming-at-scale.html" class="related-card">
+        <div class="related-cat">Safety</div>
+        <h4>Red-teaming at scale: lessons from 50,000 adversarial prompts</h4>
+        <p>How structured attack taxonomies produce better safety datasets than random fuzzing.</p>
+      </a>
+      <a href="data-flywheel.html" class="related-card">
+        <div class="related-cat">Industry</div>
+        <h4>The data flywheel: how training data quality compounds over model generations</h4>
+        <p>The quality of data you build today shapes models trained years from now.</p>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
 <footer>
-  <div class="container">
-    <div class="footer-bottom" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;padding:1rem 0;">
-      <p>© 2026 Diraflow AI. All rights reserved.</p>
-      <a href="../code-of-conduct.html" style="color:var(--subtle); text-decoration:none;">Code of Conduct</a>
+  <div class="container-wide">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="../index.html" class="brand" style="margin-bottom:0.875rem;display:inline-flex;">
+          <img src="https://placehold.co/36x36/111/fff?text=D" alt="Diraflow" class="nav-logo-img">
+        </a>
+        <p>Premium training data for AI agents and LLMs. Built by experts, trusted by frontier AI teams worldwide.</p>
+      </div>
+      <div class="footer-col"><h4>Solutions</h4><ul>
+        <li><a href="../solutions.html">Environment Generation</a></li>
+        <li><a href="blog-posts/agentic-datasets.html">Agentic Datasets</a></li>
+        <li><a href="blog-posts/red-teaming-at-scale.html">Red-Teaming</a></li>
+        <li><a href="../solutions.html">RLHF &amp; Preference</a></li>
+      </ul></div>
+      <div class="footer-col"><h4>Company</h4><ul>
+        <li><a href="../blog.html">Blog</a></li>
+        <li><a href="../careers.html">Careers</a></li>
+        <li><a href="../industries.html">Industries</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+      </ul></div>
+      <div class="footer-col"><h4>Connect</h4><ul>
+        <li><a href="mailto:diraflow.ai@gmail.com">diraflow.ai@gmail.com</a></li>
+        <li><a href="https://linkedin.com/company/diraflow" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a href="https://x.com/diraflow_" target="_blank" rel="noopener">Twitter / X</a></li>
+      </ul></div>
+    </div>
+    <div class="footer-bottom">
+      <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+        <p>© 2026 Diraflow AI. All rights reserved.</p>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="../code-of-conduct.html" style="font-size:.8125rem;color:var(--subtle);" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="../privacy-policy.html" style="font-size:.8125rem;color:var(--subtle);" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
+      </div>
+      <p style="font-size:.8125rem;color:var(--subtle);">Made with care for the AI community.</p>
     </div>
   </div>
 </footer>
 
 <script>
+/* Progress bar */
+window.addEventListener('scroll', function(){
+  var doc = document.documentElement;
+  var top = doc.scrollTop || document.body.scrollTop;
+  var height = (doc.scrollHeight || document.body.scrollHeight) - doc.clientHeight;
+  var pct = height > 0 ? (top / height) * 100 : 0;
+  var fill = document.getElementById('progress-fill');
+  if(fill) fill.style.width = pct.toFixed(1) + '%';
+}, { passive: true });
+
+/* Drawer */
 (function(){
-  let toggle = document.getElementById('themeToggle');
-  if(toggle){
-    let root = document.documentElement;
-    toggle.addEventListener('click',()=>{
-      let cur = root.getAttribute('data-theme');
-      let next = cur === 'light' ? 'dark' : 'light';
-      root.setAttribute('data-theme', next);
-      localStorage.setItem('diraflow-theme', next);
-    });
-  }
-  let hbBtn = document.getElementById('hb-btn');
-  let overlay = document.getElementById('hb-overlay');
-  let drawer = document.getElementById('hb-drawer');
-  let closeHb = document.getElementById('hb-close');
-  function openDrawer(){ drawer.classList.add('is-open'); overlay.classList.add('is-open'); }
-  function closeDrawer(){ drawer.classList.remove('is-open'); overlay.classList.remove('is-open'); }
-  if(hbBtn) hbBtn.addEventListener('click', openDrawer);
-  if(closeHb) closeHb.addEventListener('click', closeDrawer);
-  if(overlay) overlay.addEventListener('click', closeDrawer);
+  var btn=document.getElementById('hb-btn');
+  var drawer=document.getElementById('hb-drawer');
+  var overlay=document.getElementById('hb-overlay');
+  var closeBtn=document.getElementById('hb-close');
+  function open(){drawer.classList.add('is-open');overlay.classList.add('is-open');btn.classList.add('is-open');document.body.style.overflow='hidden';}
+  function close(){drawer.classList.remove('is-open');overlay.classList.remove('is-open');btn.classList.remove('is-open');document.body.style.overflow='';}
+  if(btn)btn.addEventListener('click',open);
+  if(overlay)overlay.addEventListener('click',close);
+  if(closeBtn)closeBtn.addEventListener('click',close);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
 })();
+
+/* Copy link */
+function copyLink(){
+  navigator.clipboard.writeText(window.location.href).then(function(){
+    alert('Link copied!');
+  }).catch(function(){
+    prompt('Copy this link:', window.location.href);
+  });
+}
 </script>
 </body>
 </html>
