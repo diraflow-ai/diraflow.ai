@@ -175,6 +175,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:4rem 0 0
 </style>
 </head>
 <body>
+
  
 <!-- NAV -->
 <nav class="top">
@@ -432,33 +433,31 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:4rem 0 0
 <script src="/assets/main.js" defer></script>
 
 <script>
-  function togglePost(id) {
-    const extra      = document.getElementById(id + '-extra');
-    const btn        = document.getElementById(id + '-btn');
-    const card       = btn.closest('.post-card');
-    const imgTrigger = card.querySelector('.post-image-link');
-    const isOpen     = extra.classList.contains('open');
+  (function () {
+    const hbBtn     = document.getElementById('hb-btn');
+    const hbDrawer  = document.getElementById('hb-drawer');
+    const hbOverlay = document.getElementById('hb-overlay');
+    const hbClose   = document.getElementById('hb-close');
 
-    extra.classList.toggle('open', !isOpen);
-    btn.classList.toggle('open',   !isOpen);
+    function openDrawer() {
+      hbDrawer.classList.add('is-open');
+      hbOverlay.classList.add('is-open');
+      hbBtn.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+    }
 
-    const arrow = btn.querySelector('.btn-arrow');
-    btn.childNodes[0].textContent = isOpen ? 'Read More ' : 'Show Less ';
-    arrow.textContent             = isOpen ? '→' : '↑';
+    function closeDrawer() {
+      hbDrawer.classList.remove('is-open');
+      hbOverlay.classList.remove('is-open');
+      hbBtn.classList.remove('is-open');
+      document.body.style.overflow = '';
+    }
 
-    btn.setAttribute('aria-expanded',         String(!isOpen));
-    if (imgTrigger) imgTrigger.setAttribute('aria-expanded', String(!isOpen));
-  }
-
-  // Keyboard support on clickable images
-  document.querySelectorAll('.post-image-link').forEach(el => {
-    el.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        el.click();
-      }
-    });
-  });
+    hbBtn.addEventListener('click', openDrawer);
+    hbClose.addEventListener('click', closeDrawer);
+    hbOverlay.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+  })();
 </script>
 
 </body>
