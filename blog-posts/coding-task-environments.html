@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Building coding task environments that actually test agent capability — Diraflow</title>
+<meta name="description" content="Most code evaluation environments are too clean. Real software engineering tasks are messy and ambiguous. Here's how we design for that.">
+<meta property="og:title" content="Building coding task environments that actually test agent capability — Diraflow Blog">
+<meta property="og:description" content="Most code evaluation environments are too clean. Real software engineering tasks are messy and ambiguous. Here's how we design for that.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://diraflowai.com/blog-posts/building-coding-task-environments">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="icon" type="image" href="../assets/logo.jpg">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:#f7f6f2; --bg2:#eeecea; --fg:#111110; --fg2:#555250;
+  --border:#d8d6d0; --card:#ffffff; --subtle:#999690;
+  --gold:#c8922a; --green:#4a9e5c; --red:#dc3c3c;
+  --radius:0.75rem; --radius-lg:1.25rem;
+  --transition:0.2s ease; --shadow:0 4px 24px rgba(0,0,0,0.07);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+img{display:block;max-width:100%;height:auto;}
+a{color:inherit;text-decoration:none;}
+ul{list-style:none;}
+button{font-family:inherit;}
+
+.container-wide   {max-width:1160px;margin:0 auto;padding:0 4rem;}
+.container-article{max-width:1500px; margin:0 auto;padding:0 4rem;}
+@media(max-width:900px){
+  .container-wide   {padding:0 2.5rem;}
+  .container-article{padding:0 2.5rem;}
+}
+@media(max-width:600px){
+  .container-wide   {padding:0 1.25rem;}
+  .container-article{padding:0 1.25rem;}
+}
+
+/* Progress bar */
+.progress-bar {position:fixed;top:68px;left:0;right:0;height:3px;background:var(--border);z-index:200;}
+.progress-fill{height:100%;background:var(--gold);width:0%;transition:width 0.1s linear;}
+
+/* Nav */
+nav.top{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);height:68px;display:flex;align-items:center;}
+nav.top .nav-inner{max-width:1160px;margin:0 auto;padding:0 4rem;display:flex;align-items:center;gap:2rem;width:100%;}
+@media(max-width:900px){nav.top .nav-inner{padding:0 2.5rem;}}
+@media(max-width:600px){nav.top .nav-inner{padding:0 1.25rem;}}
+.brand{display:inline-flex;align-items:center;gap:0.625rem;text-decoration:none;font-weight:700;color:var(--fg);white-space:nowrap;flex-shrink:0;}
+.nav-logo-img{width:36px;height:36px;border-radius:8px;object-fit:contain;background:#eee;}
+.brand-text{display:flex;flex-direction:column;}
+.brand-name   {font-size:1rem;font-weight:700;line-height:1.1;}
+.brand-tagline{font-size:0.65rem;color:var(--fg2);}
+nav.top ul{display:flex;list-style:none;flex:1;margin:0;padding:0;}
+nav.top ul li a{font-size:0.875rem;font-weight:500;color:var(--fg2);padding:0.5rem 0.875rem;border-radius:0.5rem;display:block;transition:color var(--transition),background var(--transition);}
+nav.top ul li a:hover,nav.top ul li a.active{color:var(--fg);background:var(--bg2);}
+.nav-right{display:flex;align-items:center;gap:0.75rem;margin-left:auto;flex-shrink:0;}
+.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.55rem 1.2rem;border-radius:2rem;font-weight:600;font-size:0.875rem;font-family:'Sora',sans-serif;cursor:pointer;border:none;background:var(--fg);color:var(--bg);text-decoration:none;transition:opacity 0.2s,transform 0.15s;}
+.btn:hover{opacity:0.85;transform:translateY(-1px);}
+.btn-sm{padding:0.45rem 1rem;font-size:0.8rem;}
+.hb-btn{display:none;flex-direction:column;justify-content:center;align-items:center;width:42px;height:42px;gap:5px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;flex-shrink:0;position:relative;z-index:9999;}
+.hb-btn span{display:block;width:20px;height:2.5px;background:var(--fg);border-radius:3px;transition:transform 0.3s ease,opacity 0.3s ease;pointer-events:none;}
+.hb-btn.is-open span:nth-child(1){transform:translateY(7.5px) rotate(45deg);}
+.hb-btn.is-open span:nth-child(2){opacity:0;}
+.hb-btn.is-open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg);}
+@media(max-width:860px){.hb-btn{display:flex!important;}nav.top ul{display:none!important;}.btn.btn-sm{display:none!important;}}
+.hb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(3px);z-index:9997;}
+.hb-overlay.is-open{display:block;}
+.hb-drawer{position:fixed;top:0;right:0;bottom:0;width:290px;max-width:88vw;background:var(--bg);border-left:1px solid var(--border);z-index:9998;display:flex;flex-direction:column;transform:translateX(110%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);box-shadow:-12px 0 50px rgba(0,0,0,0.12);}
+.hb-drawer.is-open{transform:translateX(0);}
+.hb-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);}
+.hb-close{width:32px;height:32px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;color:var(--fg2);transition:all 0.2s;}
+.hb-close:hover{background:#111;color:#fff;}
+.hb-nav{flex:1;padding:1rem 0.875rem;overflow-y:auto;display:flex;flex-direction:column;gap:0.2rem;}
+.hb-link{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1rem;border-radius:0.75rem;font-size:0.9rem;font-weight:500;color:var(--fg2);text-decoration:none;border:1px solid transparent;transition:all 0.18s;}
+.hb-link:hover,.hb-link.hb-active{background:rgba(200,146,42,0.09);border-color:rgba(200,146,42,0.22);color:#c8922a;}
+.hb-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border-radius:0.5rem;font-size:1rem;flex-shrink:0;}
+.hb-footer{padding:1.25rem;border-top:1px solid var(--border);}
+.hb-cta{display:block;text-align:center;background:var(--gold);color:#fff;padding:0.8rem 1rem;border-radius:2rem;font-size:0.875rem;font-weight:700;}
+
+/* ── HERO ── */
+.post-hero{position:relative;width:100%;aspect-ratio:21/9;overflow:hidden;}
+.post-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+.post-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.15) 0%,rgba(0,0,0,0.52) 55%,rgba(0,0,0,0.72) 100%);}
+.post-hero-content{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;padding:3rem 4rem;max-width:900px;}
+@media(max-width:900px){.post-hero-content{padding:2rem 2.5rem;}}
+@media(max-width:600px){.post-hero{aspect-ratio:4/3;}.post-hero-content{padding:1.5rem 1.25rem;}}
+.post-hero-cat-row{display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;}
+.post-hero-cat{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#fff;padding:0.25rem 0.75rem;border-radius:2rem;background:#0ea5e9;}
+.post-hero-date{font-size:0.78rem;color:rgba(255,255,255,0.75);}
+.post-hero-read{font-size:0.72rem;color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.15);padding:0.2rem 0.6rem;border-radius:2rem;border:1px solid rgba(255,255,255,0.25);}
+.post-hero-content h1{font-family:'DM Serif Display',serif;font-size:clamp(1.75rem,4.5vw,3.25rem);font-weight:400;line-height:1.18;letter-spacing:-0.03em;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.35);max-width:820px;}
+
+/* Sub-header */
+.post-subheader{padding:1.75rem 0 2rem;border-bottom:1px solid var(--border);}
+.back-link{display:inline-flex;align-items:center;gap:0.4rem;font-size:0.82rem;font-weight:600;color:var(--gold);margin-bottom:1.25rem;transition:gap 0.2s;}
+.back-link:hover{gap:0.7rem;}
+.post-author-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.post-author{display:flex;align-items:center;gap:0.875rem;}
+.post-author img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;}
+.author-name {font-size:0.9rem;font-weight:700;color:var(--fg);}
+.author-title{font-size:0.75rem;color:var(--fg2);margin-top:0.1rem;}
+.share-row{display:flex;align-items:center;gap:0.5rem;}
+.share-label{font-size:0.72rem;color:var(--fg2);}
+.share-btn{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;background:var(--bg2);border:1px solid var(--border);cursor:pointer;color:var(--fg2);text-decoration:none;transition:all 0.2s;}
+.share-btn:hover{background:var(--gold);color:#fff;border-color:var(--gold);}
+
+/* Article body */
+.post-body{padding:1rem 0;font-size:1.0625rem;line-height:1.85;color:var(--fg2);}
+.post-body>*+*{margin-top:1.5rem;}
+.post-body h2{font-family:'DM Serif Display',serif;font-size:clamp(1.5rem,3vw,2rem);font-weight:400;line-height:1.25;letter-spacing:-0.025em;color:var(--fg);margin-top:3.5rem!important;margin-bottom:1rem;padding-top:2.5rem;border-top:1px solid var(--border);}
+.post-body h3{font-size:1.125rem;font-weight:700;color:var(--fg);margin-top:2.5rem!important;margin-bottom:0.75rem;letter-spacing:-0.01em;}
+.post-body p{color:var(--fg2);}
+.post-body strong{color:var(--fg);font-weight:700;}
+.post-body em{font-style:italic;color:var(--fg);}
+.post-body a{color:var(--gold);text-decoration:underline;text-underline-offset:3px;transition:opacity 0.2s;}
+.post-body a:hover{opacity:0.75;}
+.post-body ul{padding-left:0;margin:1.5rem 0;display:flex;flex-direction:column;gap:0.625rem;list-style:none;}
+.post-body ul li{display:flex;align-items:flex-start;gap:0.625rem;color:var(--fg2);line-height:1.75;}
+.post-body ul li::before{content:'→';color:var(--gold);font-weight:700;flex-shrink:0;margin-top:0.1rem;}
+.post-body ol{padding-left:0;margin:1.5rem 0;display:flex;flex-direction:column;gap:0.625rem;counter-reset:post-counter;list-style:none;}
+.post-body ol li{display:flex;align-items:flex-start;gap:0.875rem;color:var(--fg2);line-height:1.75;counter-increment:post-counter;}
+.post-body ol li::before{content:counter(post-counter);min-width:26px;height:26px;background:var(--gold);color:#fff;border-radius:50%;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0.1rem;}
+.post-body blockquote{border-left:3px solid var(--gold);background:var(--bg2);padding:1.35rem 1.5rem;margin:2.5rem 0;border-radius:0 var(--radius-lg) var(--radius-lg) 0;font-style:italic;color:var(--fg);font-size:1.05rem;line-height:1.75;}
+.post-body blockquote cite{display:block;margin-top:0.875rem;font-style:normal;font-size:0.82rem;color:var(--fg2);font-weight:600;}
+.post-body code{font-family:'DM Mono',monospace;font-size:0.875em;background:var(--bg2);color:var(--fg);padding:0.15em 0.45em;border-radius:4px;border:1px solid var(--border);}
+.post-body pre{background:#1a1918;border:1px solid #2a2826;border-radius:var(--radius-lg);padding:1.5rem;overflow-x:auto;margin:2rem 0;font-family:'DM Mono',monospace;font-size:0.875rem;line-height:1.65;color:#f7f6f2;}
+.post-body pre code{background:none;border:none;padding:0;color:#f7f6f2;}
+.post-body figure{margin:2.5rem 0;}
+.post-body figure img{width:100%;border-radius:var(--radius-lg);border:1px solid var(--border);}
+.post-body figcaption{font-size:0.8rem;color:var(--subtle);text-align:center;margin-top:0.625rem;font-style:italic;}
+.post-body table{width:100%;border-collapse:collapse;margin:2rem 0;font-size:0.875rem;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);}
+.post-body table th{background:var(--fg);color:var(--bg);padding:0.75rem 1rem;text-align:left;font-weight:700;font-size:0.78rem;letter-spacing:0.04em;}
+.post-body table td{padding:0.7rem 1rem;border-bottom:1px solid var(--border);color:var(--fg2);vertical-align:top;line-height:1.55;}
+.post-body table tr:last-child td{border-bottom:none;}
+.post-body table tr:nth-child(even) td{background:var(--bg2);}
+
+/* Components */
+.stat-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:2.5rem 0;}
+@media(max-width:500px){.stat-strip{grid-template-columns:1fr;}}
+.stat-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.35rem;text-align:center;}
+.stat-box .stat-num{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--gold);line-height:1;margin-bottom:0.3rem;}
+.stat-box .stat-lbl{font-size:0.75rem;color:var(--fg2);line-height:1.4;}
+.callout{background:rgba(200,146,42,0.07);border:1px solid rgba(200,146,42,0.25);border-left:3px solid var(--gold);border-radius:0 var(--radius-lg) var(--radius-lg) 0;padding:1.25rem 1.5rem;margin:2rem 0;}
+.callout-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.5rem;}
+.callout p{font-size:0.9rem;color:var(--fg);line-height:1.7;margin:0!important;}
+.callout-info{background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-left:3px solid #3b82f6;border-radius:0 var(--radius-lg) var(--radius-lg) 0;padding:1.25rem 1.5rem;margin:2rem 0;}
+.callout-info .callout-label{color:#3b82f6;}
+.callout-info p{font-size:0.9rem;color:var(--fg);line-height:1.7;margin:0!important;}
+.compare-cols{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:2rem 0;}
+@media(max-width:560px){.compare-cols{grid-template-columns:1fr;}}
+.compare-col{border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;}
+.compare-col-head{padding:0.875rem 1.25rem;border-bottom:1px solid var(--border);}
+.compare-col-head .col-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.25rem;}
+.compare-col-head h4{font-size:0.9rem;font-weight:700;color:var(--fg);}
+.col-bad{background:rgba(220,60,60,0.05);}
+.col-bad .col-label{color:var(--red);}
+.col-good{background:rgba(200,146,42,0.06);}
+.col-good .col-label{color:var(--gold);}
+.compare-col-body{padding:1.25rem;background:var(--card);}
+.compare-col-body ul{margin:0;gap:0.5rem;}
+.compare-col-body ul li{font-size:0.85rem;}
+.col-bad  .compare-col-body ul li::before{content:'✗';color:var(--red);}
+.col-good .compare-col-body ul li::before{content:'✓';color:var(--green);}
+
+/* Author card */
+.author-card{display:flex;gap:1.25rem;align-items:flex-start;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem;margin:3rem 0;}
+.author-card img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;}
+.author-card-name {font-size:1rem;font-weight:700;color:var(--fg);margin-bottom:0.2rem;}
+.author-card-title{font-size:0.78rem;color:var(--gold);font-weight:600;margin-bottom:0.625rem;}
+.author-card p{font-size:0.85rem;color:var(--fg2);line-height:1.7;margin:0!important;}
+@media(max-width:500px){.author-card{flex-direction:column;}}
+
+/* Related */
+.related-section{border-top:1px solid var(--border);padding-top:2.5rem;}
+.related-section>h3{font-family:'DM Serif Display',serif;font-size:1.35rem;font-weight:400;color:var(--fg);margin-bottom:1.5rem;}
+.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+@media(max-width:640px){.related-grid{grid-template-columns:1fr;}}
+.related-card{display:block;padding:1.25rem;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--card);text-decoration:none;transition:transform 0.25s ease,box-shadow 0.25s ease,border-color 0.25s ease;}
+.related-card:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(0,0,0,0.08);border-color:var(--gold);}
+.related-cat{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold);margin-bottom:0.5rem;}
+.related-card h4{font-size:0.875rem;font-weight:700;color:var(--fg);line-height:1.4;margin-bottom:0.4rem;}
+.related-card p{font-size:0.75rem;color:var(--fg2);line-height:1.5;margin:0;}
+
+/* Footer */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:4rem 0 0;margin-top:4rem;}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem;}
+@media(max-width:760px){.footer-grid{grid-template-columns:1fr 1fr;gap:2rem;}}
+@media(max-width:480px){.footer-grid{grid-template-columns:1fr;}}
+.footer-brand p{font-size:0.875rem;color:var(--fg2);line-height:1.7;margin-top:0.75rem;}
+.footer-col h4{font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--fg2);margin-bottom:1.25rem;}
+.footer-col ul{display:flex;flex-direction:column;gap:0.625rem;}
+.footer-col ul li a{font-size:0.875rem;color:var(--fg2);transition:color 0.2s;}
+.footer-col ul li a:hover{color:var(--gold);}
+.footer-bottom{border-top:1px solid var(--border);padding:1.5rem 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.footer-bottom p{font-size:0.8125rem;color:var(--subtle);}
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
+<nav class="top">
+  <div class="nav-inner">
+    <a href="../index.html" class="brand">
+      <img src="../assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+      <span class="brand-text"><span class="brand-name">Diraflow</span><span class="brand-tagline">Training data for frontier AI</span></span>
+    </a>
+    <ul>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="../solutions.html">Solutions</a></li>
+      <li><a href="../industries.html">Industries</a></li>
+      <li><a href="../blog.html" class="active">Blog</a></li>
+      <li><a href="../careers.html">Careers</a></li>
+      <li><a href="../contact.html">Contact Us</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="../contact.html" class="btn btn-sm">Talk to us</a>
+      <button class="hb-btn" id="hb-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+<div class="hb-overlay" id="hb-overlay"></div>
+<div class="hb-drawer" id="hb-drawer">
+  <div class="hb-drawer-head">
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <img src="../assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+      <span style="font-weight:700;color:var(--fg);">Diraflow</span>
+    </div>
+    <button class="hb-close" id="hb-close">✕</button>
+  </div>
+  <nav class="hb-nav">
+    <a href="../index.html"      class="hb-link"><span class="hb-icon">🏠</span>Home</a>
+    <a href="../solutions.html"  class="hb-link"><span class="hb-icon">⚙️</span>Solutions</a>
+    <a href="../industries.html" class="hb-link"><span class="hb-icon">🏭</span>Industries</a>
+    <a href="../blog.html"       class="hb-link hb-active"><span class="hb-icon">✍️</span>Blog</a>
+    <a href="../careers.html"    class="hb-link"><span class="hb-icon">💼</span>Careers</a>
+    <a href="../contact.html"    class="hb-link"><span class="hb-icon">✉️</span>Contact Us</a>
+  </nav>
+  <div class="hb-footer"><a href="../contact.html" class="hb-cta">Talk to an expert →</a></div>
+</div>
+
+<!-- ── HERO ── -->
+<div class="post-hero">
+  <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1400&q=80&auto=format&fit=crop"
+       alt="Software engineering coding environment" loading="eager">
+  <div class="post-hero-content">
+    <div class="post-hero-cat-row">
+      <span class="post-hero-cat">Engineering</span>
+      <span class="post-hero-date">Feb 12, 2026</span>
+      <span class="post-hero-read">8 min read</span>
+    </div>
+    <h1>Building coding task environments that actually test agent capability</h1>
+  </div>
+</div>
+
+<!-- ── Sub-header ── -->
+<div class="container-article">
+  <div class="post-subheader">
+    <a href="../blog.html" class="back-link">← Back to blog</a>
+    <div class="post-author-row">
+      <div class="post-author">
+        <img src="../assets/Martin.jpg" alt="Martin O.">
+        <div>
+          <div class="author-name">Martin O.</div>
+          <div class="author-title">CEO · Diraflow</div>
+        </div>
+      </div>
+      <div class="share-row">
+        <span class="share-label">Share</span>
+        <a href="https://twitter.com/intent/tweet?text=Building+coding+task+environments+that+actually+test+agent+capability&url=https://diraflowai.com/blog-posts/building-coding-task-environments"
+           target="_blank" rel="noopener" class="share-btn" title="Share on X">𝕏</a>
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://diraflowai.com/blog-posts/building-coding-task-environments"
+           target="_blank" rel="noopener" class="share-btn" title="Share on LinkedIn">in</a>
+        <button class="share-btn" onclick="copyLink()" title="Copy link">🔗</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Article ── -->
+<main class="container-article">
+  <article class="post-body">
+
+    <p>Here is a test that sounds rigorous: give an AI agent a self-contained function, ask it to fix a bug, run the unit tests, check if they pass. The agent passes. You ship a training dataset full of examples like this. Six months later the agent deployed in production can't navigate a real codebase to save its life.</p>
+
+    <p>The problem is not the agent. The problem is the environment. Most code evaluation scaffolds are built for benchmark convenience — isolated, fully specified, hermetically sealed. Real software engineering tasks are none of those things. This post is about the gap between the two, and how we design environments that close it.</p>
+
+    <div class="stat-strip">
+      <div class="stat-box"><div class="stat-num">83%</div><div class="stat-lbl">Of SWE-Bench tasks involve changes across more than one file</div></div>
+      <div class="stat-box"><div class="stat-num">~4×</div><div class="stat-lbl">More agent failures on ambiguous specs vs. fully specified tasks in our internal evals</div></div>
+      <div class="stat-box"><div class="stat-num">61%</div><div class="stat-lbl">Of production coding agent errors trace to context retrieval, not generation quality</div></div>
+    </div>
+
+    <h2>The cleanliness problem</h2>
+
+    <p>The standard coding benchmark task looks like this: here is a function, here is a failing test, make the test pass. Everything the agent needs is right there. The context window is pre-populated with the relevant code. The task is fully specified. The evaluation is deterministic.</p>
+
+    <p>This is useful for measuring narrow capabilities. It is a poor proxy for what a coding agent actually needs to do in a real engineering environment. Real tasks have incomplete specifications. They involve repositories with hundreds of files, inconsistent naming conventions, undocumented dependencies, and context that is scattered across issues, comments, and commit history. The agent has to figure out what it needs before it can figure out what to do.</p>
+
+    <p>When agents trained on clean benchmark tasks hit real codebases, the failure mode is almost always the same: the agent generates technically correct code, in the wrong place, for the wrong reason, because it could not navigate to the actual problem. This is not a generation failure. It is a task understanding failure — and it is systematically undertrained in most coding datasets.</p>
+
+    <blockquote>
+      "The agents that perform well on HumanEval don't necessarily perform well in production. The gap isn't capability — it's that HumanEval tasks are pre-solved in terms of context. The agent doesn't have to find anything. Real codebases require finding first."
+      <cite>— Rafael Santos, Senior Environment Engineer, Diraflow</cite>
+    </blockquote>
+
+    <h2>What a realistic task environment actually requires</h2>
+
+    <p>We've built and rebuilt coding task environments over two years of production work. The properties that matter most are consistently the same five, and they're all things that clean benchmark tasks strip out.</p>
+
+    <h3>1. Repository-level scope</h3>
+
+    <p>Tasks should require the agent to navigate a real repository structure, not a pre-extracted snippet. This means multi-file contexts, import graphs that aren't handed to the agent, and the need to identify which parts of the codebase are relevant before doing anything else. A task that starts with the relevant file already open is not testing navigation ability — it is bypassing the hardest part of the problem.</p>
+
+    <p>We build our environments on top of real open-source repositories with intentional modifications: added bugs, feature stubs, outdated documentation, incomplete tests. The agent has to find the problem and understand the surrounding code before it can address it.</p>
+
+    <h3>2. Ambiguous specifications</h3>
+
+    <p>Real engineering tasks rarely arrive as precise logical propositions. They arrive as GitHub issues, Slack messages, and half-completed feature requests written by someone who had a different mental model of the codebase than the implementer. Agents trained only on fully-specified tasks learn to treat ambiguity as an error condition rather than a thing to reason through.</p>
+
+    <p>We include a spectrum of specification quality in our task sets — from tightly defined bug reports with clear reproduction steps, to loosely described feature requests where the agent must infer intent from context and make defensible implementation choices. The ability to produce a reasonable interpretation and execute against it is a distinct capability from the ability to execute against a clear spec. Both matter.</p>
+
+    <h3>3. Dependency and environment state</h3>
+
+    <p>Most benchmark tasks assume a clean, fully functional environment. Real codebases have outdated dependencies, environment variables that aren't set, configuration files that are partially broken, and test suites that fail for reasons unrelated to the task. An agent that can only operate in a pristine environment is not ready for production.</p>
+
+    <p>We version our task environments and include deliberate environment-state variation — missing dependencies, conflicting package versions, configuration gaps — so that agents learn to diagnose and address environment problems as part of the task, not as a blocker before it starts.</p>
+
+    <h3>4. Multi-step action sequences with real execution</h3>
+
+    <p>Execution feedback is one of the most important signals an agent can use. Many evaluation frameworks assess final output quality without giving the agent the ability to run code, observe the result, and iterate. This removes the primary mechanism by which real engineers solve problems.</p>
+
+    <p>Our environments run agents inside sandboxed execution contexts where they can run tests, observe failures, read stack traces, and try again. The evaluation scores the full trajectory — including how efficiently the agent navigated to the solution — not just whether the final output was correct.</p>
+
+    <h3>5. Realistic success criteria</h3>
+
+    <p>Not every real task has a single correct answer. Some tasks have multiple valid implementations. Some have correct implementations that introduce technical debt. Some have implementations that pass the tests but violate the architecture patterns of the surrounding code. Evaluation criteria that reduce everything to "tests pass / tests fail" miss the quality dimension entirely.</p>
+
+    <p>We design evaluation rubrics with multiple axes: test passage, code quality against the surrounding codebase's conventions, correctness of the approach as judged by a senior engineer reviewer, and — for ambiguous tasks — quality of the interpretation the agent chose to execute against.</p>
+
+    <div class="callout-info">
+      <div class="callout-label">ℹ️ On execution sandboxing</div>
+      <p>Running real code during evaluation introduces significant infrastructure complexity — sandboxing, resource limits, network isolation, state reset between runs. We use containerised environments with filesystem snapshots for fast reset. Each task run starts from a clean state; agents cannot carry context between tasks. The overhead is real, but the alternative — evaluating code that was never run — produces datasets that systematically reward plausible-looking incorrect solutions.</p>
+    </div>
+
+    <h2>What clean environments miss: a concrete example</h2>
+
+    <p>Consider a task framed two ways. Both are about fixing a bug in a Django REST API that causes incorrect pagination on a filtered endpoint.</p>
+
+    <table>
+      <thead>
+        <tr><th>Dimension</th><th>Clean benchmark version</th><th>Realistic environment version</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Context given</td><td>The relevant view function, pre-extracted</td><td>The full repository; agent must locate the relevant code</td></tr>
+        <tr><td>Specification</td><td>"Fix the bug in this function so these tests pass"</td><td>GitHub issue: "Pagination breaks when filters applied, seems related to queryset ordering"</td></tr>
+        <tr><td>Environment state</td><td>All dependencies installed, tests runnable</td><td>One missing env variable; agent must identify and set it before tests run</td></tr>
+        <tr><td>Evaluation</td><td>Tests pass / fail (binary)</td><td>Tests pass + code reviewed against repo conventions + no regression in related tests</td></tr>
+        <tr><td>What it measures</td><td>Can the agent generate a correct fix when told exactly where to look?</td><td>Can the agent diagnose, locate, fix, and verify a real engineering problem?</td></tr>
+      </tbody>
+    </table>
+
+    <p>An agent that scores 95% on the clean version may score 40% on the realistic version. That gap is not noise. It is the actual capability difference that matters for production deployment.</p>
+
+    <h2>Building a task library that covers the distribution</h2>
+
+    <p>Individual tasks are not enough. What matters for training is covering the distribution of real engineering work — which is highly uneven. Most tasks are routine; a small fraction are genuinely hard. Most ambiguity is mild; a small fraction requires substantial inferential work. A good task library reflects this.</p>
+
+    <p>We classify every task in our library along four axes before it goes into training data:</p>
+
+    <ul>
+      <li><strong>Complexity tier</strong> (1–5): from single-function changes to cross-cutting architectural modifications</li>
+      <li><strong>Specification quality</strong> (precise → vague): how much inferential work is required before implementation begins</li>
+      <li><strong>Context retrieval demand</strong> (low → high): how many files and subsystems must be understood to complete the task</li>
+      <li><strong>Environment difficulty</strong> (clean → degraded): how much pre-task diagnostic work is required</li>
+    </ul>
+
+    <p>This classification lets us sample the training distribution deliberately — ensuring coverage of hard cases, which are underrepresented in naturally-occurring task collections but disproportionately important for agent robustness.</p>
+
+    <div class="callout">
+      <div class="callout-label">The long-tail problem</div>
+      <p>The tasks that break agents in production are almost never the common cases. They are the edge cases — unusual dependency conflicts, ambiguous feature requests, repositories with inconsistent conventions. Designing your training task library to cover the long tail requires deliberate effort; it never happens by accident when sampling from existing codebases.</p>
+    </div>
+
+    <h2>Gold solutions and trajectory annotation</h2>
+
+    <p>Every task in our library has a gold solution — not just a correct answer, but a complete, annotated execution trajectory: the files consulted, the diagnostic steps taken, the intermediate attempts, and the reasoning at each decision point. These trajectories are produced by senior engineers working through the tasks as if they were real work, with think-aloud protocols captured.</p>
+
+    <p>The value of trajectory annotation over outcome annotation is significant. A model trained only on "here is the correct final code" cannot learn the navigational and diagnostic strategies that lead to the correct final code. A model trained on "here is how an expert worked through this problem, step by step" can learn the process — which transfers to novel tasks the final-code annotation cannot reach.</p>
+
+<pre><code># Excerpt from a trajectory annotation (simplified)
+
+Step 1 — Reproduce the issue
+  Action: Run failing test suite to confirm error
+  Output: AssertionError in test_filtered_pagination — 
+          expected 10 results, got 47
+  Reasoning: The count mismatch suggests the filter 
+             is not being applied before pagination
+
+Step 2 — Locate relevant code
+  Action: Search codebase for pagination logic
+  Files consulted: views/listing.py, utils/pagination.py,
+                   mixins/filterable.py
+  Reasoning: Pagination applied in utils, but filter
+             in mixin — likely an ordering conflict
+
+Step 3 — Identify root cause
+  Action: Inspect queryset construction in filterable.py
+  Finding: .order_by() call resets queryset slice,
+           discarding applied filter
+  ...</code></pre>
+
+    <h2>What this means for teams building coding agents</h2>
+
+    <p>If you are building or fine-tuning a coding agent, the evaluation environment is not a detail — it is a first-order design decision. Training on clean tasks produces agents that perform well on clean tasks. Training on realistic environments produces agents that generalise to real codebases. The gap between those two outcomes is one of the largest controllable variables in coding agent development, and it gets less attention than model architecture choices that have smaller effects on production performance.</p>
+
+    <ol>
+      <li><strong>Audit your task complexity distribution.</strong> If most of your tasks are single-file, fully-specified, and environment-clean, you are undertesting the capabilities that matter in production. Measure the distribution before assuming it's representative.</li>
+      <li><strong>Add specification ambiguity deliberately.</strong> At minimum, 20–30% of your tasks should require the agent to interpret and clarify an underspecified request before implementing. This is a distinct skill from implementation and needs distinct training signal.</li>
+      <li><strong>Run code during evaluation, not just after.</strong> Agents that cannot use execution feedback during a task are flying blind. If your evaluation framework doesn't support iterative execution, it is not measuring the skill that matters most.</li>
+      <li><strong>Annotate trajectories, not just outcomes.</strong> Final-code annotation is cheaper. Trajectory annotation is significantly more useful for training agents that generalise. The difference shows up clearly at evaluation time on novel task types.</li>
+      <li><strong>Weight your hard cases.</strong> The long tail of unusual, ambiguous, environment-degraded tasks is underrepresented in natural task collections. Sample it deliberately or your agent will be systematically weak in exactly the situations where weakness is most costly.</li>
+    </ol>
+
+    <div class="callout">
+      <div class="callout-label">Work with us</div>
+      <p>Diraflow builds coding task environments and agentic evaluation datasets designed to close the gap between benchmark performance and production capability. If you're building a software engineering agent and want realistic task environments with trajectory annotation and execution-verified gold solutions, <a href="../contact.html">get in touch</a>. We'll respond within one business day.</p>
+    </div>
+
+  </article>
+
+
+
+  <!-- Related posts -->
+  <section class="related-section">
+    <h3>More from the blog</h3>
+    <div class="related-grid">
+      <a href="data-flywheel.html" class="related-card">
+        <div class="related-cat">Industry</div>
+        <h4>The data flywheel: how training data quality compounds over model generations</h4>
+        <p>The quality of data you build today shapes models trained years from now.</p>
+      </a>
+      <a href="red-teaming-at-scale.html" class="related-card">
+        <div class="related-cat">Safety</div>
+        <h4>Red-teaming at scale: lessons from 5,000 adversarial prompts</h4>
+        <p>How structured attack taxonomies produce better safety datasets than random fuzzing.</p>
+      </a>
+      <a href="great-preference-annotator.html" class="related-card">
+        <div class="related-cat">RLHF</div>
+        <h4>What makes a great preference annotator? Insights from 1,000 calibration tasks</h4>
+        <p>The predictors of RLHF annotation quality weren't what we expected going in.</p>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer>
+  <div class="container-wide">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="../index.html" class="brand" style="margin-bottom:0.875rem;display:inline-flex;">
+          <img src="../assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+        </a>
+        <p>Premium training data for AI agents and LLMs. Built by experts, trusted by frontier AI teams worldwide.</p>
+      </div>
+      <div class="footer-col"><h4>Solutions</h4><ul>
+        <li><a href="../solutions.html#environment">Environment Generation</a></li>
+        <li><a href="../solutions.html#agentic">Agentic Datasets</a></li>
+        <li><a href="../solutions.html#redteaming">Red-Teaming</a></li>
+        <li><a href="../solutions.html#rlhf">RLHF &amp; Preference</a></li>
+      </ul></div>
+      <div class="footer-col"><h4>Company</h4><ul>
+        <li><a href="../blog.html">Blog</a></li>
+        <li><a href="../careers.html">Careers</a></li>
+        <li><a href="../industries.html">Industries</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+      </ul></div>
+      <div class="footer-col"><h4>Connect</h4><ul>
+        <li><a href="mailto:diraflow.ai@gmail.com">diraflow.ai@gmail.com</a></li>
+        <li><a href="https://linkedin.com/company/diraflow" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a href="https://x.com/diraflow_" target="_blank" rel="noopener">Twitter / X</a></li>
+      </ul></div>
+    </div>
+    <div class="footer-bottom">
+      <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+        <p>© 2026 Diraflow AI. All rights reserved.</p>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="../code-of-conduct.html" style="font-size:.8125rem;color:var(--subtle);" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="../privacy-policy.html" style="font-size:.8125rem;color:var(--subtle);" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
+      </div>
+      <p style="font-size:.8125rem;color:var(--subtle);">Made with care for the AI community.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+window.addEventListener('scroll', function(){
+  var doc = document.documentElement;
+  var top = doc.scrollTop || document.body.scrollTop;
+  var height = (doc.scrollHeight || document.body.scrollHeight) - doc.clientHeight;
+  var pct = height > 0 ? (top / height) * 100 : 0;
+  var fill = document.getElementById('progress-fill');
+  if(fill) fill.style.width = pct.toFixed(1) + '%';
+}, { passive: true });
+
+(function(){
+  var btn=document.getElementById('hb-btn');
+  var drawer=document.getElementById('hb-drawer');
+  var overlay=document.getElementById('hb-overlay');
+  var closeBtn=document.getElementById('hb-close');
+  function open(){drawer.classList.add('is-open');overlay.classList.add('is-open');btn.classList.add('is-open');document.body.style.overflow='hidden';}
+  function close(){drawer.classList.remove('is-open');overlay.classList.remove('is-open');btn.classList.remove('is-open');document.body.style.overflow='';}
+  if(btn)btn.addEventListener('click',open);
+  if(overlay)overlay.addEventListener('click',close);
+  if(closeBtn)closeBtn.addEventListener('click',close);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+})();
+
+function copyLink(){
+  navigator.clipboard.writeText(window.location.href).then(function(){
+    alert('Link copied!');
+  }).catch(function(){
+    prompt('Copy this link:', window.location.href);
+  });
+}
+</script>
+</body>
+</html>

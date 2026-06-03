@@ -1,512 +1,209 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inter‑annotator agreement — Diraflow AI</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Inter-annotator agreement: What it really tells you about data quality — Diraflow</title>
 <meta name="description" content="IAA scores are widely cited but poorly understood. We explain what Cohen's κ measures — and what it misses in complex annotation tasks.">
-<meta property="og:title" content="Inter‑annotator agreement: what it really tells you about data quality | Diraflow">
-<meta property="og:description" content="Why high IAA isn't always good, and low IAA isn't always bad. A practical guide to measuring and interpreting annotation consistency.">
+<meta property="og:title" content="Inter-annotator agreement: what it really tells you about data quality — Diraflow Blog">
 <meta property="og:type" content="article">
-<link rel="canonical" href="https://diraflowai.com/blog-posts/inter-annotator-agreement.html">
+<meta property="og:url" content="https://diraflowai.com/blog-posts/inter-annotator-agreement">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="icon" type="image/png" href="../assets/logo.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 <style>
-  /* ----------------------------------------------
-     GLOBAL VARIABLES & RESET
-  ----------------------------------------------- */
-  :root {
-    --bg:#f7f6f2;
-    --bg2:#eeecea;
-    --fg:#111110;
-    --fg2:#666460;
-    --border:#d8d6d0;
-    --card:#ffffff;
-    --subtle:#999690;
-    --gold:#c8922a;
-    --radius:0.75rem;
-    --radius-lg:1.25rem;
-  }
+:root {
+  --bg:#f7f6f2; --bg2:#eeecea; --fg:#111110; --fg2:#555250;
+  --border:#d8d6d0; --card:#ffffff; --subtle:#999690;
+  --gold:#c8922a; --green:#4a9e5c; --red:#dc3c3c;
+  --radius:0.75rem; --radius-lg:1.25rem;
+  --transition:0.2s ease; --shadow:0 4px 24px rgba(0,0,0,0.07);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+img{display:block;max-width:100%;height:auto;}
+a{color:inherit;text-decoration:none;}
+ul{list-style:none;}
+button{font-family:inherit;}
 
-  [data-theme="dark"]{
-    --bg:#111110;
-    --bg2:#1a1918;
-    --fg:#f7f6f2;
-    --fg2:#999690;
-    --border:#2a2826;
-    --card:#1e1c1b;
-    --subtle:#666460;
-  }
+.container-wide   {max-width:1160px;margin:0 auto;padding:0 4rem;}
+.container-article{max-width:1500px; margin:0 auto;padding:0 4rem;}
+@media(max-width:900px){
+  .container-wide   {padding:0 2.5rem;}
+  .container-article{padding:0 2.5rem;}
+}
+@media(max-width:600px){
+  .container-wide   {padding:0 1.25rem;}
+  .container-article{padding:0 1.25rem;}
+}
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+/* Progress bar */
+.progress-bar{position:fixed;top:68px;left:0;right:0;height:3px;background:var(--border);z-index:200;}
+.progress-fill{height:100%;background:var(--gold);width:0%;transition:width 0.1s linear;}
 
-  body {
-    font-family: 'Sora', sans-serif;
-    background: var(--bg);
-    color: var(--fg);
-    line-height: 1.6;
-    overflow-x: hidden;
-  }
+/* Nav */
+nav.top{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);height:68px;display:flex;align-items:center;}
+nav.top .nav-inner{max-width:1160px;margin:0 auto;padding:0 4rem;display:flex;align-items:center;gap:2rem;width:100%;}
+@media(max-width:900px){nav.top .nav-inner{padding:0 2.5rem;}}
+@media(max-width:600px){nav.top .nav-inner{padding:0 1.25rem;}}
+.brand{display:inline-flex;align-items:center;gap:0.625rem;text-decoration:none;font-weight:700;color:var(--fg);white-space:nowrap;flex-shrink:0;}
+.nav-logo-img{width:36px;height:36px;border-radius:8px;object-fit:contain;background:#eee;}
+.brand-text{display:flex;flex-direction:column;}
+.brand-name   {font-size:1rem;font-weight:700;line-height:1.1;}
+.brand-tagline{font-size:0.65rem;color:var(--fg2);}
+nav.top ul{display:flex;list-style:none;flex:1;margin:0;padding:0;}
+nav.top ul li a{font-size:0.875rem;font-weight:500;color:var(--fg2);padding:0.5rem 0.875rem;border-radius:0.5rem;display:block;transition:color var(--transition),background var(--transition);}
+nav.top ul li a:hover,nav.top ul li a.active{color:var(--fg);background:var(--bg2);}
+.nav-right{display:flex;align-items:center;gap:0.75rem;margin-left:auto;flex-shrink:0;}
+.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.55rem 1.2rem;border-radius:2rem;font-weight:600;font-size:0.875rem;font-family:'Sora',sans-serif;cursor:pointer;border:none;background:var(--fg);color:var(--bg);text-decoration:none;transition:opacity 0.2s,transform 0.15s;}
+.btn:hover{opacity:0.85;transform:translateY(-1px);}
+.btn-sm{padding:0.45rem 1rem;font-size:0.8rem;}
+.hb-btn{display:none;flex-direction:column;justify-content:center;align-items:center;width:42px;height:42px;gap:5px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;flex-shrink:0;position:relative;z-index:9999;}
+.hb-btn span{display:block;width:20px;height:2.5px;background:var(--fg);border-radius:3px;transition:transform 0.3s ease,opacity 0.3s ease;pointer-events:none;}
+.hb-btn.is-open span:nth-child(1){transform:translateY(7.5px) rotate(45deg);}
+.hb-btn.is-open span:nth-child(2){opacity:0;}
+.hb-btn.is-open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg);}
+@media(max-width:860px){.hb-btn{display:flex!important;}nav.top ul{display:none!important;}.btn.btn-sm{display:none!important;}}
+.hb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(3px);z-index:9997;}
+.hb-overlay.is-open{display:block;}
+.hb-drawer{position:fixed;top:0;right:0;bottom:0;width:290px;max-width:88vw;background:var(--bg);border-left:1px solid var(--border);z-index:9998;display:flex;flex-direction:column;transform:translateX(110%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);box-shadow:-12px 0 50px rgba(0,0,0,0.12);}
+.hb-drawer.is-open{transform:translateX(0);}
+.hb-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);}
+.hb-close{width:32px;height:32px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;color:var(--fg2);transition:all 0.2s;}
+.hb-close:hover{background:#111;color:#fff;}
+.hb-nav{flex:1;padding:1rem 0.875rem;overflow-y:auto;display:flex;flex-direction:column;gap:0.2rem;}
+.hb-link{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1rem;border-radius:0.75rem;font-size:0.9rem;font-weight:500;color:var(--fg2);text-decoration:none;border:1px solid transparent;transition:all 0.18s;}
+.hb-link:hover,.hb-link.hb-active{background:rgba(200,146,42,0.09);border-color:rgba(200,146,42,0.22);color:#c8922a;}
+.hb-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border-radius:0.5rem;font-size:1rem;flex-shrink:0;}
+.hb-footer{padding:1.25rem;border-top:1px solid var(--border);}
+.hb-cta{display:block;text-align:center;background:var(--gold);color:#fff;padding:0.8rem 1rem;border-radius:2rem;font-size:0.875rem;font-weight:700;}
 
-  /* ----------------------------------------------
-     PROFESSIONAL BLOG LAYOUT (full width + side margins)
-  ----------------------------------------------- */
-  .blog-container {
-    max-width: 1600px;       /* max width for ultra-wide screens */
-    width: 100%;
-    margin: 0 auto;
-    padding: 0 2rem;         /* comfortable side margins (left + right) */
-  }
+/* ── HERO ── */
+.post-hero{position:relative;width:100%;aspect-ratio:21/9;overflow:hidden;}
+.post-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+.post-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.15) 0%,rgba(0,0,0,0.52) 55%,rgba(0,0,0,0.72) 100%);}
+.post-hero-content{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;padding:3rem 4rem;max-width:900px;}
+@media(max-width:900px){.post-hero-content{padding:2rem 2.5rem;}}
+@media(max-width:600px){.post-hero{aspect-ratio:4/3;}.post-hero-content{padding:1.5rem 1.25rem;}}
+.post-hero-cat-row{display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;}
+.post-hero-cat{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#fff;padding:0.25rem 0.75rem;border-radius:2rem;background:#10b981;}
+.post-hero-date{font-size:0.78rem;color:rgba(255,255,255,0.75);}
+.post-hero-read{font-size:0.72rem;color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.15);padding:0.2rem 0.6rem;border-radius:2rem;border:1px solid rgba(255,255,255,0.25);}
+.post-hero-content h1{font-family:'DM Serif Display',serif;font-size:clamp(1.75rem,4.5vw,3.25rem);font-weight:400;line-height:1.18;letter-spacing:-0.03em;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.35);max-width:820px;}
 
-  /* Slightly larger margins on very big screens */
-  @media (min-width: 1920px) {
-    .blog-container {
-      padding: 0 4rem;
-    }
-  }
+/* Sub-header */
+.post-subheader{padding:1.75rem 0 2rem;border-bottom:1px solid var(--border);}
+.back-link{display:inline-flex;align-items:center;gap:0.4rem;font-size:0.82rem;font-weight:600;color:var(--gold);margin-bottom:1.25rem;transition:gap 0.2s;}
+.back-link:hover{gap:0.7rem;}
+.post-author-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.post-author{display:flex;align-items:center;gap:0.875rem;}
+.post-author img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;}
+.author-name{font-size:0.9rem;font-weight:700;color:var(--fg);}
+.author-title{font-size:0.75rem;color:var(--fg2);margin-top:0.1rem;}
+.share-row{display:flex;align-items:center;gap:0.5rem;}
+.share-label{font-size:0.72rem;color:var(--fg2);}
+.share-btn{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;background:var(--bg2);border:1px solid var(--border);cursor:pointer;color:var(--fg2);text-decoration:none;transition:all 0.2s;}
+.share-btn:hover{background:var(--gold);color:#fff;border-color:var(--gold);}
 
-  /* Smaller devices: reduce side margins */
-  @media (max-width: 768px) {
-    .blog-container {
-      padding: 0 1.25rem;
-    }
-  }
+/* Article body */
+.post-body{padding:1rem 0;font-size:1.0625rem;line-height:1.85;color:var(--fg2);}
+.post-body>*+*{margin-top:1.5rem;}
+.post-body h2{font-family:'DM Serif Display',serif;font-size:clamp(1.5rem,3vw,2rem);font-weight:400;line-height:1.25;letter-spacing:-0.025em;color:var(--fg);margin-top:3.5rem!important;margin-bottom:1rem;padding-top:2.5rem;border-top:1px solid var(--border);}
+.post-body h3{font-size:1.125rem;font-weight:700;color:var(--fg);margin-top:2.5rem!important;margin-bottom:0.75rem;letter-spacing:-0.01em;}
+.post-body p{color:var(--fg2);}
+.post-body strong{color:var(--fg);font-weight:700;}
+.post-body em{font-style:italic;color:var(--fg);}
+.post-body a{color:var(--gold);text-decoration:underline;text-underline-offset:3px;transition:opacity 0.2s;}
+.post-body a:hover{opacity:0.75;}
+.post-body ul{padding-left:0;margin:1.5rem 0;display:flex;flex-direction:column;gap:0.625rem;list-style:none;}
+.post-body ul li{display:flex;align-items:flex-start;gap:0.625rem;color:var(--fg2);line-height:1.75;}
+.post-body ul li::before{content:'→';color:var(--gold);font-weight:700;flex-shrink:0;margin-top:0.1rem;}
+.post-body ol{padding-left:0;margin:1.5rem 0;display:flex;flex-direction:column;gap:0.625rem;counter-reset:post-counter;list-style:none;}
+.post-body ol li{display:flex;align-items:flex-start;gap:0.875rem;color:var(--fg2);line-height:1.75;counter-increment:post-counter;}
+.post-body ol li::before{content:counter(post-counter);min-width:26px;height:26px;background:var(--gold);color:#fff;border-radius:50%;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0.1rem;}
+.post-body blockquote{border-left:3px solid var(--gold);background:var(--bg2);padding:1.35rem 1.5rem;margin:2.5rem 0;border-radius:0 var(--radius-lg) var(--radius-lg) 0;font-style:italic;color:var(--fg);font-size:1.05rem;line-height:1.75;}
+.post-body blockquote cite{display:block;margin-top:0.875rem;font-style:normal;font-size:0.82rem;color:var(--fg2);font-weight:600;}
+.post-body figure{margin:2.5rem 0;}
+.post-body figure img{width:100%;border-radius:var(--radius-lg);border:1px solid var(--border);}
+.post-body figcaption{font-size:0.8rem;color:var(--subtle);text-align:center;margin-top:0.625rem;font-style:italic;}
+.post-body table{width:100%;border-collapse:collapse;margin:2rem 0;font-size:0.875rem;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);}
+.post-body table th{background:var(--fg);color:var(--bg);padding:0.75rem 1rem;text-align:left;font-weight:700;font-size:0.78rem;letter-spacing:0.04em;}
+.post-body table td{padding:0.7rem 1rem;border-bottom:1px solid var(--border);color:var(--fg2);vertical-align:top;line-height:1.55;}
+.post-body table tr:last-child td{border-bottom:none;}
+.post-body table tr:nth-child(even) td{background:var(--bg2);}
 
-  /* ----------------------------------------------
-     POST HEADER
-  ----------------------------------------------- */
-  .post-header {
-    padding: 3rem 0 2rem;
-    border-bottom: 1px solid var(--border);
-  }
+/* Components */
+.stat-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:2.5rem 0;}
+@media(max-width:500px){.stat-strip{grid-template-columns:1fr;}}
+.stat-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.35rem;text-align:center;}
+.stat-box .stat-num{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--gold);line-height:1;margin-bottom:0.3rem;}
+.stat-box .stat-lbl{font-size:0.75rem;color:var(--fg2);line-height:1.4;}
+.callout{background:rgba(200,146,42,0.07);border:1px solid rgba(200,146,42,0.25);border-left:3px solid var(--gold);border-radius:0 var(--radius-lg) var(--radius-lg) 0;padding:1.25rem 1.5rem;margin:2rem 0;}
+.callout-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.5rem;}
+.callout p{font-size:0.9rem;color:var(--fg);line-height:1.7;margin:0!important;}
+.callout-info{background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-left:3px solid #3b82f6;border-radius:0 var(--radius-lg) var(--radius-lg) 0;padding:1.25rem 1.5rem;margin:2rem 0;}
+.callout-info .callout-label{color:#3b82f6;}
+.callout-info p{font-size:0.9rem;color:var(--fg);line-height:1.7;margin:0!important;}
+.compare-cols{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:2rem 0;}
+@media(max-width:560px){.compare-cols{grid-template-columns:1fr;}}
+.compare-col{border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;}
+.compare-col-head{padding:0.875rem 1.25rem;border-bottom:1px solid var(--border);}
+.compare-col-head .col-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.25rem;}
+.compare-col-head h4{font-size:0.9rem;font-weight:700;color:var(--fg);}
+.col-bad{background:rgba(220,60,60,0.05);}
+.col-bad .col-label{color:var(--red);}
+.col-good{background:rgba(200,146,42,0.06);}
+.col-good .col-label{color:var(--gold);}
+.compare-col-body{padding:1.25rem;background:var(--card);}
+.compare-col-body ul{margin:0;gap:0.5rem;}
+.compare-col-body ul li{font-size:0.85rem;}
+.col-bad  .compare-col-body ul li::before{content:'✗';color:var(--red);}
+.col-good .compare-col-body ul li::before{content:'✓';color:var(--green);}
 
-  .post-header h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: clamp(2.2rem, 6vw, 3.8rem);
-    font-weight: 400;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-    max-width: 1100px;
-    margin-top: 0.5rem;
-  }
+/* Author card */
+.author-card{display:flex;gap:1.25rem;align-items:flex-start;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem;margin:3rem 0;}
+.author-card img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;}
+.author-card-name{font-size:1rem;font-weight:700;color:var(--fg);margin-bottom:0.2rem;}
+.author-card-title{font-size:0.78rem;color:var(--gold);font-weight:600;margin-bottom:0.625rem;}
+.author-card p{font-size:0.85rem;color:var(--fg2);line-height:1.7;margin:0!important;}
+@media(max-width:500px){.author-card{flex-direction:column;}}
 
-  .post-meta-large {
-    display: flex;
-    gap: 1.8rem;
-    align-items: center;
-    flex-wrap: wrap;
-    margin: 1.8rem 0 0.5rem;
-    color: var(--fg2);
-    font-size: 0.9rem;
-  }
+/* Related */
+.related-section{border-top:1px solid var(--border);padding-top:2.5rem;}
+.related-section>h3{font-family:'DM Serif Display',serif;font-size:1.35rem;font-weight:400;color:var(--fg);margin-bottom:1.5rem;}
+.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+@media(max-width:640px){.related-grid{grid-template-columns:1fr;}}
+.related-card{display:block;padding:1.25rem;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--card);text-decoration:none;transition:transform 0.25s ease,box-shadow 0.25s ease,border-color 0.25s ease;}
+.related-card:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(0,0,0,0.08);border-color:var(--gold);}
+.related-cat{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold);margin-bottom:0.5rem;}
+.related-card h4{font-size:0.875rem;font-weight:700;color:var(--fg);line-height:1.4;margin-bottom:0.4rem;}
+.related-card p{font-size:0.75rem;color:var(--fg2);line-height:1.5;margin:0;}
 
-  .author-badge {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .author-badge img {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid var(--border);
-  }
-
-  /* ----------------------------------------------
-     POST CONTENT — READABILITY FIRST
-  ----------------------------------------------- */
-  .post-content {
-    width: 100%;
-    margin: 2.5rem auto;
-    font-size: 1.05rem;
-    line-height: 1.8;
-  }
-
-  /* Text elements get a comfortable max-width (optimal reading length) */
-  .post-content p,
-  .post-content h2,
-  .post-content h3,
-  .post-content h4,
-  .post-content ul,
-  .post-content ol,
-  .post-content blockquote {
-    max-width: 900px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  /* Spacing for paragraphs */
-  .post-content p {
-  max-width: 1400px; /* slightly narrower for better readability */
-    margin-bottom: 1.6rem;
-  }
-
-  /* Headings */
-  .post-content h2 {
-    font-size: 1.8rem;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    font-family: 'DM Serif Display', serif;
-    font-weight: 400;
-  }
-
-  .post-content h3 {
-    font-size: 1.45rem;
-    margin-top: 2rem;
-    margin-bottom: 0.8rem;
-    font-weight: 600;
-  }
-
-  /* Lists */
-  .post-content ul,
-  .post-content ol {
-    padding-left: 1.8rem;
-    margin-bottom: 1.6rem;
-  }
-
-  .post-content li {
-    margin-bottom: 0.4rem;
-  }
-
-  /* Blockquotes */
-  .post-content blockquote {
-    border-left: 4px solid var(--gold);
-    background: var(--bg2);
-    padding: 1.25rem 2rem;
-    margin: 2rem auto;
-    font-style: italic;
-    border-radius: 12px;
-    color: var(--fg2);
-  }
-
-  /* Code & pre – can be wider, but stay inside container */
-  .post-content pre,
-  .post-content .code-block {
-    background: var(--bg2);
-    padding: 1.2rem;
-    border-radius: 14px;
-    overflow-x: auto;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.85rem;
-    margin: 2rem auto;
-    max-width: 100%;
-    width: 100%;
-    border: 1px solid var(--border);
-  }
-
-  code {
-    font-family: 'DM Mono', monospace;
-    background: var(--bg2);
-    padding: 0.2rem 0.4rem;
-    border-radius: 6px;
-    font-size: 0.85em;
-  }
-
-  /* Images and media – responsive */
-  .post-content img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 16px;
-    margin: 1.8rem auto;
-    display: block;
-  }
-
-  /* ----------------------------------------------
-     RELATED POSTS GRID
-  ----------------------------------------------- */
-  .related-posts {
-    width: 100%;
-    border-top: 1px solid var(--border);
-    margin: 4rem 0 2rem;
-    padding-top: 2.5rem;
-  }
-
-  .related-posts h3 {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .related-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.8rem;
-    width: 100%;
-  }
-
-  @media (max-width: 900px) {
-    .related-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .related-card {
-    padding: 1.25rem;
-    border: 1px solid var(--border);
-    border-radius: 1rem;
-    background: var(--card);
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-    cursor: pointer;
-  }
-
-  .related-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-    border-color: var(--gold);
-  }
-
-  .related-card a {
-    font-weight: 700;
-    text-decoration: none;
-    color: var(--gold);
-    font-size: 1rem;
-  }
-
-  .related-card p {
-    margin-top: 0.5rem;
-    color: var(--fg2);
-    font-size: 0.85rem;
-    line-height: 1.4;
-  }
-
-  /* ----------------------------------------------
-     NAVIGATION (sticky, full width background)
-  ----------------------------------------------- */
-  nav.top {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
-    height: 68px;
-    display: flex;
-    align-items: center;
-    width: 100%;
-  }
-
-  nav.top .container.inner {
-    max-width: 1600px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-  }
-
-  .brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.625rem;
-    text-decoration: none;
-    font-weight: 700;
-    color: var(--fg);
-    white-space: nowrap;
-  }
-
-  .nav-logo-img {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    object-fit: contain;
-  }
-
-  .brand-text {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .brand-name {
-    font-size: 1rem;
-    font-weight: 700;
-  }
-
-  .brand-tagline {
-    font-size: 0.65rem;
-    font-weight: 400;
-    color: var(--fg2);
-  }
-
-  nav.top ul {
-    display: flex;
-    gap: 0;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    flex: 1;
-  }
-
-  nav.top ul li a {
-    text-decoration: none;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--fg2);
-    padding: 0.5rem 0.875rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s;
-  }
-
-  nav.top ul li a:hover,
-  nav.top ul li a.active {
-    color: var(--fg);
-    background: var(--bg2);
-  }
-
-  .nav-right {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-left: auto;
-  }
-
-  .theme-toggle {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 2rem;
-    padding: 0.35rem 0.75rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s;
-  }
-
-  .hb-btn {
-    display: none;
-    flex-direction: column;
-    width: 42px;
-    height: 42px;
-    background: var(--bg2);
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    cursor: pointer;
-    gap: 5px;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .hb-btn span {
-    display: block;
-    width: 20px;
-    height: 2.5px;
-    background: var(--fg);
-    border-radius: 3px;
-  }
-
-  @media (max-width: 860px) {
-    .hb-btn {
-      display: flex !important;
-    }
-    nav.top ul {
-      display: none !important;
-    }
-  }
-
-  /* Mobile Drawer */
-  .hb-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(3px);
-    z-index: 9997;
-  }
-  .hb-overlay.is-open {
-    display: block;
-  }
-  .hb-drawer {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 290px;
-    background: var(--bg);
-    border-left: 1px solid var(--border);
-    z-index: 9998;
-    transform: translateX(110%);
-    transition: transform 0.35s ease;
-  }
-  .hb-drawer.is-open {
-    transform: translateX(0);
-  }
-  .hb-nav a {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.8rem 1rem;
-    border-radius: 0.75rem;
-    color: var(--fg2);
-    text-decoration: none;
-  }
-  .hb-footer {
-    padding: 1.25rem;
-    border-top: 1px solid var(--border);
-  }
-  .hb-cta {
-    background: #c8922a;
-    color: #fff;
-    padding: 0.8rem 1rem;
-    border-radius: 2rem;
-    display: block;
-    text-align: center;
-    font-weight: 700;
-    text-decoration: none;
-  }
-
-  /* ----------------------------------------------
-     FOOTER (full width background, inner aligned)
-  ----------------------------------------------- */
-  footer {
-    background: var(--bg2);
-    border-top: 1px solid var(--border);
-    padding: 3rem 0 1.5rem;
-    margin-top: 3rem;
-    width: 100%;
-  }
-
-  .footer-inner {
-    max-width: 1600px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  @media (max-width: 768px) {
-    .footer-inner {
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-  }
-
-  .footer-inner p,
-  .footer-inner a {
-    font-size: 0.85rem;
-    color: var(--subtle);
-    text-decoration: none;
-  }
-
-  .footer-inner a:hover {
-    color: var(--gold);
-  }
+/* Footer */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:4rem 0 0;margin-top:4rem;}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem;}
+@media(max-width:760px){.footer-grid{grid-template-columns:1fr 1fr;gap:2rem;}}
+@media(max-width:480px){.footer-grid{grid-template-columns:1fr;}}
+.footer-brand p{font-size:0.875rem;color:var(--fg2);line-height:1.7;margin-top:0.75rem;}
+.footer-col h4{font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--fg2);margin-bottom:1.25rem;}
+.footer-col ul{display:flex;flex-direction:column;gap:0.625rem;}
+.footer-col ul li a{font-size:0.875rem;color:var(--fg2);transition:color 0.2s;}
+.footer-col ul li a:hover{color:var(--gold);}
+.footer-bottom{border-top:1px solid var(--border);padding:1.5rem 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.footer-bottom p{font-size:0.8125rem;color:var(--subtle);}
 </style>
 </head>
 <body>
 
+<div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
 <nav class="top">
-  <div class="container inner">
+  <div class="nav-inner">
     <a href="../index.html" class="brand">
       <img src="../assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
-      <span class="brand-text">
-        <span class="brand-name">Diraflow</span>
-        <span class="brand-tagline">Training data for frontier AI</span>
-      </span>
+      <span class="brand-text"><span class="brand-name">Diraflow</span><span class="brand-tagline">Training data for frontier AI</span></span>
     </a>
     <ul>
       <li><a href="../index.html">Home</a></li>
@@ -517,152 +214,317 @@
       <li><a href="../contact.html">Contact Us</a></li>
     </ul>
     <div class="nav-right">
-      <button class="theme-toggle" id="themeToggle">
-        <span class="icon-sun">☀️</span>
-        <span class="icon-moon">🌙</span>
-      </button>
-      <button class="hb-btn" id="hb-btn" aria-label="Open menu">
-        <span></span><span></span><span></span>
-      </button>
+      <a href="../contact.html" class="btn btn-sm">Talk to us</a>
+      <button class="hb-btn" id="hb-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
     </div>
   </div>
 </nav>
-
 <div class="hb-overlay" id="hb-overlay"></div>
 <div class="hb-drawer" id="hb-drawer">
-  <div class="hb-drawer-head" style="display:flex; justify-content:space-between; padding:1rem;">
-    <span style="font-weight:600;">Menu</span>
-    <button id="hb-close" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
+  <div class="hb-drawer-head">
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <img src="https://placehold.co/36x36/111/fff?text=D" alt="Diraflow" class="nav-logo-img">
+      <span style="font-weight:700;color:var(--fg);">Diraflow</span>
+    </div>
+    <button class="hb-close" id="hb-close">✕</button>
   </div>
   <nav class="hb-nav">
-    <a href="../index.html">Home</a>
-    <a href="../solutions.html">Solutions</a>
-    <a href="../industries.html">Industries</a>
-    <a href="../blog.html">Blog</a>
-    <a href="../careers.html">Careers</a>
-    <a href="../contact.html">Contact</a>
+    <a href="../index.html"      class="hb-link"><span class="hb-icon">🏠</span>Home</a>
+    <a href="../solutions.html"  class="hb-link"><span class="hb-icon">⚙️</span>Solutions</a>
+    <a href="../industries.html" class="hb-link"><span class="hb-icon">🏭</span>Industries</a>
+    <a href="../blog.html"       class="hb-link hb-active"><span class="hb-icon">✍️</span>Blog</a>
+    <a href="../careers.html"    class="hb-link"><span class="hb-icon">💼</span>Careers</a>
+    <a href="../contact.html"    class="hb-link"><span class="hb-icon">✉️</span>Contact Us</a>
   </nav>
-  <div class="hb-footer">
-    <a href="../contact.html" class="hb-cta">Talk to an expert →</a>
+  <div class="hb-footer"><a href="../contact.html" class="hb-cta">Talk to an expert →</a></div>
+</div>
+
+<!-- ── HERO ── -->
+<div class="post-hero">
+  <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=80&auto=format&fit=crop"
+       alt="Analytics dashboard showing annotation agreement metrics" loading="eager">
+  <div class="post-hero-content">
+    <div class="post-hero-cat-row">
+      <span class="post-hero-cat">Operations</span>
+      <span class="post-hero-date">Mar 19, 2026</span>
+      <span class="post-hero-read">7 min read</span>
+    </div>
+    <h1>Inter-annotator agreement: what it really tells you about data quality</h1>
   </div>
 </div>
 
-<main class="blog-container">
-  <div class="post-header">
-    <a href="../blog.html" style="display:inline-block; margin-bottom:1rem; color:var(--gold); font-weight:500;">← Back to blog</a>
-    <h1>Inter-annotator agreement: what it really tells you about data quality</h1>
-    <div class="post-meta-large">
-      <div class="author-badge">
-        <img src="https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?w=100&q=80&auto=format&fit=crop&crop=face" alt="Yuki Tanaka">
+<!-- ── Sub-header ── -->
+<div class="container-article">
+  <div class="post-subheader">
+    <a href="../blog.html" class="back-link">← Back to blog</a>
+    <div class="post-author-row">
+      <div class="post-author">
+        <img src="../assets/Mark.png" alt="Mark K">
         <div>
-          <strong>Yuki Tanaka</strong><br>
-          Head of Data Operations
+          <div class="author-name">Mark K</div>
+          <div class="author-title">Social Media Department · Diraflow</div>
         </div>
       </div>
-      <span>Mar 19, 2026 · 7 min read</span>
+      <div class="share-row">
+        <span class="share-label">Share</span>
+        <a href="https://twitter.com/intent/tweet?text=Inter-annotator+agreement%3A+what+it+really+tells+you+about+data+quality&url=https://diraflowai.com/blog-posts/inter-annotator-agreement"
+           target="_blank" rel="noopener" class="share-btn" title="Share on X">𝕏</a>
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://diraflowai.com/blog-posts/inter-annotator-agreement"
+           target="_blank" rel="noopener" class="share-btn" title="Share on LinkedIn">in</a>
+        <button class="share-btn" onclick="copyLink()" title="Copy link">🔗</button>
+      </div>
     </div>
   </div>
+</div>
 
-  <div class="post-content">
-    <p>Inter-annotator agreement (IAA) is one of the most cited metrics in data annotation projects. A high Cohen’s κ or Fleiss’ κ is seen as a stamp of quality; a low IAA triggers panic and rework. But after managing millions of annotations for RLHF, preference ranking, and safety classification, I’ve learned that IAA is both overused and misunderstood. Let me walk you through what IAA actually measures, where it fails, and how to use it as a diagnostic tool — not a final verdict.</p>
+<!-- ── Article ── -->
+<main class="container-article">
+  <article class="post-body">
 
-    <h2>The basic math: beyond percent agreement</h2>
-    <p>Percent agreement is simple: if two annotators label 100 items the same way 90 times, that’s 90% agreement. But that metric ignores chance. Cohen’s κ adjusts for the possibility that annotators might agree randomly just because one category is very common. For example, if 95% of items are “safe”, two annotators could agree 90% of the time by simply always choosing “safe” — but κ would reveal that agreement barely exceeds chance. That’s the theory. In practice, however, κ has serious limitations.</p>
-    
-    <h3>When high κ is misleading</h3>
-    <p>We once ran a study on a binary classification task: “Is this prompt harmful?” The data was heavily imbalanced (85% harmless). We achieved κ = 0.82, which is considered “almost perfect”. But when we examined disagreements, they were on the most subtle, borderline cases — exactly the examples that matter most for safety fine-tuning. Because κ is prevalence-dependent, a high score can mask the fact that annotators disagree on the minority class where you need the most signal. We’ve since learned to always report per‑category agreement and look at confusion matrices.</p>
+    <p>Inter-annotator agreement is one of the most cited metrics in data annotation. A high Cohen's κ is treated as a quality stamp; a low one triggers panic and rework. But after managing millions of annotations across RLHF, preference ranking, and safety classification projects, I've come to believe that IAA is both overused and misunderstood. It is a useful diagnostic. It is not a quality certificate. And conflating the two creates datasets that look good on paper and underperform in production.</p>
 
+    <p>This post is about what IAA actually measures, where it misleads, and how to use it as one signal among several — rather than the single number that determines whether a project passed or failed.</p>
 
-    <h2>Low κ isn’t always bad — sometimes it reveals richness</h2>
-    <p>In tasks with inherent subjectivity — like “rank these two responses by helpfulness” or “rate the creativity of this story” — a κ of 0.4 to 0.6 might be perfectly acceptable. Human experts simply disagree on aesthetic or nuanced judgments. Forcing an artificially high IAA through overly constrained rubrics can strip away the diversity of valid perspectives, which is harmful if you’re training a model to align with a range of human preferences. In our RLHF projects, we deliberately allow moderate IAA on preference pairs and instead measure <strong>consistency of ranking direction</strong> (e.g., transitivity) rather than strict label agreement.</p>
-    
-    <blockquote>“After switching from chasing κ > 0.8 to focusing on edge-case consistency and annotator calibration, our model’s win rate in live A/B tests increased by 12% — because we stopped over‑constraining our annotators.” — Data lead, large e‑commerce LLM team</blockquote>
+    <div class="stat-strip">
+      <div class="stat-box"><div class="stat-num">0.82</div><div class="stat-lbl">Cohen's κ we once achieved on a task where annotators were systematically missing the hardest cases</div></div>
+      <div class="stat-box"><div class="stat-num">+12%</div><div class="stat-lbl">Model win-rate improvement after we stopped chasing κ > 0.8 and focused on edge-case calibration instead</div></div>
+      <div class="stat-box"><div class="stat-num">4</div><div class="stat-lbl">Distinct reasons a low κ score might actually be fine — and one reason a high κ should worry you</div></div>
+    </div>
 
-    <h2>What IAA misses: task clarity and annotator skill</h2>
-    <p>IAA is a property of the <em>combination</em> of task, guidelines, and annotator pool. A low score could mean: (a) the task is ambiguous, (b) the guidelines are unclear, (c) annotators are poorly trained, or (d) the phenomenon itself is inherently variable. A high score could mean: (a) the task is trivial, (b) annotators are colluding, or (c) the guidelines are so rigid that they force artificial consensus. We’ve seen all of these in real projects. The solution is to supplement IAA with other metrics: per‑annotator agreement with gold standards, response time analysis, and qualitative reviews of disagreement cases.</p>
-    
-    <h3>A practical framework for using IAA</h3>
-    <ul>
-      <li><strong>Before annotation:</strong> Run a pilot with 100 examples. Compute per‑category κ and percent agreement. If κ is below 0.3, refine guidelines or split the task. If κ is above 0.8 but the task is non‑trivial, check for annotator bias (e.g., always picking the first option).</li>
-      <li><strong>During production:</strong> Track weekly IAA on a held‑out set of 50–100 examples. Use moving averages to detect drift. If κ drops significantly, re‑calibrate with a team meeting.</li>
-      <li><strong>After completion:</strong> Don’t just report average κ. Report agreement per label, per annotator pair, and per difficulty cohort (e.g., easy vs. edge cases). Use the disagreement items as a separate “challenge set” for model evaluation.</li>
-    </ul>
+    <h2>The basic math — and where it already starts to mislead</h2>
 
-    <h2>Alternatives and complements to Cohen’s κ</h2>
-    <p>Depending on your annotation type, consider these metrics:</p>
-    <ul>
-      <li><strong>Krippendorff’s α</strong> – Handles missing data, any number of annotators, and nominal/ordinal/interval scales. More flexible than κ.</li>
-      <li><strong>Gwet’s AC1</strong> – Less sensitive to prevalence and marginal imbalance. Often preferred for imbalanced datasets.</li>
-      <li><strong>F1 score for pairwise agreement</strong> – Especially useful when one class is rare (e.g., harmful content).</li>
-      <li><strong>Correlation (Pearson/Spearman)</strong> – For continuous ratings (e.g., 1–5 Likert scales).</li>
-    </ul>
-    <p>We’ve adopted a dashboard that shows multiple metrics simultaneously because no single number captures the full story.</p>
+    <p>Percent agreement is straightforward: if two annotators label 100 items identically 90 times, that's 90% agreement. Cohen's κ adjusts for the baseline agreement you'd expect by chance, given the distribution of labels. If 95% of items fall into one category, two annotators could achieve 90% agreement by always picking that category — κ reveals that this agreement barely exceeds chance and strips out the false signal.</p>
+
+    <p>That's the theory. In practice, κ carries its own set of distortions that matter enormously for AI training data.</p>
+
+    <p>κ is <strong>prevalence-sensitive</strong>. In imbalanced datasets, a high κ can mask systematic disagreement on the minority class — which is often the class you care about most. κ is also <strong>aggregative</strong>: a single number that averages across all label types, all annotators, and all task types simultaneously. That averaging hides a lot.</p>
+
+    <div class="callout-info">
+      <div class="callout-label">ℹ️ κ score interpretation guide</div>
+      <p>The standard Landis & Koch scale: κ below 0.2 is "slight" agreement, 0.21–0.40 is "fair", 0.41–0.60 is "moderate", 0.61–0.80 is "substantial", and above 0.80 is "almost perfect." These thresholds were calibrated for medical diagnosis studies in the 1970s. They have no particular validity for RLHF preference annotation or safety classification. Applying them uncritically is a category error.</p>
+    </div>
+
+    <h2>When high κ is the wrong target</h2>
+
+    <p>We once ran a binary safety classification task — "Is this prompt harmful?" — on a dataset that was 85% harmless. We achieved κ = 0.82. The project lead was pleased. When we audited the disagreements, every single conflict was on borderline cases: prompts that required genuine judgment about intent, context, and potential harm. The cases that were easy were easy for everyone. The cases that mattered were exactly the ones where annotators diverged.</p>
+
+    <p>A κ of 0.82 with this pattern tells you almost nothing useful about your safety data. It tells you your annotators agree on the easy cases. It conceals that they disagree on the hard cases — which are the only cases worth training on for safety fine-tuning, because the easy ones don't need a model to get right.</p>
+
+    <p>The fix is not to increase κ on those hard cases by constraining annotators more tightly. The fix is to report per-category agreement and per-difficulty-cohort agreement alongside the overall score, so you can see where the disagreement actually lives and whether it matters.</p>
+
+    <blockquote>
+      "After switching from chasing κ &gt; 0.8 to focusing on edge-case consistency and annotator calibration, our model's win rate in live A/B tests increased by 12% — because we stopped over-constraining our annotators on the cases where human judgment is legitimately varied."
+      <cite>— Data lead, large e-commerce LLM team</cite>
+    </blockquote>
+
+    <h2>When low κ is completely fine</h2>
+
+    <p>For tasks with inherent subjectivity — ranking responses by helpfulness, rating the creativity of a story, evaluating whether a tone is appropriate for a given context — a κ of 0.4 to 0.6 is often exactly right. Human experts genuinely disagree on these judgments. That disagreement is not a measurement error. It is a real property of the phenomenon you are trying to capture.</p>
+
+    <p>Forcing artificially high IAA on subjective tasks requires one of two things: either you constrain the rubric so tightly that annotators are mechanically following rules rather than exercising judgment, or you select a homogeneous annotator pool that reaches consensus by sharing the same priors. Both of these produce datasets that misrepresent the actual distribution of human preferences — which is the entire point of preference annotation for RLHF.</p>
+
+    <p>In our RLHF projects, we deliberately allow moderate IAA on preference pairs and instead measure <strong>consistency of ranking direction</strong> — whether annotators agree on which response is better, rather than whether they agree on a precise quality score. Transitivity (annotator A prefers X to Y and Y to Z, so also prefers X to Z) is a much more meaningful reliability indicator for preference data than raw κ.</p>
+
+    <h2>What IAA doesn't tell you at all</h2>
+
+    <p>IAA is a property of the combination of task, guidelines, and annotator pool. A low score could mean the task is genuinely ambiguous, the guidelines are unclear, the annotators are undertrained, or the phenomenon itself is inherently variable. A high score could mean the task is trivial, the annotators are colluding or anchoring on each other, or the guidelines are so prescriptive that annotators have stopped thinking and started pattern-matching.</p>
+
+    <p>None of these diagnoses are visible in the κ number itself. They require supplementary investigation.</p>
+
+    <div class="compare-cols">
+      <div class="compare-col">
+        <div class="compare-col-head col-bad">
+          <div class="col-label">❌ What a low κ might mean</div>
+          <h4>Reasons to investigate — not panic</h4>
+        </div>
+        <div class="compare-col-body">
+          <ul>
+            <li>Task specification is genuinely ambiguous and needs refinement</li>
+            <li>Annotation guidelines have gaps that annotators are filling differently</li>
+            <li>Annotators are inadequately calibrated and need a sync session</li>
+            <li>The phenomenon itself is inherently variable (subjective tasks)</li>
+            <li>One annotator is an outlier — check per-pair breakdown before assuming systemic failure</li>
+          </ul>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="compare-col-head col-good">
+          <div class="col-label">⚠ What a high κ might mean</div>
+          <h4>Reasons not to stop investigating</h4>
+        </div>
+        <div class="compare-col-body">
+          <ul>
+            <li>Task is trivial — high agreement tells you nothing meaningful</li>
+            <li>Dataset is heavily imbalanced — majority class is driving the score</li>
+            <li>Guidelines are so rigid they're suppressing legitimate annotator judgment</li>
+            <li>Annotators are anchoring on each other's choices (check if batches are truly independent)</li>
+            <li>Hard cases are being systematically skipped or arbitrated away</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <h2>A practical framework for using IAA correctly</h2>
+
+    <h3>Before annotation begins</h3>
+
+    <p>Run a pilot on 100–150 items before committing to full production. Compute per-category κ and per-annotator-pair agreement — not just the overall number. If κ is below 0.3 on a task that shouldn't be subjective, refine the guidelines or decompose the task before scaling. If κ is above 0.8 on a task that should be non-trivial, check for anchoring or rubric over-constraint before assuming success.</p>
+
+    <h3>During production</h3>
+
+    <p>Track IAA weekly on a held-out set of 50–100 items seeded continuously into the production queue. Use a rolling window rather than point-in-time snapshots — annotator drift appears as a trend, not a single observation. If κ drops by more than 0.08 from baseline, trigger a calibration session before the dataset accumulates further noise.</p>
+
+    <h3>After completion</h3>
+
+    <p>Do not report average κ alone. Report per-label agreement, per-annotator-pair agreement, and — most importantly — agreement broken down by difficulty cohort: easy cases, medium cases, and the hard edge cases that sit near the decision boundary. Use disagreement items as a separate challenge set for downstream model evaluation. The items where annotators disagreed most are the items most likely to reveal model weaknesses.</p>
+
+    <h2>Metrics that work better than κ in specific contexts</h2>
+
+    <table>
+      <thead>
+        <tr><th>Metric</th><th>Best for</th><th>Advantage over κ</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Krippendorff's α</td><td>Any number of annotators, mixed scales, missing data</td><td>More flexible; handles ordinal and interval data; not skewed by imbalance the same way</td></tr>
+        <tr><td>Gwet's AC1</td><td>Imbalanced binary or multi-class tasks</td><td>Less sensitive to prevalence and marginal distributions — more stable on skewed datasets</td></tr>
+        <tr><td>Pairwise F1 (minority class)</td><td>Safety classification with rare harmful content</td><td>Focuses agreement measurement on the class that matters, not the dominant majority</td></tr>
+        <tr><td>Spearman / Pearson correlation</td><td>Continuous ratings (Likert 1–5, quality scores)</td><td>Captures ordinal relationship rather than treating scale as nominal</td></tr>
+        <tr><td>Ranking transitivity rate</td><td>Preference pairs in RLHF</td><td>Measures internal consistency of preference judgements rather than label match</td></tr>
+      </tbody>
+    </table>
+
+    <p>No single metric captures the full picture. We run a dashboard that displays multiple metrics simultaneously so that any one score failing to tell the full story is caught by the others.</p>
 
     <h2>Case study: improving IAA without dumbing down the task</h2>
-    <p>One of our clients wanted to increase IAA on a complex legal summarisation task from 0.55 to 0.75. Instead of simplifying the rubric, we introduced two changes: (1) a 30‑minute daily calibration session where annotators discussed edge cases, and (2) a “disagree‑and‑explain” workflow where any item with initial disagreement went to a third senior annotator who wrote a clarifying guideline. Within three weeks, IAA rose to 0.72, and the quality of the final dataset (measured by downstream model performance) improved significantly. The key was not removing subjectivity but institutionalising the resolution process.</p>
-    
-    <h2>Conclusion: don’t worship the kappa</h2>
-    <p>Inter-annotator agreement is a useful diagnostic, not a quality certificate. A dataset with perfect IAA might be useless if it avoids all the interesting, ambiguous examples. A dataset with moderate IAA might be perfect if the ambiguity is inherent and the data captures that diversity. At Diraflow, we use IAA as one of many signals — alongside expert reviews, model‑based validation, and real‑world task performance — to judge data quality. Next time someone tells you “our IAA is 0.85”, ask them: what about the hard cases?</p>
-  </div>
 
-  <div class="related-posts">
-    <h3>More on data operations</h3>
-    <div class="related-grid">
-      <div class="related-card">
-        <a href="great-preference-annotator.html">What makes a great preference annotator →</a>
-        <p>Insights from 1,000 calibration tasks</p>
-      </div>
-      <div class="related-card">
-        <a href="red-teaming-at-scale.html">Red-teaming at scale →</a>
-        <p>Lessons from 50,000 adversarial prompts</p>
-      </div>
-      <div class="related-card">
-        <a href="data-flywheel.html">The data flywheel →</a>
-        <p>How data quality compounds over generations</p>
-      </div>
+    <p>A client came to us wanting to raise IAA on a complex legal summarisation task from κ = 0.55 to κ = 0.75. The instinct was to simplify the rubric. We pushed back and proposed two changes instead.</p>
+
+    <p>First, a 30-minute daily calibration session at the start of each week where annotators discussed three or four edge cases from the prior week's production batch — not to reach consensus, but to make their interpretive reasoning visible to each other. Second, a "disagree and explain" workflow: any item with initial annotator disagreement went to a third senior annotator who wrote a clarifying guideline note attached to that item category.</p>
+
+    <p>Within three weeks, IAA rose to κ = 0.72. More importantly, downstream model performance on legal summarisation tasks improved significantly — not because we reduced the subjectivity in the data, but because we institutionalised the resolution process for it. The disagreements that remained were genuine, documented, and reflected in the training signal rather than arbitrated away.</p>
+
+    <div class="callout">
+      <div class="callout-label">The disagreement items are your most valuable data</div>
+      <p>The items annotators disagree on are not the items to discard. They are the items that sit near decision boundaries — the exact cases where a well-trained model needs the most signal. Routing them to senior review and capturing the resolution rationale produces training data that is more valuable per item than any of the easy cases where everyone agreed immediately.</p>
     </div>
-  </div>
+
+    <h2>What to ask when someone shows you a κ score</h2>
+
+    <p>Next time a client, a partner, or a colleague reports an IAA figure, these are the questions worth asking before deciding what it means.</p>
+
+    <ol>
+      <li><strong>What is the label distribution?</strong> A κ of 0.80 on a balanced dataset means something very different from a κ of 0.80 on a dataset that is 90% one class.</li>
+      <li><strong>Is this an average or a breakdown?</strong> Ask for per-category and per-difficulty-cohort agreement. The average hides where the problems actually are.</li>
+      <li><strong>What happened to the disagreement items?</strong> Were they discarded, adjudicated, or resolved with documented rationale? The answer tells you whether the hard cases are represented in the dataset or filtered out of it.</li>
+      <li><strong>Does high agreement here mean anything?</strong> For genuinely trivial tasks, a high κ is expected and tells you nothing about whether the labels are correct or useful.</li>
+      <li><strong>Has this score been tracked over time?</strong> A stable κ is more informative than a single reading. Drift is the pattern that matters.</li>
+    </ol>
+
+    <p>IAA is a useful tool. It is not a verdict. A dataset with κ = 0.85 that avoids all the genuinely interesting cases is worse than a dataset with κ = 0.60 that captures the full complexity of the task. The goal is not to maximise the number — it is to understand what the number is actually telling you, and to supplement it with everything it cannot.</p>
+
+    <div class="callout">
+      <div class="callout-label">Work with us</div>
+      <p>Diraflow tracks IAA across multiple metrics, per annotator, per category, and per difficulty cohort — not just as a single project-wide number. If you want annotation data where the quality monitoring is built in rather than bolted on, <a href="../contact.html">get in touch</a>. We respond within one business day.</p>
+    </div>
+
+  </article>
+
+
+  <!-- Related posts -->
+  <section class="related-section">
+    <h3>More from the blog</h3>
+    <div class="related-grid">
+      <a href="great-preference-annotator.html" class="related-card">
+        <div class="related-cat">RLHF</div>
+        <h4>What makes a great preference annotator? Insights from 1,000 calibration tasks</h4>
+        <p>The predictors of annotation quality weren't what we expected going in.</p>
+      </a>
+      <a href="data-flywheel.html" class="related-card">
+        <div class="related-cat">Industry</div>
+        <h4>The data flywheel: how training data quality compounds over model generations</h4>
+        <p>The quality of data you build today shapes models trained years from now.</p>
+      </a>
+      <a href="red-teaming-at-scale.html" class="related-card">
+        <div class="related-cat">Safety</div>
+        <h4>Red-teaming at scale: lessons from 50,000 adversarial prompts</h4>
+        <p>How structured attack taxonomies produce better safety datasets than random fuzzing.</p>
+      </a>
+    </div>-
+  </section>
+
 </main>
 
+<!-- Footer -->
 <footer>
-  <div class="footer-inner">
-    <p>© 2026 Diraflow AI. All rights reserved.</p>
-    <a href="../code-of-conduct.html">Code of Conduct</a>
+  <div class="container-wide">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="../index.html" class="brand" style="margin-bottom:0.875rem;display:inline-flex;">
+          <img src="../assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+        </a>
+        <p>Premium training data for AI agents and LLMs. Built by experts, trusted by frontier AI teams worldwide.</p>
+      </div>
+      <div class="footer-col"><h4>Solutions</h4><ul>
+        <li><a href="../solutions.html#environment">Environment Generation</a></li>
+        <li><a href="../solutions.html#agentic">Agentic Datasets</a></li>
+        <li><a href="../solutions.html#redteaming">Red-Teaming</a></li>
+        <li><a href="../solutions.html#rlhf">RLHF &amp; Preference</a></li>
+      </ul></div>
+      <div class="footer-col"><h4>Company</h4><ul>
+        <li><a href="../blog.html">Blog</a></li>
+        <li><a href="../careers.html">Careers</a></li>
+        <li><a href="../industries.html">Industries</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+      </ul></div>
+      <div class="footer-col"><h4>Connect</h4><ul>
+        <li><a href="mailto:diraflow.ai@gmail.com">diraflow.ai@gmail.com</a></li>
+        <li><a href="https://linkedin.com/company/diraflow" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a href="https://x.com/diraflow_" target="_blank" rel="noopener">Twitter / X</a></li>
+      </ul></div>
+    </div>
+    <div class="footer-bottom">
+      <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+        <p>© 2026 Diraflow AI. All rights reserved.</p>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="../code-of-conduct.html" style="font-size:.8125rem;color:var(--subtle);" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="../privacy-policy.html" style="font-size:.8125rem;color:var(--subtle);" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
+      </div>
+      <p style="font-size:.8125rem;color:var(--subtle);">Made with care for the AI community.</p>
+    </div>
   </div>
 </footer>
 
 <script>
-  (function() {
-    // Theme toggle (light/dark)
-    let toggle = document.getElementById('themeToggle');
-    if (toggle) {
-      let root = document.documentElement;
-      toggle.addEventListener('click', () => {
-        let cur = root.getAttribute('data-theme');
-        let next = cur === 'light' ? 'dark' : 'light';
-        root.setAttribute('data-theme', next);
-        localStorage.setItem('diraflow-theme', next);
-      });
-    }
+window.addEventListener('scroll', function(){
+  var doc = document.documentElement;
+  var top = doc.scrollTop || document.body.scrollTop;
+  var height = (doc.scrollHeight || document.body.scrollHeight) - doc.clientHeight;
+  var pct = height > 0 ? (top / height) * 100 : 0;
+  var fill = document.getElementById('progress-fill');
+  if(fill) fill.style.width = pct.toFixed(1) + '%';
+}, { passive: true });
 
-    // Mobile drawer logic
-    let hbBtn = document.getElementById('hb-btn');
-    let overlay = document.getElementById('hb-overlay');
-    let drawer = document.getElementById('hb-drawer');
-    let closeHb = document.getElementById('hb-close');
+(function(){
+  var btn=document.getElementById('hb-btn');
+  var drawer=document.getElementById('hb-drawer');
+  var overlay=document.getElementById('hb-overlay');
+  var closeBtn=document.getElementById('hb-close');
+  function open(){drawer.classList.add('is-open');overlay.classList.add('is-open');btn.classList.add('is-open');document.body.style.overflow='hidden';}
+  function close(){drawer.classList.remove('is-open');overlay.classList.remove('is-open');btn.classList.remove('is-open');document.body.style.overflow='';}
+  if(btn)btn.addEventListener('click',open);
+  if(overlay)overlay.addEventListener('click',close);
+  if(closeBtn)closeBtn.addEventListener('click',close);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+})();
 
-    function openDrawer() {
-      if (drawer) drawer.classList.add('is-open');
-      if (overlay) overlay.classList.add('is-open');
-    }
-    function closeDrawer() {
-      if (drawer) drawer.classList.remove('is-open');
-      if (overlay) overlay.classList.remove('is-open');
-    }
-    if (hbBtn) hbBtn.addEventListener('click', openDrawer);
-    if (closeHb) closeHb.addEventListener('click', closeDrawer);
-    if (overlay) overlay.addEventListener('click', closeDrawer);
-  })();
+function copyLink(){
+  navigator.clipboard.writeText(window.location.href).then(function(){
+    alert('Link copied!');
+  }).catch(function(){
+    prompt('Copy this link:', window.location.href);
+  });
+}
 </script>
 </body>
 </html>
