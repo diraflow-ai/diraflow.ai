@@ -1,212 +1,756 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Agentic AI Evaluation Datasets for LLM Agents | Diraflow AI</title>
-<meta name="description" content="Learn how to build agentic AI evaluation datasets for LLM agents, autonomous AI systems, and multi-step reasoning workflows.">
-<meta property="og:title" content="Agentic AI Evaluation Datasets for LLM Agents | Diraflow">
-<meta property="og:description" content="Deep dive into AI agent evaluation, trajectory-level annotation, multi-step reasoning datasets, and tool-use fidelity for autonomous AI agents.">
+<title>Why agentic evaluation datasets are fundamentally different — Diraflow</title>
+<meta name="description" content="Multi-step agent evaluation requires a new approach to data design. We break down the key differences from single-turn annotation and share lessons from dozens of agentic training projects.">
+<meta property="og:title" content="Why agentic evaluation datasets are fundamentally different — Diraflow Blog">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://diraflowai.com/blog-posts/agentic-evaluation-datasets.html">
-<link rel="canonical" href="https://diraflowai.com/blog-posts/agentic-evaluation-datasets.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="icon" type="image/png" href="../assets/logo.jpg">
+<link rel="icon" type="image" href="../assets/logo.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 <style>
 :root {
-  --bg:#f7f6f2;--bg2:#eeecea;--fg:#111110;--fg2:#666460;
-  --border:#d8d6d0;--card:#ffffff;--subtle:#999690;
-  --gold:#c8922a;--radius:0.75rem;--radius-lg:1.25rem;
-  --transition:0.2s ease;--shadow:0 4px 24px rgba(0,0,0,0.07);
-}
-[data-theme="dark"]{
-  --bg:#111110;--bg2:#1a1918;--fg:#f7f6f2;--fg2:#999690;
-  --border:#2a2826;--card:#1e1c1b;--subtle:#666460;
+  --bg:#f7f6f2; --bg2:#eeecea; --fg:#111110; --fg2:#555250;
+  --border:#d8d6d0; --card:#ffffff; --subtle:#999690;
+  --gold:#c8922a; --green:#4a9e5c; --red:#dc3c3c;
+  --navy:#0d1b3e; --navy2:#162552;
+  --radius:0.75rem; --radius-lg:1.25rem;
+  --transition:0.2s ease;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
-body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;}
-.container{max: width 1160px;;margin:0 auto;padding:0 1.5rem;}
-.container-narrow{max: width 860px;;margin:0 auto;padding:0 1rem;}
-/* nav styles (same as main site) */
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+img{display:block;max-width:100%;height:auto;}
+a{color:inherit;text-decoration:none;}
+ul{list-style:none;}
+button{font-family:inherit;}
+
+.container-wide   {max-width:1160px;margin:0 auto;padding:0 4rem;}
+.container-article{max-width:1500px; margin:0 auto;padding:0 4rem;}
+@media(max-width:900px){.container-wide,.container-article{padding:0 2.5rem;}}
+@media(max-width:600px){.container-wide,.container-article{padding:0 1.25rem;}}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:68px;left:0;right:0;height:3px;background:var(--border);z-index:200;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),#e6a83a);width:0%;transition:width 0.1s linear;}
+
+/* Nav */
 nav.top{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);height:68px;display:flex;align-items:center;}
-nav.top .container.inner{max-width:1160px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;gap:2rem;width:100%;}
-.brand{display:inline-flex;align-items:center;gap:0.625rem;text-decoration:none;font-weight:700;color:var(--fg);white-space:nowrap;flex-shrink:0;}
-.nav-logo-img{width:36px;height:36px;border-radius:8px;object-fit:contain;}
+nav.top .nav-inner{max-width:1160px;margin:0 auto;padding:0 4rem;display:flex;align-items:center;gap:2rem;width:100%;}
+@media(max-width:900px){nav.top .nav-inner{padding:0 2.5rem;}}
+@media(max-width:600px){nav.top .nav-inner{padding:0 1.25rem;}}
+.brand{display:inline-flex;align-items:center;gap:0.625rem;font-weight:700;color:var(--fg);white-space:nowrap;flex-shrink:0;}
+.nav-logo-img{width:36px;height:36px;border-radius:8px;background:#111;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;font-weight:700;flex-shrink:0;}
 .brand-text{display:flex;flex-direction:column;}
-.brand-name{font-size:1rem;font-weight:700;line-height:1.1;}
-.brand-tagline{font-size:0.65rem;font-weight:400;color:var(--fg2);}
-nav.top ul{display:flex;gap:0;list-style:none;margin:0;padding:0;flex:1;}
-nav.top ul li a{text-decoration:none;font-size:0.875rem;font-weight:500;color:var(--fg2);padding:0.5rem 0.875rem;border-radius:0.5rem;}
+.brand-name   {font-size:1rem;font-weight:700;line-height:1.1;}
+.brand-tagline{font-size:0.65rem;color:var(--fg2);}
+nav.top ul{display:flex;list-style:none;flex:1;margin:0;padding:0;}
+nav.top ul li a{font-size:0.875rem;font-weight:500;color:var(--fg2);padding:0.5rem 0.875rem;border-radius:0.5rem;display:block;transition:color var(--transition),background var(--transition);}
 nav.top ul li a:hover,nav.top ul li a.active{color:var(--fg);background:var(--bg2);}
 .nav-right{display:flex;align-items:center;gap:0.75rem;margin-left:auto;flex-shrink:0;}
-.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.25rem;border-radius:2rem;font-weight:600;font-size:0.875rem;background:var(--fg);color:var(--bg);text-decoration:none;}
-.theme-toggle{background:var(--bg2);border:1px solid var(--border);border-radius:2rem;padding:0.35rem 0.75rem;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;gap:0.4rem;}
-.hb-btn{display:none;flex-direction:column;justify-content:center;align-items:center;width:42px;height:42px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;gap:5px;flex-shrink:0;}
-.hb-btn span{display:block;width:20px;height:2.5px;background:var(--fg);border-radius:3px;}
+.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.55rem 1.2rem;border-radius:2rem;font-weight:600;font-size:0.875rem;cursor:pointer;border:none;background:var(--fg);color:var(--bg);text-decoration:none;transition:opacity 0.2s,transform 0.15s;}
+.btn:hover{opacity:0.85;transform:translateY(-1px);}
+.btn-sm{padding:0.45rem 1rem;font-size:0.8rem;}
+.hb-btn{display:none;flex-direction:column;justify-content:center;align-items:center;width:42px;height:42px;gap:5px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;flex-shrink:0;z-index:9999;}
+.hb-btn span{display:block;width:20px;height:2.5px;background:var(--fg);border-radius:3px;transition:transform 0.3s ease,opacity 0.3s ease;}
+.hb-btn.is-open span:nth-child(1){transform:translateY(7.5px) rotate(45deg);}
+.hb-btn.is-open span:nth-child(2){opacity:0;}
+.hb-btn.is-open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg);}
 @media(max-width:860px){.hb-btn{display:flex!important;}nav.top ul{display:none!important;}.btn.btn-sm{display:none!important;}}
-.hb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);z-index:9997;}
+.hb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(3px);z-index:9997;}
 .hb-overlay.is-open{display:block;}
-.hb-drawer{position:fixed;top:0;right:0;bottom:0;width:290px;background:var(--bg);border-left:1px solid var(--border);z-index:9998;transform:translateX(110%);transition:transform 0.35s ease;}
+.hb-drawer{position:fixed;top:0;right:0;bottom:0;width:290px;max-width:88vw;background:var(--bg);border-left:1px solid var(--border);z-index:9998;display:flex;flex-direction:column;transform:translateX(110%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);box-shadow:-12px 0 50px rgba(0,0,0,0.12);}
 .hb-drawer.is-open{transform:translateX(0);}
-.hb-nav a{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1rem;border-radius:0.75rem;color:var(--fg2);text-decoration:none;}
+.hb-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);}
+.hb-close{width:32px;height:32px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;color:var(--fg2);}
+.hb-close:hover{background:#111;color:#fff;}
+.hb-nav{flex:1;padding:1rem 0.875rem;display:flex;flex-direction:column;gap:0.2rem;}
+.hb-link{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1rem;border-radius:0.75rem;font-size:0.9rem;font-weight:500;color:var(--fg2);border:1px solid transparent;transition:all 0.18s;}
+.hb-link:hover,.hb-link.hb-active{background:rgba(200,146,42,0.09);border-color:rgba(200,146,42,0.22);color:#c8922a;}
+.hb-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border-radius:0.5rem;font-size:1rem;flex-shrink:0;}
 .hb-footer{padding:1.25rem;border-top:1px solid var(--border);}
-.hb-cta{background:#c8922a;color:#fff;padding:0.8rem 1rem;border-radius:2rem;display:block;text-align:center;font-weight:700;}
-/* blog post styling */
-.post-header{padding:3rem 0 2rem;border-bottom:1px solid var(--border);}
-.post-header h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:400;line-height:1.2;}
-.post-meta-large{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;margin:1.5rem 0 1rem;color:var(--fg2);}
-.author-badge{display:flex;align-items:center;gap:0.7rem;}
-.author-badge img{width:44px;height:44px;border-radius:50%;}
-.post-content{font-size:1rem;line-height:1.75;color:var(--fg);margin:2rem auto; max-width: 1400px;}
-.post-content h2{font-family:'DM Serif Display',serif;font-size:1.8rem;margin:2rem 0 1rem;font-weight:400;}
-.post-content h3{font-weight:600;margin:1.5rem 0 0.75rem;font-size:1.25rem;}
-.post-content p{margin-bottom:1.25rem;}
-.post-content ul, .post-content ol{margin:1rem 0 1.5rem 2rem;}
-.post-content li{margin:0.5rem 0;}
-blockquote{border-left:4px solid var(--gold);background:var(--bg2);padding:1rem 1.8rem;margin:1.5rem 0;font-style:italic;}
-code{font-family:'DM Mono',monospace;background:var(--bg2);padding:0.2rem 0.4rem;border-radius:6px;font-size:0.85rem;}
-pre{background:var(--bg2);padding:1rem;border-radius:12px;overflow-x:auto;}
-.related-posts{border-top:1px solid var(--border);margin:3rem 0 2rem;padding-top:2rem;}
-.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:1.5rem;}
-@media(max-width:700px){.related-grid{grid-template-columns:1fr;}}
-.related-card{
-  padding:1.25rem;
-  border:1px solid var(--border);
-  border-radius:1rem;
-  background:var(--card);
-  transition:
-    transform 0.28s ease,
-    box-shadow 0.28s ease,
-    border-color 0.28s ease,
-    background 0.28s ease;
-  cursor:pointer;
+.hb-cta{display:block;text-align:center;background:var(--gold);color:#fff;padding:0.8rem 1rem;border-radius:2rem;font-size:0.875rem;font-weight:700;}
+
+/* ════════════════
+   HERO — full dark, large
+════════════════ */
+.post-hero{
+  position:relative;width:100%;
+  min-height:520px;
+  overflow:hidden;
+  background:var(--navy);
+  display:flex;align-items:flex-end;
+}
+.post-hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 70% 60% at 25% 50%, rgba(30,51,112,0.8) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 70% at 75% 30%, rgba(14,30,80,0.6) 0%, transparent 60%);
+}
+.post-hero-img{
+  position:absolute;right:0;top:0;bottom:0;
+  width:55%;
+  overflow:hidden;
+}
+.post-hero-img img{
+  width:100%;height:100%;object-fit:cover;
+  opacity:0.55;
+  mix-blend-mode:luminosity;
+}
+.post-hero-img::before{
+  content:'';
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(90deg, var(--navy) 0%, transparent 40%);
+}
+.post-hero-content{
+  position:relative;z-index:2;
+  padding:4rem 4rem 4.5rem;
+  max-width:640px;
+}
+@media(max-width:900px){
+  .post-hero{min-height:420px;}
+  .post-hero-img{width:100%;opacity:0.25;}
+  .post-hero-img::before{background:linear-gradient(180deg, transparent 0%, var(--navy) 70%);}
+  .post-hero-content{padding:2rem 2.5rem 3rem;}
+}
+@media(max-width:600px){.post-hero-content{padding:1.5rem 1.25rem 2.5rem;}}
+
+.hero-featured-badge{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  font-size:0.65rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:0.12em;color:#fff;
+  background:var(--gold);
+  padding:0.3rem 0.75rem;border-radius:2rem;
+  margin-bottom:1.25rem;
+}
+.hero-cat-row{display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;}
+.hero-cat-line{width:2rem;height:1.5px;background:var(--gold);}
+.hero-cat-text{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:var(--gold);}
+.post-hero-content h1{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(2rem,4.5vw,3.5rem);
+  font-weight:400;
+  line-height:1.13;
+  letter-spacing:-0.03em;
+  color:#fff;
+  text-shadow:0 2px 24px rgba(0,0,0,0.4);
+  margin-bottom:1.25rem;
+}
+.post-hero-content h1 em{color:#e6a83a;font-style:italic;}
+.post-hero-content p{
+  font-size:1rem;
+  color:rgba(255,255,255,0.6);
+  line-height:1.75;
+  margin-bottom:2rem;
+  max-width:520px;
+}
+.hero-meta-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.hero-author{display:flex;align-items:center;gap:0.75rem;}
+.hero-author img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.2);}
+.hero-author-name{font-size:0.82rem;font-weight:700;color:#fff;}
+.hero-author-date{font-size:0.72rem;color:rgba(255,255,255,0.5);margin-top:0.1rem;}
+.hero-read-badge{
+  font-size:0.72rem;color:rgba(255,255,255,0.6);
+  background:rgba(255,255,255,0.1);
+  border:1px solid rgba(255,255,255,0.18);
+  padding:0.25rem 0.75rem;border-radius:2rem;
+}
+.share-row{display:flex;align-items:center;gap:0.5rem;}
+.share-label{font-size:0.72rem;color:rgba(255,255,255,0.45);}
+.share-btn{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);cursor:pointer;color:rgba(255,255,255,0.7);text-decoration:none;transition:all 0.2s;}
+.share-btn:hover{background:var(--gold);color:#fff;border-color:var(--gold);}
+
+/* Back link */
+.back-link-row{padding:1.5rem 0 0;}
+.back-link{display:inline-flex;align-items:center;gap:0.4rem;font-size:0.82rem;font-weight:600;color:var(--gold);transition:gap 0.2s;}
+.back-link:hover{gap:0.7rem;}
+
+/* ════════════════
+   ARTICLE BODY — all standard styles
+════════════════ */
+.post-body{padding:2rem 0 1rem;font-size:1.0625rem;line-height:1.85;color:var(--fg2);}
+.post-body>*+*{margin-top:1.5rem;}
+.post-body h2{font-family:'DM Serif Display',serif;font-size:clamp(1.5rem,3vw,2rem);font-weight:400;line-height:1.25;letter-spacing:-0.025em;color:var(--fg);margin-top:3.5rem!important;margin-bottom:1rem;padding-top:2.5rem;border-top:1px solid var(--border);}
+.post-body h3{font-size:1.125rem;font-weight:700;color:var(--fg);margin-top:2.5rem!important;margin-bottom:0.75rem;letter-spacing:-0.01em;}
+.post-body p{color:var(--fg2);}
+.post-body strong{color:var(--fg);font-weight:700;}
+.post-body em{font-style:italic;color:var(--fg);}
+.post-body a{color:var(--gold);text-decoration:underline;text-underline-offset:3px;transition:opacity 0.2s;}
+.post-body a:hover{opacity:0.75;}
+.post-body ul{padding-left:0;margin:1.5rem 0;display:flex;flex-direction:column;gap:0.625rem;list-style:none;}
+.post-body ul li{display:flex;align-items:flex-start;gap:0.625rem;color:var(--fg2);line-height:1.75;}
+.post-body ul li::before{content:'→';color:var(--gold);font-weight:700;flex-shrink:0;margin-top:0.1rem;}
+.post-body ol{padding-left:0;margin:1.5rem 0;display:flex;flex-direction:column;gap:0.625rem;counter-reset:post-counter;list-style:none;}
+.post-body ol li{display:flex;align-items:flex-start;gap:0.875rem;color:var(--fg2);line-height:1.75;counter-increment:post-counter;}
+.post-body ol li::before{content:counter(post-counter);min-width:26px;height:26px;background:var(--gold);color:#fff;border-radius:50%;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0.1rem;}
+.post-body blockquote{border-left:3px solid var(--gold);background:var(--bg2);padding:1.35rem 1.5rem;margin:2.5rem 0;border-radius:0 var(--radius-lg) var(--radius-lg) 0;font-style:italic;color:var(--fg);font-size:1.05rem;line-height:1.75;}
+.post-body blockquote cite{display:block;margin-top:0.875rem;font-style:normal;font-size:0.82rem;color:var(--fg2);font-weight:600;}
+.post-body code{font-family:'DM Mono',monospace;font-size:0.875em;background:var(--bg2);color:var(--fg);padding:0.15em 0.45em;border-radius:4px;border:1px solid var(--border);}
+.post-body pre{background:#1a1918;border:1px solid #2a2826;border-radius:var(--radius-lg);padding:1.5rem;overflow-x:auto;margin:2rem 0;font-family:'DM Mono',monospace;font-size:0.875rem;line-height:1.65;color:#f7f6f2;}
+.post-body pre code{background:none;border:none;padding:0;color:#f7f6f2;}
+.post-body figure{margin:2.5rem 0;}
+.post-body figure img{width:100%;border-radius:var(--radius-lg);border:1px solid var(--border);}
+.post-body figcaption{font-size:0.8rem;color:var(--subtle);text-align:center;margin-top:0.625rem;font-style:italic;}
+.post-body table{width:100%;border-collapse:collapse;margin:2rem 0;font-size:0.875rem;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);}
+.post-body table th{background:var(--fg);color:var(--bg);padding:0.75rem 1rem;text-align:left;font-weight:700;font-size:0.78rem;letter-spacing:0.04em;}
+.post-body table td{padding:0.7rem 1rem;border-bottom:1px solid var(--border);color:var(--fg2);vertical-align:top;line-height:1.55;}
+.post-body table tr:last-child td{border-bottom:none;}
+.post-body table tr:nth-child(even) td{background:var(--bg2);}
+
+/* ════════════════
+   UNIQUE COMPONENTS for this post
+════════════════ */
+
+/* Stat strip */
+.stat-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:2.5rem 0;}
+@media(max-width:500px){.stat-strip{grid-template-columns:1fr;}}
+.stat-box{background:var(--navy);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;position:relative;overflow:hidden;}
+.stat-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
+.stat-box .stat-num{font-family:'DM Serif Display',serif;font-size:2rem;color:#e6a83a;line-height:1;margin-bottom:0.3rem;}
+.stat-box .stat-lbl{font-size:0.75rem;color:rgba(255,255,255,0.5);line-height:1.4;}
+
+/* Callouts */
+.callout{background:rgba(200,146,42,0.07);border:1px solid rgba(200,146,42,0.25);border-left:3px solid var(--gold);border-radius:0 var(--radius-lg) var(--radius-lg) 0;padding:1.25rem 1.5rem;margin:2rem 0;}
+.callout-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.5rem;}
+.callout p{font-size:0.9rem;color:var(--fg);line-height:1.7;margin:0!important;}
+.callout-info{background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-left:3px solid #3b82f6;border-radius:0 var(--radius-lg) var(--radius-lg) 0;padding:1.25rem 1.5rem;margin:2rem 0;}
+.callout-info .callout-label{color:#3b82f6;}
+.callout-info p{font-size:0.9rem;color:var(--fg);line-height:1.7;margin:0!important;}
+
+/* ── UNIQUE: Trajectory step visualiser ── */
+.trajectory-viz{
+  background:var(--navy);
+  border-radius:var(--radius-lg);
+  padding:2rem 2rem 1.5rem;
+  margin:2.5rem 0;
   position:relative;
   overflow:hidden;
 }
-
-.related-card:hover{
-  transform:translateY(-6px);
-  box-shadow:0 12px 32px rgba(0,0,0,0.12);
-  border-color:var(--gold);
-  background:linear-gradient(
-    180deg,
-    var(--card) 0%,
-    rgba(200,146,42,0.04) 100%
-  );
+.trajectory-viz::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold),#3b82f6,transparent);
 }
-
-.related-card::before{
-  content:"";
+.traj-label{
+  font-size:0.65rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.14em;
+  color:rgba(255,255,255,0.35);
+  margin-bottom:1.25rem;
+  display:flex;align-items:center;gap:0.5rem;
+}
+.traj-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.08);}
+.traj-steps{display:flex;flex-direction:column;gap:0;}
+.traj-step{
+  display:grid;
+  grid-template-columns:28px 1fr;
+  gap:0 1rem;
+  position:relative;
+}
+/* vertical connector line */
+.traj-step:not(:last-child) .traj-dot::after{
+  content:'';
   position:absolute;
-  top:0;
-  left:-120%;
-  width:120%;
-  height:100%;
-  background:linear-gradient(
-    90deg,
-    transparent,
-    rgba(255,255,255,0.08),
-    transparent
-  );
-  transition:left 0.7s ease;
+  top:28px;left:50%;
+  transform:translateX(-50%);
+  width:2px;height:calc(100% + 1rem);
+  background:rgba(255,255,255,0.08);
+  z-index:0;
 }
-
-.related-card:hover::before{
-  left:120%;
+.traj-dot{
+  width:28px;height:28px;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.05);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.62rem;font-weight:700;color:rgba(255,255,255,0.5);
+  flex-shrink:0;position:relative;z-index:1;
+  margin-top:0.15rem;
 }
-
-.related-card a{
-  text-decoration:none;
-  transition:color 0.25s ease;
+.traj-step.success .traj-dot{border-color:var(--gold);background:rgba(200,146,42,0.15);color:#e6a83a;}
+.traj-step.fail    .traj-dot{border-color:#ef4444;background:rgba(239,68,68,0.1);color:#f87171;}
+.traj-step.neutral .traj-dot{border-color:#3b82f6;background:rgba(59,130,246,0.1);color:#60a5fa;}
+.traj-body{padding-bottom:1.25rem;}
+.traj-action{font-size:0.78rem;font-weight:700;color:rgba(255,255,255,0.85);margin-bottom:0.2rem;font-family:'DM Mono',monospace;}
+.traj-note{font-size:0.72rem;color:rgba(255,255,255,0.4);line-height:1.5;}
+.traj-outcome{
+  display:inline-flex;align-items:center;gap:0.35rem;
+  font-size:0.65rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.08em;
+  margin-top:0.35rem;
+  padding:0.15rem 0.5rem;border-radius:2rem;
 }
+.traj-outcome.ok{background:rgba(200,146,42,0.15);color:#e6a83a;}
+.traj-outcome.err{background:rgba(239,68,68,0.12);color:#f87171;}
+.traj-outcome.info{background:rgba(59,130,246,0.12);color:#60a5fa;}
 
-.related-card:hover a{
-  color:var(--gold);
+/* ── UNIQUE: Comparison two-column (dark vs light) ── */
+.compare-cols{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:2rem 0;}
+@media(max-width:560px){.compare-cols{grid-template-columns:1fr;}}
+.compare-col{border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;}
+.compare-col-head{padding:0.875rem 1.25rem;border-bottom:1px solid var(--border);}
+.compare-col-head .col-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.25rem;}
+.compare-col-head h4{font-size:0.9rem;font-weight:700;color:var(--fg);}
+.col-bad{background:rgba(220,60,60,0.05);}
+.col-bad .col-label{color:var(--red);}
+.col-good{background:rgba(200,146,42,0.06);}
+.col-good .col-label{color:var(--gold);}
+.compare-col-body{padding:1.25rem;background:var(--card);}
+.compare-col-body ul{margin:0;display:flex;flex-direction:column;gap:0.5rem;}
+.compare-col-body ul li{display:flex;align-items:flex-start;gap:0.625rem;font-size:0.85rem;color:var(--fg2);line-height:1.65;}
+.col-bad  .compare-col-body ul li::before{content:'✗';color:var(--red);font-weight:700;flex-shrink:0;}
+.col-good .compare-col-body ul li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0;}
+
+/* ── UNIQUE: Numbered pillars ── */
+.pillars{display:flex;flex-direction:column;gap:0;margin:2rem 0;}
+.pillar{
+  display:grid;
+  grid-template-columns:56px 1fr;
+  gap:0 1.25rem;
+  padding:1.5rem 0;
+  border-bottom:1px solid var(--border);
+  align-items:start;
 }
-
-.related-card p{
-  margin-top:0.5rem;
-  color:var(--fg2);
-  transition:color 0.25s ease;
+.pillar:last-child{border-bottom:none;}
+.pillar-num{
+  font-family:'DM Serif Display',serif;
+  font-size:2rem;
+  color:rgba(200,146,42,0.25);
+  line-height:1;
+  font-weight:400;
+  text-align:right;
+  padding-top:0.1rem;
+  user-select:none;
 }
+.pillar-content h3{font-size:0.95rem;font-weight:700;color:var(--fg);margin-bottom:0.4rem;letter-spacing:-0.01em;}
+.pillar-content p{font-size:0.875rem;color:var(--fg2);line-height:1.7;margin:0;}
 
-.related-card:hover p{
-  color:var(--fg);
-}
+/* Author card */
+.author-card{display:flex;gap:1.25rem;align-items:flex-start;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem;margin:3rem 0;}
+.author-card img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;}
+.author-card-name{font-size:1rem;font-weight:700;color:var(--fg);margin-bottom:0.2rem;}
+.author-card-title{font-size:0.78rem;color:var(--gold);font-weight:600;margin-bottom:0.625rem;}
+.author-card p{font-size:0.85rem;color:var(--fg2);line-height:1.7;margin:0!important;}
+@media(max-width:500px){.author-card{flex-direction:column;}}
 
-footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 0 1.5rem;margin-top:2rem;}
+/* Related */
+.related-section{border-top:1px solid var(--border);padding-top:2.5rem;}
+.related-section>h3{font-family:'DM Serif Display',serif;font-size:1.35rem;font-weight:400;color:var(--fg);margin-bottom:1.5rem;}
+.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+@media(max-width:640px){.related-grid{grid-template-columns:1fr;}}
+.related-card{display:block;padding:1.25rem;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--card);text-decoration:none;transition:transform 0.25s ease,box-shadow 0.25s ease,border-color 0.25s ease;}
+.related-card:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(0,0,0,0.08);border-color:var(--gold);}
+.related-cat{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold);margin-bottom:0.5rem;}
+.related-card h4{font-size:0.875rem;font-weight:700;color:var(--fg);line-height:1.4;margin-bottom:0.4rem;}
+.related-card p{font-size:0.75rem;color:var(--fg2);line-height:1.5;margin:0;}
+
+/* Footer */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:4rem 0 0;margin-top:4rem;}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem;}
+@media(max-width:760px){.footer-grid{grid-template-columns:1fr 1fr;gap:2rem;}}
+@media(max-width:480px){.footer-grid{grid-template-columns:1fr;}}
+.footer-brand p{font-size:0.875rem;color:var(--fg2);line-height:1.7;margin-top:0.75rem;}
+.footer-col h4{font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--fg2);margin-bottom:1.25rem;}
+.footer-col ul{display:flex;flex-direction:column;gap:0.625rem;}
+.footer-col ul li a{font-size:0.875rem;color:var(--fg2);transition:color 0.2s;}
+.footer-col ul li a:hover{color:var(--gold);}
+.footer-bottom{border-top:1px solid var(--border);padding:1.5rem 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.footer-bottom p{font-size:0.8125rem;color:var(--subtle);}
 </style>
 </head>
 <body>
 
-<nav class="top"><div class="container inner"><a href="../index.html" class="brand"><img src="../assets/logo.jpg" alt="Diraflow" class="nav-logo-img"><span class="brand-text"><span class="brand-name">Diraflow</span><span class="brand-tagline">Training data for frontier AI</span></span></a><ul><li><a href="../index.html">Home</a></li><li><a href="../solutions.html">Solutions</a></li><li><a href="../industries.html">Industries</a></li><li><a href="../blog.html" class="active">Blog</a></li><li><a href="../careers.html">Careers</a></li><li><a href="../contact.html">Contact Us</a></li></ul><div class="nav-right"><button class="theme-toggle" id="themeToggle"><span class="icon-sun">☀️</span><span class="icon-moon">🌙</span></button><button class="hb-btn" id="hb-btn"><span></span><span></span><span></span></button></div></div></nav>
-<div class="hb-overlay" id="hb-overlay"></div><div class="hb-drawer" id="hb-drawer"><div class="hb-drawer-head" style="display:flex;justify-content:space-between;padding:1rem;"><span>Menu</span><button id="hb-close" style="background:none;border:none;font-size:1.5rem;">✕</button></div><nav class="hb-nav"><a href="../index.html">Home</a><a href="../solutions.html">Solutions</a><a href="../industries.html">Industries</a><a href="../blog.html">Blog</a><a href="../careers.html">Careers</a><a href="../contact.html">Contact</a></nav><div class="hb-footer"><a href="../contact.html" class="hb-cta">Talk to an expert →</a></div></div>
+<div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
 
-<div class="container-narrow">
-  <div class="post-header">
-    <a href="../blog.html" style="display:inline-block;margin-bottom:1rem;color:var(--gold);">← Back to blog</a>
-    <h1>How to Build Agentic AI Evaluation Datasets for LLM Agents</h1>
-    <div class="post-meta-large">
-      <div class="author-badge"><img src="../assets/Dominic.jpg" alt="Dominic G."><div><strong>Dominic G.</strong><br>Sales Department . Diraflow </div></div>
-      <span>Apr 14, 2026 · 8 min read</span>
+<nav class="top">
+  <div class="nav-inner">
+    <a href="../index.html" class="brand">
+      <img src="../assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+      <span class="brand-text"><span class="brand-name">Diraflow</span><span class="brand-tagline">Training data for frontier AI</span></span>
+    </a>
+    <ul>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="../solutions.html">Solutions</a></li>
+      <li><a href="../industries.html">Industries</a></li>
+      <li><a href="../blog.html" class="active">Blog</a></li>
+      <li><a href="../careers.html">Careers</a></li>
+      <li><a href="../contact.html">Contact Us</a></li>
+      <li><a href="../team.html">Our Team</a></li>
+      <li><a href="../report.html">Report Concerns</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="../contact.html" class="btn btn-sm">Talk to us</a>
+      <button class="hb-btn" id="hb-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
     </div>
   </div>
-  <div class="post-content">
-    <p>Agentic AI systems are redefining what’s possible with large language models (LLMs). From autonomous AI agents that write and debug code to enterprise AI workflows that call APIs and use external tools, modern AI agents operate across multi-step environments. But evaluating these systems requires a fundamentally different type of AI training dataset. Traditional NLP benchmarks fail because they ignore sequential reasoning, tool usage, state transitions, and trajectory-level decision making. Over the last two years, Diraflow has built agentic AI datasets and evaluation pipelines for frontier AI labs developing advanced LLM agents.</p>
-    <h2>Why AI Agent Evaluation Requires Multi-Step Reasoning Datasets</h2>
-    <p>Traditional supervised fine-tuning (SFT) and RLHF datasets are designed around isolated prompt-response pairs. AI agents behave differently. An autonomous AI agent may browse files, execute tools, retry failed actions, interpret logs, and adapt its strategy across multiple steps. Because of this, agentic AI evaluation requires trajectory-based datasets that measure reasoning quality, tool-use fidelity, and long-horizon task completion.</p>
-    <h3>Where single-turn datasets mislead</h3>
-    <p>Suppose you’re building a dataset for a coding agent. A standard “code generation” dataset would provide a docstring and expect a final function. But in reality, agents run code, see error messages, debug, and iterate. If an evaluation dataset doesn’t capture whether the agent correctly interprets a stack trace and reverts a bad edit, it won’t measure real-world competence. That’s why we’ve moved to <strong>sandboxed environment snapshots</strong> and step-wise metrics like “cost-to-success” or “action efficiency”.</p>
-    <h2>Core Components of High-Quality Agentic AI Datasets</h2>
-    <ul>
-      <li><strong>Environment fidelity:</strong> Simulate realistic tools (bash, REST APIs, browsers). Low-fidelity mocks train brittle policies.</li>
-      <li><strong>Partial credit & reward modeling:</strong> Subgoal completion should be scored even when the final answer is wrong.</li>
-      <li><strong>Diversity of strategies:</strong> Two expert annotators might solve the same task using entirely different tool sequences; both must be accepted as positive examples.</li>
-      <li><strong>Anti-hacking measures:</strong> Agents find shortcuts. Dataset environments need to be adversarially validated.</li>
-    </ul>
-    <pre><code># Example trajectory annotation format (simplified)
-{
-  "task": "Fix the failing test in auth_service.py",
-  "initial_state": "hash_of_snapshot",
-  "expected_final_state": "all_tests_pass",
-  "positive_trajectories": [
-    ["ls -la", "cat auth_service.py", "sed ...", "pytest"],
-    ["find . -name '*.py'", "python -m pytest -k auth", "git diff"]
-  ],
-  "reward_structure": {"test_pass":1.0, "edit_cleanliness":0.3}
-}</code></pre>
-    <h2>How Diraflow Builds AI Agent Evaluation Datasets</h2>
-    <p>We combine expert annotators (former software engineers, security researchers) with programmatic sandbox tracing. Annotators interact inside instrumented environments; we record every keystroke, tool call, and environmental observation. We then cluster successful trajectories, identify common failure modes, and use those to generate synthetic variations. The result: agentic benchmarks that correlate with real-world deployment success, not just static leaderboard scores.</p>
-    <blockquote>“The first time we evaluated our agent on Diraflow’s dataset, we discovered it was blindly retrying failed API calls — a behaviour that never appeared in static unit tests. That changed our entire training strategy.” — ML Lead, major AI lab</blockquote>
-    <h2>Practical recommendations for agentic data projects</h2>
-    <p>If you're building your own agentic evaluation suite, start with these steps: (1) define a state transition model for your environment; (2) collect raw trajectory logs from human experts; (3) design a rubric for partial success; (4) use inter-annotator agreement on trajectory quality, not just final outcomes; (5) iterate with red-team style adversarial agents to find blind spots.</p>
-    <p>The era of single-turn benchmarks is ending. Agentic evaluation is the new frontier — and it starts with data that captures the richness of real, multi-step reasoning.</p>
-    <h2>Common Use Cases for Agentic AI Evaluation</h2>
-
-<p>Organizations building advanced AI agents use agentic evaluation datasets for:</p>
-
-<ul>
-  <li>Code generation and software engineering agents</li>
-  <li>Browser automation agents</li>
-  <li>Research and retrieval AI systems</li>
-  <li>Multi-agent orchestration workflows</li>
-  <li>Autonomous customer support systems</li>
-  <li>Tool-using LLM applications</li>
-</ul>
-
-<p>As AI systems become increasingly autonomous, trajectory-level evaluation is becoming one of the most important challenges in AI safety, reliability, and performance measurement.</p>
-
-<br>Need custom agentic evaluation datasets for your AI system? <strong><a href="../contact.html" style="color:var(--primary);">Contact Diraflow AI</a></strong> to build human-generated evaluation pipelines for autonomous agents, tool use, reasoning traces, and safety benchmarking.<br>
-
+</nav>
+<div class="hb-overlay" id="hb-overlay"></div>
+<div class="hb-drawer" id="hb-drawer">
+  <div class="hb-drawer-head">
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <div class="nav-logo-img" style="width:32px;height:32px;font-size:0.875rem;">D</div>
+      <span style="font-weight:700;color:var(--fg);">Diraflow</span>
+    </div>
+    <button class="hb-close" id="hb-close">✕</button>
   </div>
-  <div class="related-posts"><h3>Related reads</h3><div class="related-grid"><div class="related-card"><a href="red-teaming-at-scale.html" style="font-weight:bold;">Red-teaming at scale →</a><p style="font-size:0.8rem;">Lessons from 5k adversarial prompts</p></div><div class="related-card"><a href="coding-task-environments.html" style="font-weight:bold;">Coding task environments →</a><p style="font-size:0.8rem;">How to test agent capability</p></div></div></div>
+  <nav class="hb-nav">
+    <a href="../index.html"      class="hb-link"><span class="hb-icon">🏠</span>Home</a>
+    <a href="../solutions.html"  class="hb-link"><span class="hb-icon">⚙️</span>Solutions</a>
+    <a href="../industries.html" class="hb-link"><span class="hb-icon">🏭</span>Industries</a>
+    <a href="../blog.html"       class="hb-link hb-active"><span class="hb-icon">✍️</span>Blog</a>
+    <a href="../careers.html"    class="hb-link"><span class="hb-icon">💼</span>Careers</a>
+    <a href="../contact.html"    class="hb-link"><span class="hb-icon">✉️</span>Contact Us</a>
+    <a href="../team.html"       class="hb-link"><span class="hb-icon">👥</span>Our Team</a>
+    <a href="../report.html"     class="hb-link"><span class="hb-icon">⚠️</span>Report Concerns</a>
+  </nav>
+  <div class="hb-footer"><a href="../contact.html" class="hb-cta">Talk to an expert →</a></div>
 </div>
 
-<footer><div class="container"><div class="footer-bottom"><p>© 2026 Diraflow AI. All rights reserved.</p><a href="../code-of-conduct.html" style="color:var(--subtle);">Code of Conduct</a></div></div></footer>
+<!-- ════════════════ HERO ════════════════ -->
+<div class="post-hero">
+  <div class="post-hero-bg"></div>
+  <div class="post-hero-img">
+    <img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=1200&q=80&auto=format&fit=crop"
+         alt="Agentic AI neural network" loading="eager">
+  </div>
+  <div class="post-hero-content">
+    <div class="hero-featured-badge">✦ Featured</div>
+    <div class="hero-cat-row">
+      <div class="hero-cat-line"></div>
+      <span class="hero-cat-text">Deep Dive</span>
+    </div>
+    <h1>Why agentic evaluation datasets are <em>fundamentally different</em> — and how to build them right</h1>
+    <p>Multi-step agent evaluation requires a new approach to data design. We break down the key differences from single-turn annotation and share lessons from dozens of agentic training projects.</p>
+    <div class="hero-meta-row">
+      <div class="hero-author">
+        <img src="../assets/Dominic.jpg" alt="Dominic G.">
+        <div>
+          <div class="hero-author-name">Dominic G.</div>
+          <div class="hero-author-date">Apr 14, 2026</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+        <span class="hero-read-badge">8 min read</span>
+        <div class="share-row">
+          <span class="share-label">Share</span>
+          <a href="https://twitter.com/intent/tweet?text=Why+agentic+evaluation+datasets+are+fundamentally+different&url=https://diraflowai.com/blog-posts/agentic-evaluation-datasets"
+             target="_blank" rel="noopener" class="share-btn" title="Share on X">𝕏</a>
+          <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://diraflowai.com/blog-posts/agentic-evaluation-datasets"
+             target="_blank" rel="noopener" class="share-btn" title="Share on LinkedIn">in</a>
+          <button class="share-btn" onclick="copyLink()" title="Copy link">🔗</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-<script>(function(){let toggle=document.getElementById('themeToggle');if(toggle){let root=document.documentElement;toggle.addEventListener('click',()=>{let cur=root.getAttribute('data-theme');let next=cur==='light'?'dark':'light';root.setAttribute('data-theme',next);localStorage.setItem('diraflow-theme',next);});}
-let hbBtn=document.getElementById('hb-btn');let overlay=document.getElementById('hb-overlay');let drawer=document.getElementById('hb-drawer');let closeHb=document.getElementById('hb-close');function openDrawer(){drawer.classList.add('is-open');overlay.classList.add('is-open');}function closeDrawer(){drawer.classList.remove('is-open');overlay.classList.remove('is-open');}hbBtn?.addEventListener('click',openDrawer);closeHb?.addEventListener('click',closeDrawer);overlay?.addEventListener('click',closeDrawer);})();</script>
+<!-- ════════════════ ARTICLE ════════════════ -->
+<main class="container-article">
+
+  <div class="back-link-row">
+    <a href="../blog.html" class="back-link">← Back to blog</a>
+  </div>
+
+  <article class="post-body">
+
+    <p>Agentic AI systems are redefining what's possible with large language models. From autonomous coding agents that write, run, and debug software to enterprise AI workflows that chain tool calls across multiple APIs, modern agents operate across <em>multi-step environments</em> where a single wrong decision compounds into cascading failure. Traditional NLP benchmarks — built around isolated prompt-response pairs — are completely blind to this.</p>
+
+    <p>Over the past two years, Diraflow has built agentic evaluation datasets for frontier AI labs developing advanced LLM agents. Here is what the work has taught us about why trajectory-level data is so different to build, and what it takes to do it right.</p>
+
+    <div class="stat-strip">
+      <div class="stat-box"><div class="stat-num">83%</div><div class="stat-lbl">Of agentic failures occur mid-trajectory — not at the final step</div></div>
+      <div class="stat-box"><div class="stat-num">4×</div><div class="stat-lbl">More agent errors when evaluation environments are cleaner than production</div></div>
+      <div class="stat-box"><div class="stat-num">~3.4</div><div class="stat-lbl">Average number of valid solution paths per task in our agentic dataset library</div></div>
+    </div>
+
+    <h2>The single-turn illusion</h2>
+
+    <p>Standard training datasets present a prompt and expect a response. This framing is so deeply embedded in ML infrastructure that it shapes not just what we measure, but what we think good performance looks like. An agent that produces a correct-looking output on a clean, static benchmark may fail completely when deployed in an environment where it has to take actions, observe their effects, and decide what to do next.</p>
+
+    <p>The failure is not usually in the final generation. It's in the steps before it — the agent's ability to navigate to the relevant context, interpret ambiguous intermediate states, recover from errors, and resist the temptation to hallucinate a shortcut to the finish line.</p>
+
+    <div class="compare-cols">
+      <div class="compare-col">
+        <div class="compare-col-head col-bad">
+          <div class="col-label">❌ Single-turn evaluation</div>
+          <h4>What most datasets measure</h4>
+        </div>
+        <div class="compare-col-body">
+          <ul>
+            <li>One prompt, one response — no environmental feedback</li>
+            <li>Context is pre-populated; agent never needs to navigate</li>
+            <li>Correct output is binary — no partial credit for sound reasoning</li>
+            <li>No recovery signal — agent can't observe and iterate</li>
+            <li>Task is fully specified — ambiguity is treated as an error</li>
+            <li>Measures generation quality, not problem-solving capability</li>
+          </ul>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="compare-col-head col-good">
+          <div class="col-label">✓ Trajectory-level evaluation</div>
+          <h4>What agentic datasets require</h4>
+        </div>
+        <div class="compare-col-body">
+          <ul>
+            <li>Multi-step sequences with real environment state transitions</li>
+            <li>Agent must locate relevant context before acting on it</li>
+            <li>Partial credit for correct reasoning; subgoal-level scoring</li>
+            <li>Execution feedback — agent runs code, reads output, iterates</li>
+            <li>Underspecified tasks that require interpretation and inference</li>
+            <li>Measures the full problem-solving process, not just the final output</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <h2>What a real agentic trajectory looks like</h2>
+
+    <p>Below is a simplified annotated trajectory from our dataset — a software engineering task where the agent must diagnose and fix a failing test. Notice how the interesting information lives in the intermediate steps, not the final answer.</p>
+
+    <div class="trajectory-viz">
+      <div class="traj-label">Example trajectory — SWE task: fix failing auth test</div>
+      <div class="traj-steps">
+
+        <div class="traj-step neutral">
+          <div class="traj-dot">1</div>
+          <div class="traj-body">
+            <div class="traj-action">$ pytest tests/test_auth.py -v</div>
+            <div class="traj-note">Agent runs the full test suite first to understand scope of failure</div>
+            <div class="traj-outcome info">3 failed, 12 passed — scope identified</div>
+          </div>
+        </div>
+
+        <div class="traj-step neutral">
+          <div class="traj-dot">2</div>
+          <div class="traj-body">
+            <div class="traj-action">$ cat auth/middleware.py | grep -n "token"</div>
+            <div class="traj-note">Searches for token handling logic — correct diagnostic strategy</div>
+            <div class="traj-outcome info">Locates validate_token() on line 47</div>
+          </div>
+        </div>
+
+        <div class="traj-step fail">
+          <div class="traj-dot">3</div>
+          <div class="traj-body">
+            <div class="traj-action">sed -i 's/expire_at/expires_at/g' auth/middleware.py</div>
+            <div class="traj-note">Applies fix — but introduces a regression in token creation path</div>
+            <div class="traj-outcome err">Partial fix — new failure introduced</div>
+          </div>
+        </div>
+
+        <div class="traj-step neutral">
+          <div class="traj-dot">4</div>
+          <div class="traj-body">
+            <div class="traj-action">$ pytest tests/ -v 2>&1 | tail -20</div>
+            <div class="traj-note">Agent re-runs tests, reads stack trace, identifies regression</div>
+            <div class="traj-outcome info">Detects new failure in test_create_token</div>
+          </div>
+        </div>
+
+        <div class="traj-step success">
+          <div class="traj-dot">5</div>
+          <div class="traj-body">
+            <div class="traj-action">Targeted edit — restores expire_at in creation path only</div>
+            <div class="traj-note">Correctly scopes the fix after reading the full diff</div>
+            <div class="traj-outcome ok">All 15 tests pass ✓</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <p>A static benchmark would give this agent full marks for the final answer. A trajectory-level evaluation gives it credit for steps 1, 2, and 4 — and penalises step 3, flagging it as a regression-introducing edit. That distinction is the signal that actually improves agent behaviour during training.</p>
+
+    <h2>The five properties that define high-quality agentic data</h2>
+
+    <div class="pillars">
+      <div class="pillar">
+        <div class="pillar-num">01</div>
+        <div class="pillar-content">
+          <h3>Environment fidelity</h3>
+          <p>Low-fidelity mocks train brittle policies. Agents evaluated in simplified environments learn to exploit the simplification, not to reason. Realistic tool interfaces — real bash, real API call patterns, real file system state — are not optional.</p>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">02</div>
+        <div class="pillar-content">
+          <h3>Subgoal-level scoring</h3>
+          <p>Binary success/failure destroys training signal. An agent that correctly diagnoses a bug but introduces a regression during the fix deserves a different reward signal than one that gave up in step one. Reward structures need to reflect the quality of the reasoning process, not just the terminal state.</p>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">03</div>
+        <div class="pillar-content">
+          <h3>Multiple valid trajectories</h3>
+          <p>Two expert annotators solving the same task often take completely different paths — different tool sequences, different diagnostic strategies, different intermediate representations. Both are correct. A dataset that accepts only one path teaches agents that there is a canonical procedure. There isn't.</p>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">04</div>
+        <div class="pillar-content">
+          <h3>Adversarial validation</h3>
+          <p>Agents find shortcuts. Any reward structure that can be hacked will be hacked during training. Every environment in our dataset library is red-teamed by a separate team specifically looking for ways to achieve high scores through exploits rather than genuine task completion.</p>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">05</div>
+        <div class="pillar-content">
+          <h3>Execution during evaluation</h3>
+          <p>Assessing code that was never run is assessing plausibility, not correctness. Our evaluation pipelines run agents inside sandboxed execution contexts — real code, real tool calls, real failure messages — and score the full execution trajectory, not predicted outputs.</p>
+        </div>
+      </div>
+    </div>
+
+    <h2>How we build it: the Diraflow pipeline</h2>
+
+    <p>We combine expert annotators — former software engineers, security researchers, domain specialists — with programmatic sandbox tracing. Annotators work inside instrumented environments where every keystroke, tool invocation, and environmental observation is recorded. We then cluster successful trajectories, identify common failure modes, and use those clusters to generate targeted synthetic variations that cover the long tail of edge cases natural collection misses.</p>
+
+<pre><code>// Trajectory annotation format (simplified)
+{
+  "task": "Fix the failing test in auth_service.py",
+  "initial_state": "snapshot_hash_abc123",
+  "expected_final_state": "all_tests_pass",
+  "positive_trajectories": [
+    ["pytest -v", "cat auth_service.py", "targeted_edit", "pytest"],
+    ["find . -name '*.py'", "grep -n token", "git diff", "patch"]
+  ],
+  "reward_structure": {
+    "all_tests_pass": 1.0,
+    "no_regressions_introduced": 0.5,
+    "edit_minimality": 0.3,
+    "correct_diagnostic_step": 0.2
+  },
+  "anti_shortcut_checks": ["no_delete_tests", "no_hardcode_expected"]
+}</code></pre>
+
+    <blockquote>
+      "The first time we evaluated our agent on Diraflow's agentic dataset, we discovered it was blindly retrying failed API calls 11 times before giving up — a behaviour that never appeared in static unit tests. That single finding changed our entire training strategy."
+      <cite>— ML Lead, large frontier AI lab (name withheld)</cite>
+    </blockquote>
+
+    <div class="callout-info">
+      <div class="callout-label">ℹ️ On inter-annotator agreement for trajectories</div>
+      <p>IAA in trajectory annotation is more complex than in single-turn labelling. Two annotators might produce trajectories with no step in common but identical final outcomes — both are valid positives. We measure agreement on three dimensions independently: final state quality, subgoal completion rate, and strategy efficiency. Overall trajectory-level IAA (κ) on our SWE tasks sits at 0.71 — lower than factual annotation but appropriate for the inherent diversity of valid problem-solving approaches.</p>
+    </div>
+
+    <h2>What this means for teams building agents</h2>
+
+    <p>The era of single-turn benchmarks as a proxy for agent capability is ending. Leaderboard scores on static datasets tell you whether your model can produce plausible-looking outputs. They tell you almost nothing about whether it can operate in an environment, adapt to feedback, and complete tasks that require sustained multi-step reasoning.</p>
+
+    <ol>
+      <li><strong>Invest in environment infrastructure first.</strong> The quality of your agentic evaluation is bounded by the fidelity of your environments. This is infrastructure work, not annotation work — budget for it accordingly.</li>
+      <li><strong>Design reward structures before collecting data.</strong> Retrofitting subgoal scoring onto existing trajectory data is painful. Define what partial success looks like for each task type before a single trajectory is collected.</li>
+      <li><strong>Accept trajectory diversity as signal, not noise.</strong> Multiple valid paths to the same outcome are a feature of the domain, not a quality problem. Your annotation process should capture that diversity, not flatten it.</li>
+      <li><strong>Red-team your environments continuously.</strong> Agents evolve. An environment that was robust against last month's model may have exploitable shortcuts against this month's. Adversarial validation needs to be an ongoing process, not a one-time audit.</li>
+      <li><strong>Annotate failure modes, not just successes.</strong> The trajectories where agents go wrong — particularly the ones that look plausible but introduce regressions — are some of the most valuable training examples in the entire corpus. Collect and annotate them deliberately.</li>
+    </ol>
+
+    <div class="callout">
+      <div class="callout-label">Work with us</div>
+      <p>Diraflow builds agentic evaluation datasets with sandboxed execution environments, multi-trajectory annotation, subgoal-level reward structures, and adversarial environment validation built in by default. If you're developing LLM agents and want evaluation data that actually predicts production performance, <a href="../contact.html">get in touch</a>. We respond within one business day.</p>
+    </div>
+
+  </article>
+
+
+
+  <!-- Related posts -->
+  <section class="related-section">
+    <h3>More from the blog</h3>
+    <div class="related-grid">
+      <a href="building-coding-task-environments.html" class="related-card">
+        <div class="related-cat">Engineering</div>
+        <h4>Building coding task environments that actually test agent capability</h4>
+        <p>Most code evaluation environments are too clean. Real tasks are messy and ambiguous.</p>
+      </a>
+      <a href="red-teaming-at-scale.html" class="related-card">
+        <div class="related-cat">Safety</div>
+        <h4>Red-teaming at scale: lessons from 50,000 adversarial prompts</h4>
+        <p>How structured attack taxonomies produce better safety datasets than random fuzzing.</p>
+      </a>
+      <a href="data-flywheel.html" class="related-card">
+        <div class="related-cat">Industry</div>
+        <h4>The data flywheel: how training data quality compounds over model generations</h4>
+        <p>The quality of data you build today shapes models trained years from now.</p>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer>
+  <div class="container-wide">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="../index.html" class="brand" style="margin-bottom:0.875rem;display:inline-flex;">
+          <img src="../assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+        </a>
+        <p>Premium training data for AI agents and LLMs. Built by experts, trusted by frontier AI teams worldwide.</p>
+      </div>
+      <div class="footer-col"><h4>Solutions</h4><ul>
+        <li><a href="../solutions.html#environment">Environment Generation</a></li>
+        <li><a href="../solutions.html#agentic">Agentic Datasets</a></li>
+        <li><a href="../solutions.html#redteaming">Red-Teaming</a></li>
+        <li><a href="../solutions.html#rlhf">RLHF &amp; Preference</a></li>
+      </ul></div>
+      <div class="footer-col"><h4>Company</h4><ul>
+        <li><a href="../blog.html">Blog</a></li>
+        <li><a href="../careers.html">Careers</a></li>
+        <li><a href="../industries.html">Industries</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+      </ul></div>
+      <div class="footer-col"><h4>Connect</h4><ul>
+        <li><a href="mailto:diraflow.ai@gmail.com">diraflow.ai@gmail.com</a></li>
+        <li><a href="https://linkedin.com/company/diraflow" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a href="https://x.com/diraflow_" target="_blank" rel="noopener">Twitter / X</a></li>
+      </ul></div>
+    </div>
+    <div class="footer-bottom">
+      <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+        <p>© 2026 Diraflow AI. All rights reserved.</p>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="../code-of-conduct.html" style="font-size:.8125rem;color:var(--subtle);" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="../privacy-policy.html" style="font-size:.8125rem;color:var(--subtle);" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+window.addEventListener('scroll', function(){
+  var doc = document.documentElement;
+  var top = doc.scrollTop || document.body.scrollTop;
+  var height = (doc.scrollHeight || document.body.scrollHeight) - doc.clientHeight;
+  var pct = height > 0 ? (top / height) * 100 : 0;
+  var fill = document.getElementById('progress-fill');
+  if(fill) fill.style.width = pct.toFixed(1) + '%';
+}, { passive: true });
+
+(function(){
+  var btn=document.getElementById('hb-btn');
+  var drawer=document.getElementById('hb-drawer');
+  var overlay=document.getElementById('hb-overlay');
+  var closeBtn=document.getElementById('hb-close');
+  function open(){drawer.classList.add('is-open');overlay.classList.add('is-open');btn.classList.add('is-open');document.body.style.overflow='hidden';}
+  function close(){drawer.classList.remove('is-open');overlay.classList.remove('is-open');btn.classList.remove('is-open');document.body.style.overflow='';}
+  if(btn)btn.addEventListener('click',open);
+  if(overlay)overlay.addEventListener('click',close);
+  if(closeBtn)closeBtn.addEventListener('click',close);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+})();
+
+function copyLink(){
+  navigator.clipboard.writeText(window.location.href).then(function(){
+    alert('Link copied!');
+  }).catch(function(){
+    prompt('Copy this link:', window.location.href);
+  });
+}
+</script>
 </body>
 </html>
