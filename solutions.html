@@ -6,268 +6,329 @@
 <title>Solutions — Diraflow</title>
 <meta name="description" content="Diraflow's full suite of AI training data solutions — from agentic environments and red-teaming to STEM data and RLHF preference datasets.">
 <meta property="og:title" content="Solutions — Diraflow">
-<meta property="og:description" content="Expert-curated AI training data solutions for frontier model development.">
 <meta property="og:type" content="website">
+<link rel="icon" type="image/png" href="assets/logo.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/styles.css">
-<link rel="icon" type="image/png" sizes="32x32" href="/assets/logo.jpg">
-
 <script>
-  /* One-time clear of saved theme preference */
   localStorage.removeItem('diraflow-theme');
   document.documentElement.setAttribute('data-theme', 'light');
 </script>
 
 <style>
-/* ════════════════════════════════
-   SOLUTIONS PAGE STYLES
-════════════════════════════════ */
+/* ── Tokens ── */
+:root {
+  --bg:#f7f6f2; --bg2:#eeecea; --fg:#111110; --fg2:#555250;
+  --border:#d8d6d0; --card:#ffffff; --subtle:#999690;
+  --gold:#c8922a; --green:#4a9e5c; --red:#dc3c3c;
+  --navy:#0d1b3e;
+  --radius:0.75rem; --radius-lg:1.25rem;
+  --transition:0.2s ease; --shadow:0 4px 24px rgba(0,0,0,0.07);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+img{display:block;max-width:100%;height:auto;}
+a{color:inherit;text-decoration:none;}
+ul{list-style:none;}
+button{font-family:inherit;}
 
-/* ── Solution hero cards ── */
-.solution-card {
-  background: var(--card, #fff);
-  border: 1px solid var(--border, #e5e5e5);
-  border-radius: 1.25rem;
-  overflow: hidden;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-  scroll-margin-top: 7rem;
-}
-.solution-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.1);
-  border-color: #c8922a;
-}
-.solution-card-media {
-  aspect-ratio: 16/9;
-  overflow: hidden;
-}
-.solution-card-media img {
-  width: 100%; height: 100%;
-  object-fit: cover; display: block;
-  transition: transform 0.5s ease;
-}
-.solution-card:hover .solution-card-media img {
-  transform: scale(1.04);
-}
-.solution-card-body {
-  padding: 1.75rem 2rem 2rem;
-}
-.solution-card-body .card-icon {
-  font-size: 1.75rem;
-  margin-bottom: 0.875rem;
-  display: inline-block;
-}
-.solution-card-body h3 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--fg);
-  margin-bottom: 0.625rem;
-  letter-spacing: -0.02em;
-}
-.solution-card-body p {
-  font-size: 0.9rem;
-  color: var(--fg2, #888);
-  line-height: 1.75;
-  margin-bottom: 1.25rem;
-}
+/* ── Layout ── */
+.container-wide{max-width:1160px;margin:0 auto;padding:0 4rem;}
+@media(max-width:900px){.container-wide{padding:0 2.5rem;}}
+@media(max-width:600px){.container-wide{padding:0 1.25rem;}}
 
-/* ── Feature list inside cards ── */
-.solution-features {
-  list-style: none;
-  padding: 0; margin: 0 0 1.5rem;
-  display: flex; flex-direction: column; gap: 0.5rem;
-}
-.solution-features li {
-  font-size: 0.82rem;
-  color: var(--fg2, #888);
-  display: flex; align-items: flex-start; gap: 0.5rem;
-  line-height: 1.5;
-}
-.solution-features li::before {
-  content: '✓';
-  color: #c8922a;
-  font-weight: 700;
-  flex-shrink: 0;
-  margin-top: 0.05rem;
-}
+/* ── Nav ── */
+nav.top{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);height:68px;display:flex;align-items:center;}
+nav.top .nav-inner{max-width:1160px;margin:0 auto;padding:0 4rem;display:flex;align-items:center;gap:2rem;width:100%;}
+@media(max-width:900px){nav.top .nav-inner{padding:0 2.5rem;}}
+@media(max-width:600px){nav.top .nav-inner{padding:0 1.25rem;}}
+.brand{display:inline-flex;align-items:center;gap:0.625rem;font-weight:700;color:var(--fg);white-space:nowrap;flex-shrink:0;}
+.nav-logo-img{width:36px;height:36px;border-radius:8px;object-fit:contain;}
+.brand-text{display:flex;flex-direction:column;}
+.brand-name{font-size:1rem;font-weight:700;line-height:1.1;}
+.brand-tagline{font-size:0.65rem;color:var(--fg2);}
+nav.top ul{display:flex;list-style:none;flex:1;margin:0;padding:0;}
+nav.top ul li a{font-size:0.875rem;font-weight:500;color:var(--fg2);padding:0.5rem 0.875rem;border-radius:0.5rem;display:block;transition:color var(--transition),background var(--transition);}
+nav.top ul li a:hover,nav.top ul li a.active{color:var(--fg);background:var(--bg2);}
+.nav-right{display:flex;align-items:center;gap:0.75rem;margin-left:auto;flex-shrink:0;}
+.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.55rem 1.2rem;border-radius:2rem;font-weight:600;font-size:0.875rem;font-family:'Sora',sans-serif;cursor:pointer;border:none;background:var(--fg);color:var(--bg);text-decoration:none;transition:opacity 0.2s,transform 0.15s;}
+.btn:hover{opacity:0.85;transform:translateY(-1px);}
+.btn-sm{padding:0.45rem 1rem;font-size:0.8rem;}
+.btn-gold{background:var(--gold);color:#fff;}
+.btn-gold:hover{background:#a8771e;opacity:1;}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--fg);}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);opacity:1;}
 
-/* ── Tag pills ── */
-.solution-tags {
-  display: flex; flex-wrap: wrap; gap: 0.4rem;
-  margin-bottom: 1.25rem;
-}
-.solution-tag {
-  font-size: 0.7rem; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.07em;
-  padding: 0.25rem 0.65rem;
-  border-radius: 2rem;
-  background: rgba(200,146,42,0.1);
-  border: 1px solid rgba(200,146,42,0.25);
-  color: #c8922a;
-}
+/* hamburger */
+.hb-btn{display:none;flex-direction:column;justify-content:center;align-items:center;width:42px;height:42px;gap:5px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;flex-shrink:0;z-index:9999;}
+.hb-btn span{display:block;width:20px;height:2.5px;background:var(--fg);border-radius:3px;transition:transform 0.3s ease,opacity 0.3s ease;pointer-events:none;}
+.hb-btn.is-open span:nth-child(1){transform:translateY(7.5px) rotate(45deg);}
+.hb-btn.is-open span:nth-child(2){opacity:0;}
+.hb-btn.is-open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg);}
+@media(max-width:860px){.hb-btn{display:flex!important;}nav.top ul{display:none!important;}.btn.btn-sm{display:none!important;}}
+/* drawer */
+.hb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(3px);z-index:9997;}
+.hb-overlay.is-open{display:block;}
+.hb-drawer{position:fixed;top:0;right:0;bottom:0;width:290px;max-width:88vw;background:var(--bg);border-left:1px solid var(--border);z-index:9998;display:flex;flex-direction:column;transform:translateX(110%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);box-shadow:-12px 0 50px rgba(0,0,0,0.12);}
+.hb-drawer.is-open{transform:translateX(0);}
+.hb-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);}
+.hb-close{width:32px;height:32px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;color:var(--fg2);transition:all 0.2s;}
+.hb-close:hover{background:#111;color:#fff;}
+.hb-nav{flex:1;padding:1rem 0.875rem;overflow-y:auto;display:flex;flex-direction:column;gap:0.2rem;}
+.hb-link{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1rem;border-radius:0.75rem;font-size:0.9rem;font-weight:500;color:var(--fg2);border:1px solid transparent;transition:all 0.18s;}
+.hb-link:hover,.hb-link.hb-active{background:rgba(200,146,42,0.09);border-color:rgba(200,146,42,0.22);color:#c8922a;}
+.hb-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border-radius:0.5rem;font-size:1rem;flex-shrink:0;}
+.hb-footer{padding:1.25rem;border-top:1px solid var(--border);}
+.hb-cta{display:block;text-align:center;background:var(--gold);color:#fff;padding:0.8rem 1rem;border-radius:2rem;font-size:0.875rem;font-weight:700;}
 
-/* ── CTA inside card ── */
-.solution-cta {
-  display: inline-flex; align-items: center; gap: 0.4rem;
-  font-size: 0.85rem; font-weight: 700;
-  color: #c8922a; text-decoration: none;
-  cursor: pointer; background: none; border: none;
-  padding: 0; transition: gap 0.2s ease;
-}
-.solution-cta:hover { gap: 0.65rem; }
+/* ── Page Hero ── */
+.page-head{padding:5rem 0 4.5rem;background:var(--bg2);border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+.page-head::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 65% 0%,rgba(200,146,42,0.08) 0%,transparent 65%);pointer-events:none;}
+.section-label{display:flex;align-items:center;gap:0.625rem;font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--gold);margin-bottom:0.875rem;}
+.section-label::before{content:'';display:block;width:1.5rem;height:1.5px;background:var(--gold);}
+.page-head h1{font-family:'DM Serif Display',serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:400;line-height:1.1;letter-spacing:-0.035em;color:var(--fg);margin-bottom:1rem;}
+.page-head h1 em{color:var(--gold);font-style:italic;}
+.page-head > div > p{font-size:1.05rem;color:var(--fg2);max-width:560px;line-height:1.75;}
 
-/* ── Featured / wide solution card ── */
-.solution-card-featured {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  background: var(--fg, #111);
-  border-radius: 1.25rem;
-  overflow: hidden;
-  border: none;
+/* fade-in */
+.fade-up{opacity:0;transform:translateY(20px);animation:fadeUp 0.6s ease forwards;}
+.fade-up-1{animation-delay:0.1s;}.fade-up-2{animation-delay:0.2s;}.fade-up-3{animation-delay:0.3s;}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+
+/* ── Stats strip ── */
+.stats-strip{background:var(--navy);padding:3rem 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;}
+@media(max-width:700px){.stats-grid{grid-template-columns:1fr 1fr;}}
+.stat-card{text-align:center;padding:1rem;}
+.stat-card .num{font-family:'DM Serif Display',serif;font-size:2.25rem;color:#e6a83a;line-height:1;margin-bottom:0.4rem;}
+.stat-card .lbl{font-size:0.8rem;font-weight:600;color:rgba(255,255,255,0.75);margin-bottom:0.2rem;}
+.stat-card .sub{font-size:0.72rem;color:rgba(255,255,255,0.4);line-height:1.4;}
+
+/* ══════════════════════════
+   SERVICE CARDS GRID
+══════════════════════════ */
+.services-section{padding:5rem 0;}
+.services-section-head{text-align:center;margin-bottom:3.5rem;}
+.services-section-head h2{font-family:'DM Serif Display',serif;font-size:clamp(1.875rem,3.5vw,2.75rem);font-weight:400;line-height:1.15;letter-spacing:-0.03em;color:var(--fg);margin-bottom:0.75rem;}
+.services-section-head h2 em{color:var(--gold);font-style:italic;}
+.services-section-head p{font-size:1rem;color:var(--fg2);line-height:1.75;max-width:540px;margin:0 auto;}
+
+.cards-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1.75rem;
 }
-.solution-card-featured .solution-card-media {
-  aspect-ratio: auto;
-  min-height: 360px;
+@media(max-width:960px){.cards-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:580px){.cards-grid{grid-template-columns:1fr;}}
+
+/* ── Individual service card ── */
+.svc-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  /* hover animation */
+  transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),
+             box-shadow 0.3s ease,
+             border-color 0.3s ease;
+  cursor:default;
 }
-.solution-card-featured .solution-card-body {
-  padding: 2.5rem;
-  display: flex; flex-direction: column; justify-content: center;
-}
-.solution-card-featured h3 { color: #fff; font-size: 1.5rem; }
-.solution-card-featured p  { color: rgba(255,255,255,0.6); }
-.solution-card-featured .solution-features li { color: rgba(255,255,255,0.6); }
-.solution-card-featured .solution-features li::before { color: #c8922a; }
-.solution-card-featured .solution-tag {
-  background: rgba(200,146,42,0.15);
-  border-color: rgba(200,146,42,0.3);
-}
-.solution-card-featured .solution-cta { color: #c8922a; }
-@media (max-width: 768px) {
-  .solution-card-featured {
-    grid-template-columns: 1fr;
-  }
-  .solution-card-featured .solution-card-media { min-height: 220px; }
+.svc-card:hover{
+  transform:translateY(-8px) scale(1.015);
+  box-shadow:0 20px 56px rgba(0,0,0,0.11);
+  border-color:rgba(200,146,42,0.45);
 }
 
-/* ── Sidebar nav ── */
-.solutions-layout {
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 3rem;
-  align-items: start;
+/* image */
+.svc-card-img{
+  position:relative;
+  aspect-ratio:1/1;
+  overflow:hidden;
 }
-@media (max-width: 860px) {
-  .solutions-layout { grid-template-columns: 1fr; }
-  .solutions-sidebar { display: none; }
+.svc-card-img img{
+  width:100%;height:100%;
+  object-fit:cover;
+  display:block;
+  transition:transform 0.5s ease;
 }
-.solutions-sidebar {
-  position: sticky; top: 6rem;
-}
-.solutions-sidebar h4 {
-  font-size: 0.72rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--fg2, #888); margin-bottom: 0.875rem;
-}
-.solutions-sidebar nav a {
-  display: flex; align-items: center; gap: 0.6rem;
-  font-size: 0.82rem; color: var(--fg2, #888);
-  text-decoration: none; padding: 0.45rem 0.75rem;
-  border-left: 2px solid var(--border, #e5e5e5);
-  transition: color 0.2s, border-color 0.2s;
-  margin-bottom: 0.15rem; line-height: 1.4;
-}
-.solutions-sidebar nav a:hover,
-.solutions-sidebar nav a.active {
-  color: #c8922a; border-left-color: #c8922a;
-}
-.solutions-sidebar nav a .nav-icon { font-size: 0.9rem; }
+.svc-card:hover .svc-card-img img{transform:scale(1.06);}
 
-/* ── Grid layouts ── */
-.solutions-grid {
-  display: flex; flex-direction: column; gap: 2rem;
+/* badge overlay on image */
+.svc-badge{
+  position:absolute;top:0.875rem;left:0.875rem;
+  font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;
+  padding:0.2rem 0.6rem;border-radius:2rem;
+  background:rgba(200,146,42,0.9);color:#fff;
+  backdrop-filter:blur(4px);
 }
 
-/* ── Comparison table ── */
-.compare-table {
-  width: 100%; border-collapse: collapse;
-  font-size: 0.85rem; margin: 1.5rem 0;
-  border-radius: 0.875rem; overflow: hidden;
+/* card body */
+.svc-card-body{
+  padding:1rem 1rem 1.125rem;
+  display:flex;
+  flex-direction:column;
+  flex:1;
 }
-.compare-table th {
-  background: var(--fg, #111); color: #fff;
-  padding: 0.75rem 1rem; text-align: left;
-  font-weight: 700; font-size: 0.78rem;
-  letter-spacing: 0.04em;
+.svc-icon{
+  font-size:1.25rem;
+  width:40px;height:40px;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:0.75rem;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:0.75rem;
+  transition:background 0.3s ease, border-color 0.3s ease;
 }
-.compare-table th:first-child { border-radius: 0.875rem 0 0 0; }
-.compare-table th:last-child  { border-radius: 0 0.875rem 0 0; }
-.compare-table td {
-  padding: 0.7rem 1rem;
-  border-bottom: 1px solid var(--border, #e5e5e5);
-  color: var(--fg2, #666); vertical-align: top;
-  line-height: 1.55;
+.svc-card:hover .svc-icon{
+  background:rgba(200,146,42,0.1);
+  border-color:rgba(200,146,42,0.3);
 }
-.compare-table tr:last-child td { border-bottom: none; }
-.compare-table tr:nth-child(even) td { background: var(--bg2, #f7f5f2); }
-
-/* ── Process steps ── */
-.solution-process {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1rem; margin: 1.5rem 0;
+.svc-card-body h3{
+  font-size:0.95rem;font-weight:700;
+  color:var(--fg);margin-bottom:0.4rem;
+  letter-spacing:-0.02em;line-height:1.25;
 }
-.solution-process-step {
-  background: var(--bg2, #f7f5f2);
-  border: 1px solid var(--border, #e5e5e5);
-  border-radius: 0.875rem; padding: 1.25rem;
-  text-align: center;
-}
-.solution-process-step .step-n {
-  font-family: 'DM Serif Display', serif;
-  font-size: 2rem; color: #c8922a;
-  line-height: 1; margin-bottom: 0.5rem;
-}
-.solution-process-step h4 {
-  font-size: 0.82rem; font-weight: 700;
-  color: var(--fg); margin-bottom: 0.3rem;
-}
-.solution-process-step p {
-  font-size: 0.78rem; color: var(--fg2, #888);
-  line-height: 1.5; margin: 0;
+.svc-card-body > p{
+  font-size:0.8rem;color:var(--fg2);
+  line-height:1.6;margin-bottom:0.875rem;
+  flex-shrink:0;
 }
 
-/* ── Brief form ── */
-.brief-field {
-  width: 100%; background: var(--bg2);
-  border: 1.5px solid var(--border);
-  border-radius: .625rem; padding: .875rem 1.125rem;
-  font-size: .875rem; color: var(--fg);
-  font-family: 'Sora', sans-serif;
-  box-sizing: border-box; outline: none;
-  transition: border-color 0.2s;
-  position: relative; z-index: 2; pointer-events: auto;
+/* bullet list */
+.svc-bullets{
+  list-style:none;padding:0;margin:0 0 1.5rem;
+  display:flex;flex-direction:column;gap:0.4rem;
+  flex:1;
 }
-.brief-field:focus { border-color: #c8922a; }
-textarea.brief-field { resize: vertical; min-height: 110px; }
+.svc-bullets li{
+  font-size:0.8rem;color:var(--fg2);
+  display:flex;align-items:flex-start;gap:0.5rem;
+  line-height:1.55;
+}
+.svc-bullets li::before{
+  content:'✓';
+  color:var(--gold);font-weight:700;
+  flex-shrink:0;margin-top:0.05rem;
+  font-size:0.75rem;
+}
+
+/* CTA button */
+.svc-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:0.4rem;
+  padding:0.7rem 1.25rem;
+  border-radius:2rem;
+  font-size:0.82rem;font-weight:700;
+  font-family:'Sora',sans-serif;
+  border:1.5px solid var(--border);
+  background:transparent;color:var(--fg);
+  text-decoration:none;
+  transition:background 0.25s ease, border-color 0.25s ease, color 0.25s ease, gap 0.2s ease;
+  width:100%;
+  margin-top:auto;
+}
+.svc-btn:hover{
+  background:var(--gold);
+  border-color:var(--gold);
+  color:#fff;
+  gap:0.65rem;
+}
+.svc-btn .arrow{display:inline-block;transition:transform 0.2s ease;}
+.svc-btn:hover .arrow{transform:translateX(3px);}
+
+/* ── Featured wide card (first card spans 2 cols on desktop) ── */
+.svc-card-featured{
+  grid-column:span 1;
+  display:flex;
+  flex-direction:column;
+}
+.svc-card-featured .svc-card-img{aspect-ratio:1/1;}
+@media(max-width:960px){.svc-card-featured{grid-column:span 1;}}
+@media(max-width:700px){.svc-card-featured{grid-column:span 1;}}
+@media(max-width:580px){.svc-card-featured{grid-column:span 1;}}
+
+/* ── Custom card (dark) ── */
+.svc-card-dark{
+  background:var(--fg);
+  border-color:var(--fg);
+}
+.svc-card-dark h3{color:#fff;}
+.svc-card-dark > .svc-card-body > p{color:rgba(255,255,255,0.55);}
+.svc-card-dark .svc-bullets li{color:rgba(255,255,255,0.55);}
+.svc-card-dark .svc-bullets li::before{color:#e6a83a;}
+.svc-card-dark .svc-icon{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.14);}
+.svc-card-dark:hover .svc-icon{background:rgba(200,146,42,0.2);border-color:rgba(200,146,42,0.4);}
+.svc-card-dark .svc-btn{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.85);}
+.svc-card-dark .svc-btn:hover{background:#e6a83a;border-color:#e6a83a;color:#fff;}
+.svc-card-dark:hover{border-color:rgba(200,146,42,0.5);}
+
+/* ── Quality compare ── */
+.quality-section{background:var(--bg2);padding:5rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.section-title{font-family:'DM Serif Display',serif;font-size:clamp(1.875rem,3.5vw,2.75rem);font-weight:400;line-height:1.15;letter-spacing:-0.03em;color:var(--fg);margin-bottom:1rem;}
+.section-title em{color:var(--gold);font-style:italic;}
+.section-intro{font-size:1rem;color:var(--fg2);line-height:1.75;max-width:580px;margin-bottom:2.5rem;}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+@media(max-width:700px){.compare-grid{grid-template-columns:1fr;}}
+.compare-card{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
+.compare-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);}
+.compare-header .label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.35rem;}
+.compare-header h3{font-size:1.05rem;font-weight:700;color:var(--fg);}
+.compare-header.bad{background:rgba(220,60,60,0.05);}
+.compare-header.bad .label{color:var(--red);}
+.compare-header.good{background:rgba(200,146,42,0.06);}
+.compare-header.good .label{color:var(--gold);}
+.compare-body{padding:1.25rem 1.5rem;background:var(--card);}
+.compare-list{list-style:none;display:flex;flex-direction:column;gap:0.75rem;}
+.compare-list li{display:flex;gap:0.625rem;font-size:0.875rem;color:var(--fg2);line-height:1.5;align-items:flex-start;}
+.compare-list .icon{flex-shrink:0;font-weight:700;margin-top:0.05rem;}
+
+/* ── CTA form ── */
+.cta-form-section{padding:5rem 0;}
+.cta-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;max-width:960px;margin:0 auto;}
+@media(max-width:768px){.cta-form-grid{grid-template-columns:1fr;gap:2.5rem;}}
+.cta-bullets{display:flex;flex-direction:column;gap:0.75rem;font-size:0.875rem;color:var(--fg2);margin-top:1.5rem;}
+.cta-bullet{display:flex;align-items:center;gap:0.75rem;}
+.cta-bullet span:first-child{color:var(--gold);}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.25rem;box-shadow:var(--shadow);}
+.form-card h3{font-size:1.15rem;font-weight:700;color:var(--fg);margin-bottom:0.35rem;letter-spacing:-0.015em;}
+.form-card > p{font-size:0.85rem;color:var(--fg2);margin-bottom:1.5rem;}
+.brief-field{width:100%;background:var(--bg2);border:1.5px solid var(--border);border-radius:0.625rem;padding:0.875rem 1.125rem;font-size:0.875rem;color:var(--fg);font-family:'Sora',sans-serif;box-sizing:border-box;outline:none;transition:border-color 0.2s;display:block;}
+.brief-field:focus{border-color:var(--gold);}
+textarea.brief-field{resize:vertical;min-height:110px;}
+select.brief-field{cursor:pointer;}
+.form-fields{display:flex;flex-direction:column;gap:0.875rem;}
+.form-label{font-size:0.8rem;font-weight:600;display:block;margin-bottom:0.4rem;color:var(--fg);}
+
+/* ── Footer ── */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:4rem 0 0;}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem;}
+@media(max-width:760px){.footer-grid{grid-template-columns:1fr 1fr;gap:2rem;}}
+@media(max-width:480px){.footer-grid{grid-template-columns:1fr;}}
+.footer-brand p{font-size:0.875rem;color:var(--fg2);line-height:1.7;margin-top:0.75rem;}
+.footer-col h4{font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--fg2);margin-bottom:1.25rem;}
+.footer-col ul{display:flex;flex-direction:column;gap:0.625rem;}
+.footer-col ul li a{font-size:0.875rem;color:var(--fg2);transition:color 0.2s;}
+.footer-col ul li a:hover{color:var(--gold);}
+.footer-bottom{border-top:1px solid var(--border);padding:1.5rem 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.footer-bottom p{font-size:0.8125rem;color:var(--subtle);}
 </style>
 </head>
 <body>
 
-<!-- ════════════════════════════════
-     NAV
-════════════════════════════════ -->
+<!-- ═══ NAV ═══ -->
 <nav class="top">
-  <div class="container inner">
-    <a href="/" class="brand">
-      <img src="/assets/logo.jpg" alt="Diraflow" class="nav-logo-img nav-logo-transparent">
+  <div class="nav-inner">
+    <a href="index.html" class="brand">
+      <img src="assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
       <span class="brand-text">
         <span class="brand-name">Diraflow</span>
         <span class="brand-tagline">Training data for frontier AI</span>
       </span>
     </a>
     <ul>
-      <li><a href="/">Home</a></li>
+      <li><a href="index.html">Home</a></li>
       <li><a href="solutions.html" class="active">Solutions</a></li>
       <li><a href="industries.html">Industries</a></li>
       <li><a href="blog.html">Blog</a></li>
@@ -278,360 +339,156 @@ textarea.brief-field { resize: vertical; min-height: 110px; }
     </ul>
     <div class="nav-right">
       <a href="contact.html" class="btn btn-sm">Talk to us</a>
-    <button class="hamburger" id="hamburger-btn" aria-label="Open menu" onclick="openDrawer()">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <button class="hb-btn" id="hb-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
     </div>
   </div>
 </nav>
-
-<!-- ════════════════════════════════
-     MOBILE DRAWER
-════════════════════════════════ -->
-<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
-<div class="drawer" id="drawer">
-
-  <!-- Drawer header -->
-  <div class="drawer-header">
-    <div class="drawer-brand">
-      <img src="../assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
-      <span style="font-weight:700; font-size:0.95rem;">Diraflow</span>
+<div class="hb-overlay" id="hb-overlay"></div>
+<div class="hb-drawer" id="hb-drawer">
+  <div class="hb-drawer-head">
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <img src="assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+      <span style="font-weight:700;color:var(--fg);">Diraflow</span>
     </div>
-    <button class="drawer-close" onclick="closeDrawer()" aria-label="Close menu">✕</button>
+    <button class="hb-close" id="hb-close">✕</button>
   </div>
-
-  <!-- Drawer nav links -->
-  <nav class="drawer-nav">
-    <a href="index.html" class="drawer-link">
-      <span class="drawer-icon">🏠</span> Home
-    </a>
-    <a href="solutions.html" class="drawer-link">
-      <span class="drawer-icon">⚙️</span> Solutions
-    </a>
-    <a href="industries.html" class="drawer-link">
-      <span class="drawer-icon">🏭</span> Industries
-    </a>
-    <a href="blog.html" class="drawer-link">
-      <span class="drawer-icon">✍️</span> Blog
-    </a>
-    <a href="careers.html" class="drawer-link">
-      <span class="drawer-icon">💼</span> Careers
-    </a>
-    <a href="contact.html" class="drawer-link">
-      <span class="drawer-icon">✉️</span> Contact Us
-    </a>
-    <a href="team.html" class="drawer-link">
-      <span class="drawer-icon">🏢</span> Our Team
-    </a>
-    <a href="report.html" class="drawer-link">
-      <span class="drawer-icon">🛡️</span> Report Concerns
-    </a>
+  <nav class="hb-nav">
+    <a href="index.html"      class="hb-link"><span class="hb-icon">🏠</span>Home</a>
+    <a href="solutions.html"  class="hb-link hb-active"><span class="hb-icon">⚙️</span>Solutions</a>
+    <a href="industries.html" class="hb-link"><span class="hb-icon">🏭</span>Industries</a>
+    <a href="blog.html"       class="hb-link"><span class="hb-icon">✍️</span>Blog</a>
+    <a href="careers.html"    class="hb-link"><span class="hb-icon">💼</span>Careers</a>
+    <a href="contact.html"    class="hb-link"><span class="hb-icon">✉️</span>Contact Us</a>
+    <a href="team.html"       class="hb-link"><span class="hb-icon">👥</span>Our Team</a>
+    <a href="report.html"     class="hb-link"><span class="hb-icon">⚠️</span>Report Concerns</a>
   </nav>
-
-  <!-- Drawer footer -->
-  <div class="drawer-footer">
-    <a href="contact.html" class="drawer-cta">
-      Talk to an expert →
-    </a>
-    <div class="drawer-socials">
-      <a href="https://www.linkedin.com/company/diraflow/" target="_blank" aria-label="LinkedIn"
-        style="width:36px;height:36px;border-radius:8px;background:#0A66C2;display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-      </a>
-      <a href="https://x.com/diraflow_" target="_blank" aria-label="X"
-        style="width:36px;height:36px;border-radius:8px;background:#000;border:1px solid #333;display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-      </a>
-      <a href="https://www.instagram.com/diraflow_?utm_source=qr&igsh=MTVkdHRwem92dHQ4cQ==" target="_blank" aria-label="Instagram"
-        style="width:36px;height:36px;border-radius:8px;background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%);display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-      </a>
-    </div>
-    <p style="font-size:0.7rem; color:var(--fg2, #888); text-align:center; margin-top:0.75rem;">
-      © 2026 Diraflow AI. All rights reserved.
-    </p>
-  </div>
+  <div class="hb-footer"><a href="contact.html" class="hb-cta">Talk to an expert →</a></div>
 </div>
 
-
-<!-- ════════════════════════════════
-     PAGE HEADER
-════════════════════════════════ -->
+<!-- ═══ PAGE HERO ═══ -->
 <section class="page-head">
-  <div class="page-head-bg"></div>
-  <div class="container">
+  <div class="container-wide">
     <div class="section-label fade-up fade-up-1">What we build</div>
     <h1 class="fade-up fade-up-2">Our <em>Solutions</em></h1>
     <p class="fade-up fade-up-3">High-complexity, expert-generated datasets purpose-built for frontier model training and evaluation. We go far beyond commodity crowdsourcing.</p>
   </div>
 </section>
 
-<!-- ════════════════════════════════
-     SOLUTIONS BODY
-════════════════════════════════ -->
-<section class="block">
-  <div class="container">
-    <div class="solutions-layout">
 
-      <!-- ── Sidebar ── -->
-      <aside class="solutions-sidebar">
-        <h4>Jump to</h4>
-        <nav id="solutions-nav">
-          <a href="#environment" class="active"><span class="nav-icon">📦</span> Environment Generation</a>
-          <a href="#agentic"><span class="nav-icon">📖</span> Agentic Datasets</a>
-          <a href="#redteaming"><span class="nav-icon">🛡️</span> Red-Teaming &amp; Safety</a>
-          <a href="#stem"><span class="nav-icon">🔬</span> STEM &amp; Scientific</a>
-          <a href="#rlhf"><span class="nav-icon">⚖️</span> RLHF &amp; Preference</a>
-          <a href="#multilingual"><span class="nav-icon">🌐</span> Multilingual Data</a>
-          <a href="#custom"><span class="nav-icon">✦</span> Custom Engagements</a>
-        </nav>
-        <div style="margin-top:2rem; padding:1rem; background:var(--bg2); border-radius:0.875rem; border:1px solid var(--border);">
-          <p style="font-size:0.78rem; color:var(--fg2); line-height:1.6; margin-bottom:0.75rem;">Not sure which solution fits your project?</p>
-          <a href="contact.html" class="btn btn-sm" style="width:100%; justify-content:center; display:flex;">Talk to us →</a>
+<!-- ═══ SERVICE CARDS ═══ -->
+<section class="services-section">
+  <div class="container-wide">
+    <div class="services-section-head">
+      <div class="section-label" style="justify-content:center;">Our full suite</div>
+      <h2>Everything you need to train <em>frontier models</em></h2>
+      <p>Seven specialised solutions covering every stage of model development — from pre-training to safety evaluation.</p>
+    </div>
+
+    <div class="cards-grid">
+
+      <!-- 1. Image Annotation — FEATURED (spans 2 cols) -->
+      <article class="svc-card">
+        <div class="svc-card-img">
+          <img src="image-annotation/annotated_img 5.jpeg" alt="Image annotation" loading="lazy">
+          <span class="svc-badge">Most popular</span>
         </div>
-      </aside>
-
-      <!-- ── Solutions list ── -->
-      <div class="solutions-grid">
-
-        <!-- ════ 1. ENVIRONMENT GENERATION ════ -->
-        <div class="solution-card solution-card-featured" id="environment">
-          <div class="solution-card-media">
-            <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&q=80&auto=format&fit=crop" alt="AI environment generation" loading="lazy">
-          </div>
-          <div class="solution-card-body">
-            <div class="solution-tags">
-              <span class="solution-tag">Most popular</span>
-              <span class="solution-tag">Agentic AI</span>
-            </div>
-            <div class="card-icon">📦</div>
-            <h3>Environment Generation</h3>
-            <p>Context-rich simulated environments for training and evaluating agents on real-world tasks — from coding sandboxes to enterprise workflows. We design every environment to expose the exact failure modes your model needs to learn from.</p>
-            <ul class="solution-features">
-              <li>Multi-step task scaffolding with ground-truth solution trajectories</li>
-              <li>Coding, tool-use, browser, and enterprise workflow environments</li>
-              <li>Partial-credit scoring rubrics built in from day one</li>
-              <li>Controlled messiness injection — ambiguous specs, broken dependencies, outdated docs</li>
-              <li>Delivered in your preferred format: JSON, JSONL, HuggingFace datasets</li>
-            </ul>
-            
-          </div>
+        <div class="svc-card-body">
+          <div class="svc-icon">📦</div>
+          <h3>Image Annotation</h3>
+          <p>High-quality, human-verified image annotations for training computer vision models.</p>
+          <a href="image-annotation.html" class="svc-btn">See more details <span class="arrow">→</span></a>
         </div>
+      </article>
 
-        <!-- ════ 2. AGENTIC DATASETS ════ -->
-        <div class="solution-card" id="agentic">
-          <div class="solution-card-media">
-            <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80&auto=format&fit=crop" alt="AI agentic training datasets" loading="lazy">
-          </div>
-          <div class="solution-card-body">
-            <div class="solution-tags">
-              <span class="solution-tag">Multi-turn</span>
-              <span class="solution-tag">Reasoning</span>
-              <span class="solution-tag">Tool use</span>
-            </div>
-            <div class="card-icon">📖</div>
-            <h3>Agentic Training Datasets</h3>
-            <p>Specialised multi-step reasoning traces, tool-use demonstrations, and decision trajectories crafted by domain experts. We capture the full decision path — not just the final output — so models learn to reason, not just respond.</p>
-            <ul class="solution-features">
-              <li>Long-horizon reasoning chains with explicit step-by-step annotation</li>
-              <li>Tool-call sequences: web search, code execution, file management, API calls</li>
-              <li>Partial-trajectory annotation for credit assignment research</li>
-              <li>Failure trace datasets — what the wrong path looks like and why</li>
-              <li>Available as SFT data, DPO pairs, or reward model training sets</li>
-            </ul>
-
-            <!-- How we build it -->
-            <h4 style="font-size:0.85rem; font-weight:700; color:var(--fg); margin:1.25rem 0 0.75rem;">How we build it</h4>
-            <div class="solution-process">
-              <div class="solution-process-step">
-                <div class="step-n">01</div>
-                <h4>Task design</h4>
-                <p>Define agent objectives, tools available, and success criteria</p>
-              </div>
-              <div class="solution-process-step">
-                <div class="step-n">02</div>
-                <h4>Expert execution</h4>
-                <p>Domain specialists complete tasks with full trajectory logging</p>
-              </div>
-              <div class="solution-process-step">
-                <div class="step-n">03</div>
-                <h4>QA review</h4>
-                <p>Lead reviewers verify trajectory quality and correctness</p>
-              </div>
-              <div class="solution-process-step">
-                <div class="step-n">04</div>
-                <h4>Delivery</h4>
-                <p>Versioned, documented datasets in your chosen format</p>
-              </div>
-            </div>
-
-            
-          </div>
+      <!-- 2. Audio Annotation -->
+      <article class="svc-card">
+        <div class="svc-card-img">
+          <img src="audio annotation/audio-annotation-services.png" alt="Audio annotation" loading="lazy">
         </div>
-
-        <!-- ════ 3. RED-TEAMING & SAFETY ════ -->
-        <div class="solution-card" id="redteaming">
-          <div class="solution-card-media">
-            <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80&auto=format&fit=crop" alt="AI red-teaming and safety evaluation" loading="lazy">
-          </div>
-          <div class="solution-card-body">
-            <div class="solution-tags">
-              <span class="solution-tag">Safety</span>
-              <span class="solution-tag">Adversarial</span>
-              <span class="solution-tag">Evaluation</span>
-            </div>
-            <div class="card-icon">🛡️</div>
-            <h3>Red-Teaming &amp; Safety Evaluation</h3>
-            <p>Adversarial prompts, safety benchmarks, and structured evaluation suites. Identify model vulnerabilities before they reach production. Our red-teamers think like attackers — not testers — producing genuinely novel, high-risk inputs.</p>
-            <ul class="solution-features">
-              <li>50,000+ adversarial prompts across harm categories: deception, manipulation, CSAM, extremism, CBRN</li>
-              <li>Jailbreak and prompt injection datasets with creative variation</li>
-              <li>Structured risk taxonomies tailored to your model's threat model</li>
-              <li>Held-out evaluation suites — never leaked to the model under test</li>
-              <li>Annotator calibration on severity scores for consistent labelling</li>
-            </ul>
-
-            <!-- Harm taxonomy table -->
-            <h4 style="font-size:0.85rem; font-weight:700; color:var(--fg); margin:1.25rem 0 0.5rem;">Coverage by harm category</h4>
-            <table class="compare-table">
-              <thead><tr><th>Category</th><th>Examples</th><th>Coverage</th></tr></thead>
-              <tbody>
-                <tr><td>Deception &amp; manipulation</td><td>Phishing scripts, fake personas, social engineering</td><td>Full</td></tr>
-                <tr><td>Hate &amp; harassment</td><td>Targeted abuse, extremist content, incitement</td><td>Full</td></tr>
-                <tr><td>Dangerous knowledge</td><td>CBRN synthesis, weapon instructions</td><td>Controlled access</td></tr>
-                <tr><td>Privacy violations</td><td>PII extraction, doxxing, surveillance</td><td>Full</td></tr>
-                <tr><td>Jailbreaks</td><td>Prompt injection, role-play bypass, encoding tricks</td><td>Full</td></tr>
-                <!-- NOTE: Add more rows as your taxonomy expands -->
-              </tbody>
-            </table>
-
-            
-          </div>
+        <div class="svc-card-body">
+          <div class="svc-icon">📖</div>
+          <h3>Audio Annotation</h3>
+          <p>High-quality, human-verified audio annotations for training speech recognition and synthesis models.</p>
+          <a href="audio-annotation.html" class="svc-btn">See more details <span class="arrow">→</span></a>
         </div>
+      </article>
 
-        <!-- ════ 4. STEM & SCIENTIFIC DATA ════ -->
-        <div class="solution-card" id="stem">
-          <div class="solution-card-media">
-            <img src="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&q=80&auto=format&fit=crop" alt="STEM and scientific AI data" loading="lazy">
-          </div>
-          <div class="solution-card-body">
-            <div class="solution-tags">
-              <span class="solution-tag">Mathematics</span>
-              <span class="solution-tag">Science</span>
-              <span class="solution-tag">Expert-generated</span>
-            </div>
-            <div class="card-icon">🔬</div>
-            <h3>STEM &amp; Scientific Data</h3>
-            <p>Expert-annotated datasets spanning mathematics, biology, chemistry, and physics — built with researchers who hold advanced degrees in each domain. We cover notation diversity, proof styles, error taxonomy, and solution diversity so models develop genuinely flexible reasoning.</p>
-            <ul class="solution-features">
-              <li>Multi-notation coverage: LaTeX, natural language, symbolic, step-by-step prose</li>
-              <li>Proof diversity — formal, informal, and worked-example styles</li>
-              <li>Curated error taxonomy: arithmetic slips, logical gaps, sign errors, wrong theorem application</li>
-              <li>Multiple correct solution paths per problem to build generalisation</li>
-              <li>PhD-level contributors verified by domain credential review</li>
-            </ul>
-            
-          </div>
+      <!-- 3. Video Annotation -->
+      <article class="svc-card">
+        <div class="svc-card-img">
+          <img src="video annotation/video-annotation-services.png" alt="Video annotation" loading="lazy">
         </div>
-
-        <!-- ════ 5. RLHF & PREFERENCE DATA ════ -->
-        <div class="solution-card" id="rlhf">
-          <div class="solution-card-media">
-            <img src="https://images.unsplash.com/photo-1655720828018-edd2daec9349?w=800&q=80&auto=format&fit=crop" alt="RLHF preference data" loading="lazy">
-          </div>
-          <div class="solution-card-body">
-            <div class="solution-tags">
-              <span class="solution-tag">RLHF</span>
-              <span class="solution-tag">DPO</span>
-              <span class="solution-tag">Reward models</span>
-            </div>
-            <div class="card-icon">⚖️</div>
-            <h3>RLHF &amp; Preference Data</h3>
-            <p>High-signal human preference data and reward model training sets, annotated by carefully vetted experts aligned to your model's goals and values. We screen for consistency, bias patterns, and articulation quality — not just speed.</p>
-            <ul class="solution-features">
-              <li>Pairwise preference annotation with structured rationale capture</li>
-              <li>Multi-dimensional scoring: helpfulness, safety, factuality, tone</li>
-              <li>Annotator calibration rounds to align with your rubric before production</li>
-              <li>Screening for consistency bias (length preference, confidence preference)</li>
-              <li>Available as Bradley-Terry pairs, scalar rewards, or Constitutional AI critiques</li>
-            </ul>
-
-            <h4 style="font-size:0.85rem; font-weight:700; color:var(--fg); margin:1.25rem 0 0.75rem;">What makes our RLHF data different</h4>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1.5rem;">
-              <div style="background:var(--bg2); border-radius:0.75rem; padding:1rem;">
-                <div style="font-weight:700; font-size:0.8rem; color:var(--fg); margin-bottom:0.3rem;">Standard RLHF</div>
-                <p style="font-size:0.78rem; color:var(--fg2); margin:0; line-height:1.55;">Click A or B. No rationale. No calibration. High variance. Gut instinct labelling.</p>
-              </div>
-              <div style="background:rgba(200,146,42,0.07); border:1px solid rgba(200,146,42,0.2); border-radius:0.75rem; padding:1rem;">
-                <div style="font-weight:700; font-size:0.8rem; color:#c8922a; margin-bottom:0.3rem;">Diraflow RLHF</div>
-                <p style="font-size:0.78rem; color:var(--fg2); margin:0; line-height:1.55;">Structured rubrics. Written rationales. Calibration rounds. Bias screening. Expert-tier annotators.</p>
-              </div>
-            </div>
-
-            
-          </div>
+        <div class="svc-card-body">
+          <div class="svc-icon">🛡️</div>
+          <h3>Video Annotation</h3>
+          <p>Comprehensive video annotations for training action recognition and object tracking models.</p>
+          <a href="video-annotation.html" class="svc-btn">See more details <span class="arrow">→</span></a>
         </div>
+      </article>
 
-        <!-- ════ 6. MULTILINGUAL DATA ════ -->
-        <div class="solution-card" id="multilingual">
-          <div class="solution-card-media">
-            <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80&auto=format&fit=crop" alt="Multilingual AI data" loading="lazy">
-          </div>
-          <div class="solution-card-body">
-            <div class="solution-tags">
-              <span class="solution-tag">30+ languages</span>
-              <span class="solution-tag">Native speakers</span>
-              <span class="solution-tag">Low-resource</span>
-            </div>
-            <div class="card-icon">🌐</div>
-            <h3>Multilingual &amp; Cross-cultural Data</h3>
-            <p>High-quality original content in 30+ languages — never machine-translated. Native-speaker contributors with deep cultural fluency ensure your model understands not just words, but meaning, context, and register.</p>
-            <ul class="solution-features">
-              <li>Original human-generated content — zero MT post-edit</li>
-              <li>Native speakers with cultural and dialectal fluency in every target language</li>
-              <li>Support for low-resource and underrepresented languages via in-region partnerships</li>
-              <li>Cross-lingual preference annotation and translation quality evaluation</li>
-              <li>Culturally-sensitive content review for safety and localisation accuracy</li>
-            </ul>
-            <!-- NOTE: Add the full list of supported languages here when confirmed -->
-            <p style="font-size:0.78rem; color:var(--fg2); margin-bottom:1.25rem;">Current coverage includes: English, Swahili,  and more. Contact us to confirm your target language.</p>
-            
-          </div>
+      <!-- 4. 3D & LiDAR Annotation Services-->
+      <article class="svc-card">
+        <div class="svc-card-img">
+          <img src="3d annotation/lidar-annotation.png" alt="3D & LiDAR annotation" loading="lazy">
         </div>
-
-        
-            
-          </div>
+        <div class="svc-card-body">
+          <div class="svc-icon">🔬</div>
+          <h3>3D & LiDAR Annotation Services</h3>
+          <p>High-quality 3D and LiDAR point cloud annotations for training autonomous driving and robotics models.</p>
+          <a href="3d-lidar.html" class="svc-btn">See more details <span class="arrow">→</span></a>
         </div>
+      </article>
 
-      </div><!-- end solutions-grid -->
-    </div><!-- end solutions-layout -->
+      <!-- 5. NLP Annotation -->
+      <article class="svc-card">
+        <div class="svc-card-img">
+          <img src="npl/nlp-named-entity-recognition.png" alt="NLP annotation" loading="lazy">
+        </div>
+        <div class="svc-card-body">
+          <div class="svc-icon">⚖️</div>
+          <h3>NLP Annotation</h3>
+          <p>High-quality natural language processing annotations for training language models.</p>
+          <a href="nlp-annotation.html" class="svc-btn">See more details <span class="arrow">→</span></a>
+        </div>
+      </article>
+
+      <!-- 6. Data Classification Services -->
+      <article class="svc-card">
+        <div class="svc-card-img">
+          <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80&auto=format&fit=crop" alt="Data classification" loading="lazy">
+        </div>
+        <div class="svc-card-body">
+          <div class="svc-icon">🌐</div>
+          <h3>Data Classification Services</h3>
+          <p>Accurate and consistent data categorization for improved model performance.</p>
+          <a href="data-classification.html" class="svc-btn">See more details <span class="arrow">→</span></a>
+        </div>
+      </article>
+
+
+    </div><!-- /cards-grid -->
   </div>
 </section>
 
-<!-- ════════════════════════════════
-     COMPARE — OUR QUALITY STANDARD
-════════════════════════════════ -->
-<section class="block" style="background:var(--bg2);">
-  <div class="container">
+<!-- ═══ QUALITY COMPARE ═══ -->
+<section class="quality-section">
+  <div class="container-wide">
     <div class="section-label">The Diraflow difference</div>
-    <h2 class="section-title">Why our data <em>outperforms</em> the alternatives</h2>
-    <p class="section-intro" style="max-width:600px; margin-bottom:2.5rem;">Across every solution we offer, the same quality principles apply — because the gap between average and exceptional training data compounds over every future model generation.</p>
+    <h2 class="section-title">Why our data <em>outperforms</em><br>the alternatives</h2>
+    <p class="section-intro">Across every solution we offer, the same quality principles apply — because the gap between average and exceptional training data compounds over every future model generation.</p>
     <div class="compare-grid">
       <div class="compare-card">
         <div class="compare-header bad">
-          <div class="label">❌ Commodity data</div>
+          <div class="label">❌ Commodity data providers</div>
           <h3>What you get elsewhere</h3>
         </div>
         <div class="compare-body">
           <ul class="compare-list">
-            <li><span class="icon" style="color:var(--red);">✗</span> Generalist crowdworkers with no domain knowledge</li>
-            <li><span class="icon" style="color:var(--red);">✗</span> No calibration or consistency enforcement</li>
-            <li><span class="icon" style="color:var(--red);">✗</span> Volume-first mentality, quality as afterthought</li>
-            <li><span class="icon" style="color:var(--red);">✗</span> Recycled or semi-synthetic content passed off as original</li>
-            <li><span class="icon" style="color:var(--red);">✗</span> No audit trails, no versioning, no transparency</li>
+            <li><span class="icon" style="color:var(--red);">✗</span>Generalist crowdworkers with no domain knowledge</li>
+            <li><span class="icon" style="color:var(--red);">✗</span>No calibration or consistency enforcement</li>
+            <li><span class="icon" style="color:var(--red);">✗</span>Volume-first mentality — quality as an afterthought</li>
+            <li><span class="icon" style="color:var(--red);">✗</span>Recycled or semi-synthetic content passed off as original</li>
+            <li><span class="icon" style="color:var(--red);">✗</span>No audit trails, no versioning, no transparency</li>
           </ul>
         </div>
       </div>
@@ -642,11 +499,11 @@ textarea.brief-field { resize: vertical; min-height: 110px; }
         </div>
         <div class="compare-body">
           <ul class="compare-list">
-            <li><span class="icon" style="color:var(--green);">✓</span> Vetted domain experts — PhDs, researchers, senior practitioners</li>
-            <li><span class="icon" style="color:var(--green);">✓</span> Calibration tasks and IAA monitoring on every project</li>
-            <li><span class="icon" style="color:var(--green);">✓</span> Quality-first: we refuse work we can't do exceptionally well</li>
-            <li><span class="icon" style="color:var(--green);">✓</span> Original, human-generated content with zero AI fill-in</li>
-            <li><span class="icon" style="color:var(--green);">✓</span> Full audit trails, version control, transparent QA reports</li>
+            <li><span class="icon" style="color:var(--green);">✓</span>Vetted domain experts — PhDs, researchers, senior practitioners</li>
+            <li><span class="icon" style="color:var(--green);">✓</span>IAA monitoring and calibration tasks on every project</li>
+            <li><span class="icon" style="color:var(--green);">✓</span>Quality-first: we decline work we can't do exceptionally well</li>
+            <li><span class="icon" style="color:var(--green);">✓</span>Original, human-generated content — zero AI fill-in, ever</li>
+            <li><span class="icon" style="color:var(--green);">✓</span>Full audit trails, version control, and transparent QA reports</li>
           </ul>
         </div>
       </div>
@@ -654,40 +511,37 @@ textarea.brief-field { resize: vertical; min-height: 110px; }
   </div>
 </section>
 
-<!-- ════════════════════════════════
-     CONTACT CTA — BRIEF FORM
-════════════════════════════════ -->
-<section class="block" id="get-a-quote">
-  <div class="container">
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:start; max-width:960px; margin:0 auto;">
+<!-- ═══ CTA FORM ═══ -->
+<section class="cta-form-section" id="get-a-quote">
+  <div class="container-wide">
+    <div class="cta-form-grid">
       <div>
         <div class="section-label">Ready to start?</div>
         <h2 class="section-title">Tell us about <em>your project</em></h2>
-        <p style="font-size:0.9rem; color:var(--fg2); line-height:1.8; margin-bottom:1.5rem;">Send us a brief and we'll come back with a tailored proposal — including scope, timeline, and per-task pricing — within one business day.</p>
-        <div style="display:flex; flex-direction:column; gap:0.75rem; font-size:0.875rem; color:var(--fg2);">
-          <div style="display:flex; align-items:center; gap:0.75rem;"><span style="color:#c8922a;">✉</span> <a href="mailto:contact@diraflowai.com" style="color:var(--fg2); text-decoration:none;">contact@diraflowai.com</a></div>
-          <div style="display:flex; align-items:center; gap:0.75rem;"><span style="color:#c8922a;">⏱</span> Response within 1 business day</div>
-          <div style="display:flex; align-items:center; gap:0.75rem;"><span style="color:#c8922a;">🔒</span> NDAs signed before any project discussion</div>
-          <div style="display:flex; align-items:center; gap:0.75rem;"><span style="color:#c8922a;">🚀</span> Most projects begin within 1–2 weeks of scope agreement</div>
+        <p style="font-size:0.9rem;color:var(--fg2);line-height:1.8;">Send us a brief and we'll come back with a tailored proposal — scope, timeline, and pricing — within one business day.</p>
+        <div class="cta-bullets">
+          <div class="cta-bullet"><span>✉</span><a href="mailto:contact@diraflowai.com" style="color:var(--fg2);">contact@diraflowai.com</a></div>
+          <div class="cta-bullet"><span>⏱</span><span>Response within 1 business day</span></div>
+          <div class="cta-bullet"><span>🔒</span><span>NDAs signed before any project discussion</span></div>
+          <div class="cta-bullet"><span>🚀</span><span>Most projects begin within 1–2 weeks of scope agreement</span></div>
         </div>
       </div>
-
-      <div class="card" style="padding:2.5rem; position:relative; z-index:1;">
-        <h3 style="font-size:1.2rem; font-weight:600; color:var(--fg); margin-bottom:0.4rem;">Send us a brief</h3>
-        <p style="font-size:0.85rem; color:var(--fg2); margin-bottom:1.75rem;">Include your use case, volume, and timeline.</p>
-        <form id="brief-form" action="https://formspree.io/f/xnjllewe" method="POST" style="display:flex; flex-direction:column; gap:0.9rem; position:relative; z-index:2;">
+      <div class="form-card">
+        <h3>Send us a brief</h3>
+        <p>Include your use case, volume, and timeline.</p>
+        <form id="brief-form" action="https://formspree.io/f/xnjllewe" method="POST" class="form-fields">
           <input type="hidden" name="_subject" value="Solutions Page Enquiry — Diraflow">
           <div>
-            <label style="font-size:.8125rem; font-weight:600; display:block; margin-bottom:.4rem; color:var(--fg);">Name *</label>
+            <label class="form-label">Name *</label>
             <input type="text" name="name" required placeholder="Your full name" class="brief-field">
           </div>
           <div>
-            <label style="font-size:.8125rem; font-weight:600; display:block; margin-bottom:.4rem; color:var(--fg);">Work email *</label>
+            <label class="form-label">Work email *</label>
             <input type="email" name="email" required placeholder="you@company.com" class="brief-field">
           </div>
           <div>
-            <label style="font-size:.8125rem; font-weight:600; display:block; margin-bottom:.4rem; color:var(--fg);">Which solution? *</label>
-            <select name="solution" required class="brief-field" style="cursor:pointer;">
+            <label class="form-label">Which solution? *</label>
+            <select name="solution" required class="brief-field">
               <option value="" disabled selected>Select a solution…</option>
               <option>Environment Generation</option>
               <option>Agentic Training Datasets</option>
@@ -700,124 +554,93 @@ textarea.brief-field { resize: vertical; min-height: 110px; }
             </select>
           </div>
           <div>
-            <label style="font-size:.8125rem; font-weight:600; display:block; margin-bottom:.4rem; color:var(--fg);">Project brief *</label>
+            <label class="form-label">Project brief *</label>
             <textarea name="brief" required rows="4" placeholder="Use case, task type, volume, timeline…" class="brief-field"></textarea>
           </div>
-          <button type="submit" id="brief-submit-btn" class="btn" style="justify-content:center; width:100%; margin-top:0.25rem; cursor:pointer; position:relative; z-index:2; pointer-events:auto;">
-            Send enquiry →
-          </button>
-          <p id="brief-success" style="display:none; font-size:.85rem; color:#7ecb8f; text-align:center; margin:0;">✓ Brief received! We'll be in touch within one business day.</p>
-          <p id="brief-error" style="display:none; font-size:.85rem; color:#e07070; text-align:center; margin:0;">Something went wrong — please email contact@diraflowai.com</p>
-          <p style="font-size:.72rem; color:var(--subtle); text-align:center; margin:0;">We respond within one business day. No commitment required.</p>
+          <button type="submit" id="brief-submit-btn" class="btn" style="width:100%;justify-content:center;">Send enquiry →</button>
+          <p id="brief-success" style="display:none;font-size:.85rem;color:#7ecb8f;text-align:center;margin:0;">✓ Brief received! We'll be in touch within one business day.</p>
+          <p id="brief-error"   style="display:none;font-size:.85rem;color:#e07070;text-align:center;margin:0;">Something went wrong — please email contact@diraflowai.com</p>
+          <p style="font-size:.72rem;color:var(--subtle);text-align:center;margin:0;">No commitment required. We respond within one business day.</p>
         </form>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ════════════════════════════════
-     FOOTER
-════════════════════════════════ -->
+<!-- ═══ FOOTER ═══ -->
 <footer>
-  <div class="container">
+  <div class="container-wide">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a href="/" class="brand" style="display:inline-flex; gap:.625rem; align-items:center; font-weight:700; font-size:1.125rem; letter-spacing:-.025em; margin-bottom:1rem;">
-          <img src="/assets/logo.jpg" alt="Diraflow" class="nav-logo-img nav-logo-transparent">
+        <a href="index.html" class="brand" style="margin-bottom:0.875rem;display:inline-flex;">
+          <img src="assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
         </a>
         <p>Premium training data for AI agents and LLMs. Built by experts, trusted by frontier AI teams worldwide.</p>
-        <div style="display:flex; gap:0.6rem; align-items:center; margin-top:1.25rem; flex-wrap:wrap;">
-          <a href="https://www.linkedin.com/company/diraflow/" target="_blank" rel="noopener" aria-label="LinkedIn" style="width:38px;height:38px;border-radius:9px;background:#0A66C2;display:flex;align-items:center;justify-content:center;transition:transform 0.2s,opacity 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)';this.style.opacity='0.85'" onmouseout="this.style.transform='translateY(0)';this.style.opacity='1'"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
-          
-          <a href="https://x.com/diraflow_" target="_blank" rel="noopener" aria-label="X" style="width:38px;height:38px;border-radius:9px;background:#000;border:1px solid #333;display:flex;align-items:center;justify-content:center;transition:transform 0.2s,opacity 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)';this.style.opacity='0.85'" onmouseout="this.style.transform='translateY(0)';this.style.opacity='1'"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-
-          <a href="https://www.facebook.com/share/1HHQD7LH2U/" target="_blank" rel="noopener" aria-label="Facebook" style="width:38px;height:38px;border-radius:9px;background:#1877F2;display:flex;align-items:center;justify-content:center;transition:transform 0.2s,opacity 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)';this.style.opacity='0.85'" onmouseout="this.style.transform='translateY(0)';this.style.opacity='1'"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
-          <a href="https://www.instagram.com/diraflow_?utm_source=qr&igsh=MTVkdHRwem92dHQ4cQ==" target="_blank" rel="noopener" aria-label="Instagram" style="width:38px;height:38px;border-radius:9px;background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%);display:flex;align-items:center;justify-content:center;transition:transform 0.2s,opacity 0.2s;text-decoration:none;flex-shrink:0;" onmouseover="this.style.transform='translateY(-3px)';this.style.opacity='0.85'" onmouseout="this.style.transform='translateY(0)';this.style.opacity='1'"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
-        </div>
       </div>
       <div class="footer-col"><h4>Solutions</h4><ul>
-        <li><a href="../solutions.html#environment">Environment Generation</a></li>
-        <li><a href="../solutions.html#agentic">Agentic Datasets</a></li>
-        <li><a href="../solutions.html#redteaming">Red-Teaming</a></li>
-        <li><a href="../solutions.html#rlhf">RLHF &amp; Preference</a></li>
+        <li><a href="services/environment.html">Environment Generation</a></li>
+        <li><a href="services/agentic.html">Agentic Datasets</a></li>
+        <li><a href="services/red-teaming.html">Red-Teaming</a></li>
+        <li><a href="services/rlhf.html">RLHF &amp; Preference</a></li>
       </ul></div>
-      
-      <div class="footer-col"><h4>Company</h4><ul><li><a href="blog.html">Blog</a></li><li><a href="careers.html">Careers</a></li><li><a href="index.html#faq">FAQ</a></li><li><a href="industries.html">Industries</a></li><li><a href="contact.html">Contact Us</a></li></ul></div>
-      
-      <div class="footer-col"><h4>Connect</h4><ul><li><a href="mailto:contact@diraflowai.com">contact@diraflowai.com</a></li><li><a href="https://www.linkedin.com/company/diraflow/" target="_blank" rel="noopener">LinkedIn</a></li><li><a href="https://x.com/diraflow_" target="_blank" rel="noopener">Twitter / X</a></li>
+      <div class="footer-col"><h4>Company</h4><ul>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="careers.html">Careers</a></li>
+        <li><a href="industries.html">Industries</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul></div>
+      <div class="footer-col"><h4>Connect</h4><ul>
+        <li><a href="mailto:contact@diraflowai.com">contact@diraflowai.com</a></li>
+        <li><a href="https://linkedin.com/company/diraflow" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a href="https://x.com/diraflow_" target="_blank" rel="noopener">Twitter / X</a></li>
+      </ul></div>
     </div>
     <div class="footer-bottom">
-      <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
         <p>© 2026 Diraflow AI. All rights reserved.</p>
-        <span style="color:var(--subtle); font-size:.8125rem;">·</span>
-        <a href="/code-of-conduct.html" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
-        <span style="color:var(--subtle); font-size:.8125rem;">·</span>
-        <a href="privacy-policy.html" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="code-of-conduct.html" style="font-size:.8125rem;color:var(--subtle);" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="privacy-policy.html" style="font-size:.8125rem;color:var(--subtle);" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
       </div>
-      
     </div>
   </div>
 </footer>
 
-<script src="/assets/main.js" defer></script>
 <script>
-/* ── Sidebar active state on scroll ── */
-const sections = document.querySelectorAll('[id]');
-const navLinks = document.querySelectorAll('#solutions-nav a');
-window.addEventListener('scroll', () => {
-  let current = '';
-  sections.forEach(s => {
-    if (window.scrollY >= s.offsetTop - 130) current = s.id;
-  });
-  navLinks.forEach(a => {
-    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
-  });
-});
+/* ── Drawer ── */
+(function(){
+  var btn=document.getElementById('hb-btn');
+  var drawer=document.getElementById('hb-drawer');
+  var overlay=document.getElementById('hb-overlay');
+  var closeBtn=document.getElementById('hb-close');
+  function open(){drawer.classList.add('is-open');overlay.classList.add('is-open');btn.classList.add('is-open');document.body.style.overflow='hidden';}
+  function close(){drawer.classList.remove('is-open');overlay.classList.remove('is-open');btn.classList.remove('is-open');document.body.style.overflow='';}
+  if(btn)btn.addEventListener('click',open);
+  if(overlay)overlay.addEventListener('click',close);
+  if(closeBtn)closeBtn.addEventListener('click',close);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+})();
 
 /* ── Brief form ── */
-const briefForm = document.getElementById('brief-form');
-if (briefForm) {
-  briefForm.addEventListener('submit', async e => {
+(function(){
+  var form=document.getElementById('brief-form');
+  if(!form)return;
+  form.addEventListener('submit',async function(e){
     e.preventDefault();
-    const btn     = document.getElementById('brief-submit-btn');
-    const success = document.getElementById('brief-success');
-    const error   = document.getElementById('brief-error');
-    btn.textContent = 'Sending…'; btn.disabled = true;
-    error.style.display = 'none';
-    try {
-      const res = await fetch(briefForm.action, {
-        method: 'POST', body: new FormData(briefForm),
-        headers: { 'Accept': 'application/json' }
-      });
-      if (res.ok) {
-        briefForm.reset();
-        btn.style.display = 'none';
-        success.style.display = 'block';
-        setTimeout(() => {
-          success.style.display = 'none';
-          btn.style.display = 'block';
-          btn.textContent = 'Send enquiry →'; btn.disabled = false;
-        }, 5000);
+    var btn=document.getElementById('brief-submit-btn');
+    var success=document.getElementById('brief-success');
+    var error=document.getElementById('brief-error');
+    btn.textContent='Sending…';btn.disabled=true;
+    error.style.display='none';
+    try{
+      var res=await fetch(form.action,{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}});
+      if(res.ok){form.reset();btn.style.display='none';success.style.display='block';
+        setTimeout(function(){success.style.display='none';btn.style.display='flex';btn.textContent='Send enquiry →';btn.disabled=false;},5000);
       } else { throw new Error(); }
-    } catch {
-      error.style.display = 'block';
-      btn.textContent = 'Send enquiry →'; btn.disabled = false;
-    }
+    }catch{error.style.display='block';btn.textContent='Send enquiry →';btn.disabled=false;}
   });
-}
+})();
 </script>
-
 </body>
 </html>
-
-<script>
-function openDrawer() {
-  document.getElementById("drawer").classList.add("open");
-  document.getElementById("drawer-overlay").classList.add("show");
-}
-
-function closeDrawer() {
-  document.getElementById("drawer").classList.remove("open");
-  document.getElementById("drawer-overlay").classList.remove("show");
-}
-</script>

@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Video Annotation — Diraflow</title>
+<meta name="description" content="Expert video annotation services for AI training — object detection, action recognition, pose estimation, scene understanding, and temporal localization with computer vision specialists.">
+<meta property="og:title" content="Video Annotation — Diraflow">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/png" href="assets/logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  localStorage.removeItem('diraflow-theme');
+  document.documentElement.setAttribute('data-theme', 'light');
+</script>
+
+<style>
+/* ── Tokens ── */
+:root {
+  --bg:#f7f6f2; --bg2:#eeecea; --fg:#111110; --fg2:#555250;
+  --border:#d8d6d0; --card:#ffffff; --subtle:#999690;
+  --gold:#c8922a; --green:#4a9e5c; --red:#dc3c3c;
+  --navy:#0d1b3e;
+  --radius:0.75rem; --radius-lg:1.25rem;
+  --transition:0.2s ease; --shadow:0 4px 24px rgba(0,0,0,0.07);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+img{display:block;max-width:100%;height:auto;}
+a{color:inherit;text-decoration:none;}
+ul{list-style:none;}
+button{font-family:inherit;}
+
+/* ── Layout ── */
+.container-wide{max-width:1160px;margin:0 auto;padding:0 4rem;}
+@media(max-width:900px){.container-wide{padding:0 2.5rem;}}
+@media(max-width:600px){.container-wide{padding:0 1.25rem;}}
+
+/* ── Nav ── */
+nav.top{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);height:68px;display:flex;align-items:center;}
+nav.top .nav-inner{max-width:1160px;margin:0 auto;padding:0 4rem;display:flex;align-items:center;gap:2rem;width:100%;}
+@media(max-width:900px){nav.top .nav-inner{padding:0 2.5rem;}}
+@media(max-width:600px){nav.top .nav-inner{padding:0 1.25rem;}}
+.brand{display:inline-flex;align-items:center;gap:0.625rem;font-weight:700;color:var(--fg);white-space:nowrap;flex-shrink:0;}
+.nav-logo-img{width:36px;height:36px;border-radius:8px;object-fit:contain;}
+.brand-text{display:flex;flex-direction:column;}
+.brand-name{font-size:1rem;font-weight:700;line-height:1.1;}
+.brand-tagline{font-size:0.65rem;color:var(--fg2);}
+nav.top ul{display:flex;list-style:none;flex:1;margin:0;padding:0;}
+nav.top ul li a{font-size:0.875rem;font-weight:500;color:var(--fg2);padding:0.5rem 0.875rem;border-radius:0.5rem;display:block;transition:color var(--transition),background var(--transition);}
+nav.top ul li a:hover,nav.top ul li a.active{color:var(--fg);background:var(--bg2);}
+.nav-right{display:flex;align-items:center;gap:0.75rem;margin-left:auto;flex-shrink:0;}
+.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.55rem 1.2rem;border-radius:2rem;font-weight:600;font-size:0.875rem;font-family:'Sora',sans-serif;cursor:pointer;border:none;background:var(--fg);color:var(--bg);text-decoration:none;transition:opacity 0.2s,transform 0.15s;}
+.btn:hover{opacity:0.85;transform:translateY(-1px);}
+.btn-sm{padding:0.45rem 1rem;font-size:0.8rem;}
+.btn-gold{background:var(--gold);color:#fff;}
+.btn-gold:hover{background:#a8771e;opacity:1;}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--fg);}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);opacity:1;}
+
+/* hamburger */
+.hb-btn{display:none;flex-direction:column;justify-content:center;align-items:center;width:42px;height:42px;gap:5px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;flex-shrink:0;z-index:9999;}
+.hb-btn span{display:block;width:20px;height:2.5px;background:var(--fg);border-radius:3px;transition:transform 0.3s ease,opacity 0.3s ease;pointer-events:none;}
+.hb-btn.is-open span:nth-child(1){transform:translateY(7.5px) rotate(45deg);}
+.hb-btn.is-open span:nth-child(2){opacity:0;}
+.hb-btn.is-open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg);}
+@media(max-width:860px){.hb-btn{display:flex!important;}nav.top ul{display:none!important;}.btn.btn-sm{display:none!important;}}
+/* drawer */
+.hb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(3px);z-index:9997;}
+.hb-overlay.is-open{display:block;}
+.hb-drawer{position:fixed;top:0;right:0;bottom:0;width:290px;max-width:88vw;background:var(--bg);border-left:1px solid var(--border);z-index:9998;display:flex;flex-direction:column;transform:translateX(110%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);box-shadow:-12px 0 50px rgba(0,0,0,0.12);}
+.hb-drawer.is-open{transform:translateX(0);}
+.hb-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);}
+.hb-close{width:32px;height:32px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;color:var(--fg2);transition:all 0.2s;}
+.hb-close:hover{background:#111;color:#fff;}
+.hb-nav{flex:1;padding:1rem 0.875rem;overflow-y:auto;display:flex;flex-direction:column;gap:0.2rem;}
+.hb-link{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1rem;border-radius:0.75rem;font-size:0.9rem;font-weight:500;color:var(--fg2);border:1px solid transparent;transition:all 0.18s;}
+.hb-link:hover,.hb-link.hb-active{background:rgba(200,146,42,0.09);border-color:rgba(200,146,42,0.22);color:#c8922a;}
+.hb-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border-radius:0.5rem;font-size:1rem;flex-shrink:0;}
+.hb-footer{padding:1.25rem;border-top:1px solid var(--border);}
+.hb-cta{display:block;text-align:center;background:var(--gold);color:#fff;padding:0.8rem 1rem;border-radius:2rem;font-size:0.875rem;font-weight:700;}
+
+/* ── Page Hero ── */
+.page-head{padding:5rem 0 4.5rem;background:var(--bg2);border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+.page-head::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 65% 0%,rgba(200,146,42,0.08) 0%,transparent 65%);pointer-events:none;}
+.section-label{display:flex;align-items:center;gap:0.625rem;font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--gold);margin-bottom:0.875rem;}
+.section-label::before{content:'';display:block;width:1.5rem;height:1.5px;background:var(--gold);}
+.page-head h1{font-family:'DM Serif Display',serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:400;line-height:1.1;letter-spacing:-0.035em;color:var(--fg);margin-bottom:1rem;}
+.page-head h1 em{color:var(--gold);font-style:italic;}
+.page-head > div > p{font-size:1.05rem;color:var(--fg2);max-width:560px;line-height:1.75;}
+
+/* fade-in */
+.fade-up{opacity:0;transform:translateY(20px);animation:fadeUp 0.6s ease forwards;}
+.fade-up-1{animation-delay:0.1s;}.fade-up-2{animation-delay:0.2s;}.fade-up-3{animation-delay:0.3s;}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+
+/* ══════════════════════════
+   SERVICE CARDS GRID
+══════════════════════════ */
+.services-section{padding:5rem 0;}
+.services-section-head{text-align:center;margin-bottom:3.5rem;}
+.services-section-head h2{font-family:'DM Serif Display',serif;font-size:clamp(1.875rem,3.5vw,2.75rem);font-weight:400;line-height:1.15;letter-spacing:-0.03em;color:var(--fg);margin-bottom:0.75rem;}
+.services-section-head h2 em{color:var(--gold);font-style:italic;}
+.services-section-head p{font-size:1rem;color:var(--fg2);line-height:1.75;max-width:540px;margin:0 auto;}
+
+/* ── Quality compare ── */
+.quality-section{background:var(--bg2);padding:5rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.section-title{font-family:'DM Serif Display',serif;font-size:clamp(1.875rem,3.5vw,2.75rem);font-weight:400;line-height:1.15;letter-spacing:-0.03em;color:var(--fg);margin-bottom:1rem;}
+.section-title em{color:var(--gold);font-style:italic;}
+.section-intro{font-size:1rem;color:var(--fg2);line-height:1.75;max-width:580px;margin-bottom:2.5rem;}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+@media(max-width:700px){.compare-grid{grid-template-columns:1fr;}}
+.compare-card{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
+.compare-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);}
+.compare-header .label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.35rem;}
+.compare-header h3{font-size:1.05rem;font-weight:700;color:var(--fg);}
+.compare-header.bad{background:rgba(220,60,60,0.05);}
+.compare-header.bad .label{color:var(--red);}
+.compare-header.good{background:rgba(200,146,42,0.06);}
+.compare-header.good .label{color:var(--gold);}
+.compare-body{padding:1.25rem 1.5rem;background:var(--card);}
+.compare-list{list-style:none;display:flex;flex-direction:column;gap:0.75rem;}
+.compare-list li{display:flex;gap:0.625rem;font-size:0.875rem;color:var(--fg2);line-height:1.5;align-items:flex-start;}
+.compare-list .icon{flex-shrink:0;font-weight:700;margin-top:0.05rem;}
+
+/* ── CTA form ── */
+.cta-form-section{padding:5rem 0;}
+.cta-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;max-width:960px;margin:0 auto;}
+@media(max-width:768px){.cta-form-grid{grid-template-columns:1fr;gap:2.5rem;}}
+.cta-bullets{display:flex;flex-direction:column;gap:0.75rem;font-size:0.875rem;color:var(--fg2);margin-top:1.5rem;}
+.cta-bullet{display:flex;align-items:center;gap:0.75rem;}
+.cta-bullet span:first-child{color:var(--gold);}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.25rem;box-shadow:var(--shadow);}
+.form-card h3{font-size:1.15rem;font-weight:700;color:var(--fg);margin-bottom:0.35rem;letter-spacing:-0.015em;}
+.form-card > p{font-size:0.85rem;color:var(--fg2);margin-bottom:1.5rem;}
+.brief-field{width:100%;background:var(--bg2);border:1.5px solid var(--border);border-radius:0.625rem;padding:0.875rem 1.125rem;font-size:0.875rem;color:var(--fg);font-family:'Sora',sans-serif;box-sizing:border-box;outline:none;transition:border-color 0.2s;display:block;}
+.brief-field:focus{border-color:var(--gold);}
+textarea.brief-field{resize:vertical;min-height:110px;}
+select.brief-field{cursor:pointer;}
+.form-fields{display:flex;flex-direction:column;gap:0.875rem;}
+.form-label{font-size:0.8rem;font-weight:600;display:block;margin-bottom:0.4rem;color:var(--fg);}
+
+/* ── Footer ── */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:4rem 0 0;}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem;}
+@media(max-width:760px){.footer-grid{grid-template-columns:1fr 1fr;gap:2rem;}}
+@media(max-width:480px){.footer-grid{grid-template-columns:1fr;}}
+.footer-brand p{font-size:0.875rem;color:var(--fg2);line-height:1.7;margin-top:0.75rem;}
+.footer-col h4{font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--fg2);margin-bottom:1.25rem;}
+.footer-col ul{display:flex;flex-direction:column;gap:0.625rem;}
+.footer-col ul li a{font-size:0.875rem;color:var(--fg2);transition:color 0.2s;}
+.footer-col ul li a:hover{color:var(--gold);}
+.footer-bottom{border-top:1px solid var(--border);padding:1.5rem 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.footer-bottom p{font-size:0.8125rem;color:var(--subtle);}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav class="top">
+  <div class="nav-inner">
+    <a href="index.html" class="brand">
+      <img src="assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+      <span class="brand-text">
+        <span class="brand-name">Diraflow</span>
+        <span class="brand-tagline">Training data for frontier AI</span>
+      </span>
+    </a>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="solutions.html">Solutions</a></li>
+      <li><a href="industries.html">Industries</a></li>
+      <li><a href="blog.html">Blog</a></li>
+      <li><a href="careers.html">Careers</a></li>
+      <li><a href="contact.html">Contact Us</a></li>
+      <li><a href="team.html">Our Team</a></li>
+      <li><a href="report.html">Report Concerns</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="contact.html" class="btn btn-sm">Talk to us</a>
+      <button class="hb-btn" id="hb-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+<div class="hb-overlay" id="hb-overlay"></div>
+<div class="hb-drawer" id="hb-drawer">
+  <div class="hb-drawer-head">
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <img src="assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+      <span style="font-weight:700;color:var(--fg);">Diraflow</span>
+    </div>
+    <button class="hb-close" id="hb-close">✕</button>
+  </div>
+  <nav class="hb-nav">
+    <a href="index.html"      class="hb-link"><span class="hb-icon">🏠</span>Home</a>
+    <a href="solutions.html"  class="hb-link"><span class="hb-icon">⚙️</span>Solutions</a>
+    <a href="industries.html" class="hb-link"><span class="hb-icon">🏭</span>Industries</a>
+    <a href="blog.html"       class="hb-link"><span class="hb-icon">✍️</span>Blog</a>
+    <a href="careers.html"    class="hb-link"><span class="hb-icon">💼</span>Careers</a>
+    <a href="contact.html"    class="hb-link"><span class="hb-icon">✉️</span>Contact Us</a>
+    <a href="team.html"       class="hb-link"><span class="hb-icon">👥</span>Our Team</a>
+    <a href="report.html"     class="hb-link"><span class="hb-icon">⚠️</span>Report Concerns</a>
+  </nav>
+  <div class="hb-footer"><a href="contact.html" class="hb-cta">Talk to an expert →</a></div>
+</div>
+
+<!-- ═══ PAGE HERO ═══ -->
+<section class="page-head">
+  <div class="container-wide">
+    <div class="section-label fade-up fade-up-1">Specialized expertise</div>
+    <h1 class="fade-up fade-up-2">Video <em>Annotation</em></h1>
+    <p class="fade-up fade-up-3">Precision object detection, action recognition, pose estimation, scene understanding, and temporal localization — from computer vision specialists with deep domain expertise.</p>
+  </div>
+</section>
+
+<!-- ═══ BACK BUTTON ═══ -->
+<div style="padding:1.5rem 0;text-align:center;background:var(--bg);">
+  <div class="container-wide">
+    <a href="solutions.html" class="btn btn-outline">← Back to Solutions</a>
+  </div>
+</div>
+
+<!-- ═══ SERVICE CARDS ═══ -->
+<section class="services-section">
+  <div class="container-wide">
+    <div class="services-section-head">
+      <div class="section-label" style="justify-content:center;">Our annotation types</div>
+      <h2>Complete <em>video annotation</em> coverage</h2>
+      <p>Nine specialized annotation types covering every video AI use case — from object detection to action recognition and pose estimation.</p>
+    </div>
+
+    <div style="max-width:1000px;margin:0 auto;">
+      
+      <!-- 1. Object Detection & Bounding Boxes -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:start;margin-bottom:4rem;@media(max-width:700px){grid-template-columns:1fr;}">
+        <div>
+          <img src="video annotation/Object- detection.jpg" alt="Object detection annotation" style="width:100%;border-radius:var(--radius-lg);margin-bottom:1.5rem;">
+        </div>
+        <div>
+          <h3 style="font-size:1.35rem;font-weight:700;color:var(--fg);margin-bottom:0.75rem;">🎯 Object Detection & Bounding Boxes</h3>
+          <p style="font-size:0.95rem;color:var(--fg2);line-height:1.8;margin-bottom:1rem;">Object detection locates and labels objects within video frames — people, vehicles, animals, products, etc. Annotators draw bounding boxes around each instance, classify object type, and handle occlusion and scale variation. This enables computer vision models to identify, track, and understand objects across real-world video streams for autonomous systems and visual search.</p>
+          <p style="font-size:0.9rem;color:var(--fg2);line-height:1.7;"><strong>Common use cases:</strong> Autonomous vehicle perception, retail inventory monitoring, industrial quality inspection, wildlife tracking, security surveillance, sports analytics, and object-based video search systems.</p>
+        </div>
+      </div>
+
+      <!-- 2. Action & Activity Recognition -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:start;margin-bottom:4rem;@media(max-width:700px){grid-template-columns:1fr;}">
+        <div style="order:2;@media(max-width:700px){order:1;}">
+          <img src="video annotation/activity-detection.webp" alt="Action recognition annotation" style="width:100%;border-radius:var(--radius-lg);margin-bottom:1.5rem;">
+        </div>
+        <div style="order:1;@media(max-width:700px){order:2;}">
+          <h3 style="font-size:1.35rem;font-weight:700;color:var(--fg);margin-bottom:0.75rem;">🏃 Action & Activity Recognition</h3>
+          <p style="font-size:0.95rem;color:var(--fg2);line-height:1.8;margin-bottom:1rem;">Action recognition identifies what people and objects are doing in video — walking, running, sitting, waving, throwing, swimming, etc. Annotators classify actions with temporal boundaries, capturing when actions start and end. Essential for understanding human behavior, workplace safety monitoring, sports performance analysis, and context-aware video understanding systems.</p>
+          <p style="font-size:0.9rem;color:var(--fg2);line-height:1.7;"><strong>Common use cases:</strong> Workplace safety monitoring, sports video analysis, fitness tracking systems, crowd behavior analysis, surveillance anomaly detection, gesture recognition, and human-computer interaction training.</p>
+        </div>
+      </div>
+
+      
+
+      <!-- 4. Keypoint & Pose Estimation -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:start;margin-bottom:4rem;@media(max-width:700px){grid-template-columns:1fr;}">
+        <div style="order:2;@media(max-width:700px){order:1;}">
+          <img src="video annotation/keypoint-annotation.png" alt="Pose estimation annotation" style="width:100%;border-radius:var(--radius-lg);margin-bottom:1.5rem;">
+        </div>
+        <div style="order:1;@media(max-width:700px){order:2;}">
+          <h3 style="font-size:1.35rem;font-weight:700;color:var(--fg);margin-bottom:0.75rem;">🤸 Keypoint & Pose Estimation</h3>
+          <p style="font-size:0.95rem;color:var(--fg2);line-height:1.8;margin-bottom:1rem;">Pose estimation marks skeletal keypoints on human bodies — head, joints, limbs — to capture body configuration and movement. Annotators precisely label anatomical landmarks across video frames, handling occlusion and complex postures. Enables motion capture, fitness coaching, dance analysis, rehabilitation monitoring, and sports biomechanics training at scale.</p>
+          <p style="font-size:0.9rem;color:var(--fg2);line-height:1.7;"><strong>Common use cases:</strong> Motion capture for animation, fitness app form correction, physical therapy assessment, dance choreography analysis, sports performance improvement, virtual fitness coaching, and gesture-based interfaces.</p>
+        </div>
+      </div>
+
+      <!-- 5. Semantic Segmentation -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:start;margin-bottom:4rem;@media(max-width:700px){grid-template-columns:1fr;}">
+        <div>
+          <img src="video annotation/semantic-segmentation.png" alt="Semantic segmentation annotation" style="width:100%;border-radius:var(--radius-lg);margin-bottom:1.5rem;">
+        </div>
+        <div>
+          <h3 style="font-size:1.35rem;font-weight:700;color:var(--fg);margin-bottom:0.75rem;">🎨 Semantic Segmentation</h3>
+          <p style="font-size:0.95rem;color:var(--fg2);line-height:1.8;margin-bottom:1rem;">Semantic segmentation assigns class labels to every pixel in video frames — sky, road, building, vegetation, person, vehicle. Annotators perform pixel-level classification, creating precise masks that segment scenes into meaningful regions. Essential for autonomous driving perception, medical imaging analysis, and applications requiring dense, per-pixel understanding of visual content.</p>
+          <p style="font-size:0.9rem;color:var(--fg2);line-height:1.7;"><strong>Common use cases:</strong> Autonomous vehicle road understanding, medical image segmentation, satellite image analysis, agricultural crop monitoring, background removal for video editing, and scene understanding for robotics.</p>
+        </div>
+      </div>
+
+      
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ QUALITY COMPARE ═══ -->
+<section class="quality-section">
+  <div class="container-wide">
+    <div class="section-label">Why Diraflow</div>
+    <h2 class="section-title">Video annotation <em>precision</em> that<br>powers computer vision</h2>
+    <p class="section-intro">We employ computer vision specialists, roboticists, and annotation engineers who understand visual nuance and technical annotation requirements. Rigorous quality checks ensure bounding boxes, segmentation masks, and labels meet production standards.</p>
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-header bad">
+          <div class="label">❌ Commodity annotation</div>
+          <h3>What you get elsewhere</h3>
+        </div>
+        <div class="compare-body">
+          <ul class="compare-list">
+            <li><span class="icon" style="color:var(--red);">✗</span>Generalist workers unfamiliar with computer vision or domain requirements</li>
+            <li><span class="icon" style="color:var(--red);">✗</span>Poor handling of occlusion, perspective, and complex scenarios</li>
+            <li><span class="icon" style="color:var(--red);">✗</span>No inter-annotator agreement or consistency validation</li>
+            <li><span class="icon" style="color:var(--red);">✗</span>Inaccurate bounding boxes, masks, and temporal boundaries</li>
+            <li><span class="icon" style="color:var(--red);">✗</span>No audit trails or detailed quality reporting</li>
+          </ul>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-header good">
+          <div class="label">✦ Diraflow standard</div>
+          <h3>What you get with us</h3>
+        </div>
+        <div class="compare-body">
+          <ul class="compare-list">
+            <li><span class="icon" style="color:var(--green);">✓</span>Computer vision specialists with domain expertise and technical training</li>
+            <li><span class="icon" style="color:var(--green);">✓</span>Expert handling of occlusion, perspective, and edge cases</li>
+            <li><span class="icon" style="color:var(--green);">✓</span>IAA monitoring and calibration on every project</li>
+            <li><span class="icon" style="color:var(--green);">✓</span>Pixel-perfect bounding boxes, segmentation, and temporal accuracy</li>
+            <li><span class="icon" style="color:var(--green);">✓</span>Full audit trails, versioning, and detailed QA reports</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA FORM ═══ -->
+<section class="cta-form-section" id="get-a-quote">
+  <div class="container-wide">
+    <div class="cta-form-grid">
+      <div>
+        <div class="section-label">Ready to start?</div>
+        <h2 class="section-title">Tell us about <em>your project</em></h2>
+        <p style="font-size:0.9rem;color:var(--fg2);line-height:1.8;">Send us details about your video annotation needs and we'll provide a tailored proposal — scope, timeline, and pricing — within one business day.</p>
+        <div class="cta-bullets">
+          <div class="cta-bullet"><span>✉</span><a href="mailto:contact@diraflowai.com" style="color:var(--fg2);">contact@diraflowai.com</a></div>
+          <div class="cta-bullet"><span>⏱</span><span>Response within 1 business day</span></div>
+          <div class="cta-bullet"><span>🔒</span><span>NDAs signed before project discussion</span></div>
+          <div class="cta-bullet"><span>🚀</span><span>Projects start within 1–2 weeks</span></div>
+        </div>
+      </div>
+      <div class="form-card">
+        <h3>Send us a brief</h3>
+        <p>Include annotation type, video duration, and timeline.</p>
+        <form id="brief-form" action="https://formspree.io/f/xnjllewe" method="POST" class="form-fields">
+          <input type="hidden" name="_subject" value="Video Annotation Enquiry — Diraflow">
+          <div>
+            <label class="form-label">Name *</label>
+            <input type="text" name="name" required placeholder="Your full name" class="brief-field">
+          </div>
+          <div>
+            <label class="form-label">Work email *</label>
+            <input type="email" name="email" required placeholder="you@company.com" class="brief-field">
+          </div>
+          <div>
+            <label class="form-label">Annotation type *</label>
+            <select name="annotation_type" required class="brief-field">
+              <option value="" disabled selected>Select annotation type…</option>
+              <option>Object Detection</option>
+              <option>Action Recognition</option>
+              <option>Scene Understanding</option>
+              <option>Pose Estimation</option>
+              <option>Semantic Segmentation</option>
+              <option>Instance Segmentation</option>
+              <option>Temporal Action Localization</option>
+              <option>Face Detection & Attributes</option>
+              <option>Video Captioning</option>
+              <option>Multiple types</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Project brief *</label>
+            <textarea name="brief" required rows="4" placeholder="Video duration, resolution, domain, quality requirements…" class="brief-field"></textarea>
+          </div>
+          <button type="submit" id="brief-submit-btn" class="btn" style="width:100%;justify-content:center;">Send enquiry →</button>
+          <p id="brief-success" style="display:none;font-size:.85rem;color:#7ecb8f;text-align:center;margin:0;">✓ Brief received! We'll be in touch within one business day.</p>
+          <p id="brief-error"   style="display:none;font-size:.85rem;color:#e07070;text-align:center;margin:0;">Something went wrong — please email contact@diraflowai.com</p>
+          <p style="font-size:.72rem;color:var(--subtle);text-align:center;margin:0;">No commitment required. We respond within one business day.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="container-wide">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="brand" style="margin-bottom:0.875rem;display:inline-flex;">
+          <img src="assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+        </a>
+        <p>Premium training data for AI agents and LLMs. Built by experts, trusted by frontier AI teams worldwide.</p>
+      </div>
+      <div class="footer-col"><h4>Solutions</h4><ul>
+        <li><a href="services/environment.html">Environment Generation</a></li>
+        <li><a href="services/agentic.html">Agentic Datasets</a></li>
+        <li><a href="services/red-teaming.html">Red-Teaming</a></li>
+        <li><a href="services/rlhf.html">RLHF &amp; Preference</a></li>
+      </ul></div>
+      <div class="footer-col"><h4>Company</h4><ul>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="careers.html">Careers</a></li>
+        <li><a href="industries.html">Industries</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul></div>
+      <div class="footer-col"><h4>Connect</h4><ul>
+        <li><a href="mailto:contact@diraflowai.com">contact@diraflowai.com</a></li>
+        <li><a href="https://linkedin.com/company/diraflow" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a href="https://x.com/diraflow_" target="_blank" rel="noopener">Twitter / X</a></li>
+      </ul></div>
+    </div>
+    <div class="footer-bottom">
+      <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+        <p>© 2026 Diraflow AI. All rights reserved.</p>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="code-of-conduct.html" style="font-size:.8125rem;color:var(--subtle);" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
+        <span style="color:var(--subtle);font-size:.8125rem;">·</span>
+        <a href="privacy-policy.html" style="font-size:.8125rem;color:var(--subtle);" onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── Drawer ── */
+(function(){
+  var btn=document.getElementById('hb-btn');
+  var drawer=document.getElementById('hb-drawer');
+  var overlay=document.getElementById('hb-overlay');
+  var closeBtn=document.getElementById('hb-close');
+  function open(){drawer.classList.add('is-open');overlay.classList.add('is-open');btn.classList.add('is-open');document.body.style.overflow='hidden';}
+  function close(){drawer.classList.remove('is-open');overlay.classList.remove('is-open');btn.classList.remove('is-open');document.body.style.overflow='';}
+  if(btn)btn.addEventListener('click',open);
+  if(overlay)overlay.addEventListener('click',close);
+  if(closeBtn)closeBtn.addEventListener('click',close);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+})();
+
+/* ── Brief form ── */
+(function(){
+  var form=document.getElementById('brief-form');
+  if(!form)return;
+  form.addEventListener('submit',async function(e){
+    e.preventDefault();
+    var btn=document.getElementById('brief-submit-btn');
+    var success=document.getElementById('brief-success');
+    var error=document.getElementById('brief-error');
+    btn.textContent='Sending…';btn.disabled=true;
+    error.style.display='none';
+    try{
+      var res=await fetch(form.action,{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}});
+      if(res.ok){form.reset();btn.style.display='none';success.style.display='block';
+        setTimeout(function(){success.style.display='none';btn.style.display='flex';btn.textContent='Send enquiry →';btn.disabled=false;},5000);
+      } else { throw new Error(); }
+    }catch{error.style.display='block';btn.textContent='Send enquiry →';btn.disabled=false;}
+  });
+})();
+</script>
+</body>
+</html>
