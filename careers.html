@@ -10,37 +10,135 @@
 <link rel="stylesheet" href="../assets/styles.css">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo.jpg">
 <script>
-  /* One-time clear of saved theme preference */
   localStorage.removeItem('diraflow-theme');
   document.documentElement.setAttribute('data-theme', 'light');
 </script>
-
 <script>
-  // These MUST be global — no wrapping, no DOMContentLoaded
   function openDrawer() {
     document.getElementById('drawer').classList.add('open');
     document.getElementById('drawer-overlay').classList.add('open');
     document.getElementById('hamburger-btn').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
-
   function closeDrawer() {
     document.getElementById('drawer').classList.remove('open');
     document.getElementById('drawer-overlay').classList.remove('open');
     document.getElementById('hamburger-btn').classList.remove('open');
     document.body.style.overflow = '';
   }
-
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeDrawer();
   });
-
-  // Highlight active page in drawer
   var current = window.location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.drawer-link').forEach(function(a) {
     if (a.getAttribute('href') === current) a.classList.add('active');
   });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .job-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    transition: border-color var(--transition), transform var(--transition), background var(--transition);
+  }
+  .job-card:hover { border-color: #c8922a; transform: translateY(-2px); }
+  .job-card h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: .5rem; color: var(--fg); }
+  .job-card .job-tagline { color: var(--subtle); font-size: .9375rem; margin-bottom: 1rem; }
+  .job-card .job-desc { margin-bottom: 1.25rem; font-size: .9375rem; }
+  .job-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  @media (max-width: 720px) { .job-card-grid { grid-template-columns: 1fr; } }
+  .job-card-grid h4 { font-size: .8125rem; text-transform: uppercase; letter-spacing: .04em; color: var(--subtle); margin-bottom: .625rem; }
+  .job-card-grid ul { margin: 0; padding-left: 1.125rem; font-size: .9375rem; }
+  .job-card-grid li { margin-bottom: .375rem; }
+
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55);
+    z-index: 999; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 3rem 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    max-width: 680px; width: 100%; padding: 2.25rem; position: relative; animation: modalIn .25s ease;
+  }
+  @keyframes modalIn { from { opacity:0; transform:translateY(12px);} to { opacity:1; transform:translateY(0);} }
+  .modal-close {
+    position: absolute; top: 1.25rem; right: 1.25rem; background: none; border: none;
+    font-size: 1.25rem; cursor: pointer; color: var(--subtle); line-height: 1;
+  }
+  .modal-close:hover { color: var(--fg); }
+  .modal-box h3 { font-size: 1.375rem; font-weight: 700; margin-bottom: .375rem; }
+  .modal-box .modal-sub { color: var(--subtle); font-size: .9375rem; margin-bottom: 1.75rem; }
+
+  .form-section-label {
+    font-size: .8125rem; text-transform: uppercase; letter-spacing: .04em; color: #c8922a;
+    font-weight: 600; margin: 1.75rem 0 .875rem; border-top: 1px solid var(--border); padding-top: 1.5rem;
+  }
+  .form-section-label:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+  .form-field { display: flex; flex-direction: column; gap: .375rem; margin-bottom: 1rem; }
+  .form-field label { font-size: .8125rem; font-weight: 600; color: var(--fg); }
+  .form-field input, .form-field select, .form-field textarea {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: .625rem .75rem; font-family: inherit; font-size: .9375rem; color: var(--fg);
+    transition: border-color var(--transition);
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+    outline: none; border-color: #c8922a;
+  }
+  .form-field textarea,
+  .question-block textarea {
+    width: 100%;
+    min-height: 160px;
+    resize: vertical;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    border-radius: 12px;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+  .question-block select {
+    width: 100%;
+    height: 52px;
+    padding: 0 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--fg);
+    cursor: pointer;
+    appearance: auto;
+    transition: all 0.2s ease;
+  }
+  .question-block select:hover { border-color: #c8922a; }
+  .question-block select:focus {
+    outline: none;
+    border-color: #c8922a;
+    box-shadow: 0 0 0 3px rgba(200, 146, 42, 0.15);
+  }
+  .question-block { margin-bottom: 2rem; }
+  .question-block label {
+    display: block;
+    margin-bottom: .75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .form-field-checks { display: flex; flex-direction: column; gap: .5rem; }
+  .form-check { display: flex; align-items: center; gap: .5rem; font-size: .9375rem; }
+  .form-check input { width: auto; }
+  .form-msg { font-size: .875rem; margin-top: 1rem; display: none; }
+  .form-msg.show { display: block; }
+  .form-msg.success { color: #2e8b57; }
+  .form-msg.error { color: #c0392b; }
+  .modal-submit-row { margin-top: 1.75rem; display: flex; justify-content: flex-end; gap: .75rem; }
+  .btn[disabled] { opacity: .6; cursor: not-allowed; }
+</style>
 </head>
 <body>
 
@@ -65,22 +163,15 @@
     </ul>
     <div class="nav-right">
       <a href="contact.html" class="btn btn-sm">Talk to us</a>
-    <button class="hamburger" id="hamburger-btn" aria-label="Open menu" onclick="openDrawer()">
-        <span></span>
-        <span></span>
-        <span></span>
+      <button class="hamburger" id="hamburger-btn" aria-label="Open menu" onclick="openDrawer()">
+        <span></span><span></span><span></span>
       </button>
     </div>
   </div>
 </nav>
 
-<!-- ════════════════════════════════
-     MOBILE DRAWER
-════════════════════════════════ -->
 <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
-
-  <!-- Drawer header -->
   <div class="drawer-header">
     <div class="drawer-brand">
       <img src="assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
@@ -88,41 +179,18 @@
     </div>
     <button class="drawer-close" onclick="closeDrawer()" aria-label="Close menu">✕</button>
   </div>
-
-  <!-- Drawer nav links -->
   <nav class="drawer-nav">
-    <a href="index.html" class="drawer-link">
-      <span class="drawer-icon">🏠</span> Home
-    </a>
-    <a href="solutions.html" class="drawer-link">
-      <span class="drawer-icon">⚙️</span> Solutions
-    </a>
-    <a href="industries.html" class="drawer-link">
-      <span class="drawer-icon">🏭</span> Industries
-    </a>
-    <a href="blog.html" class="drawer-link">
-      <span class="drawer-icon">✍️</span> Blog
-    </a>
-    <a href="careers.html" class="drawer-link">
-      <span class="drawer-icon">💼</span> Careers
-    </a>
-    <a href="contact.html" class="drawer-link">
-      <span class="drawer-icon">✉️</span> Contact Us
-    </a>
-    </a>
-    <a href="team.html" class="drawer-link">
-      <span class="drawer-icon">🏢</span> Our Team
-    </a>
-    <a href="report.html" class="drawer-link">
-      <span class="drawer-icon">🛡️</span> Report Concerns
-    </a>
+    <a href="index.html" class="drawer-link"><span class="drawer-icon">🏠</span> Home</a>
+    <a href="solutions.html" class="drawer-link"><span class="drawer-icon">⚙️</span> Solutions</a>
+    <a href="industries.html" class="drawer-link"><span class="drawer-icon">🏭</span> Industries</a>
+    <a href="blog.html" class="drawer-link"><span class="drawer-icon">✍️</span> Blog</a>
+    <a href="careers.html" class="drawer-link"><span class="drawer-icon">💼</span> Careers</a>
+    <a href="contact.html" class="drawer-link"><span class="drawer-icon">✉️</span> Contact Us</a>
+    <a href="team.html" class="drawer-link"><span class="drawer-icon">🏢</span> Our Team</a>
+    <a href="report.html" class="drawer-link"><span class="drawer-icon">🛡️</span> Report Concerns</a>
   </nav>
-
-  <!-- Drawer footer -->
   <div class="drawer-footer">
-    <a href="contact.html" class="drawer-cta">
-      Talk to an expert →
-    </a>
+    <a href="contact.html" class="drawer-cta">Talk to an expert →</a>
     <div class="drawer-socials">
       <a href="https://www.linkedin.com/company/diraflow/" target="_blank" aria-label="LinkedIn"
         style="width:36px;height:36px;border-radius:8px;background:#0A66C2;display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;">
@@ -137,9 +205,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
       </a>
     </div>
-    <p style="font-size:0.7rem; color:var(--fg2, #888); text-align:center; margin-top:0.75rem;">
-      © 2026 Diraflow AI. All rights reserved.
-    </p>
+    <p style="font-size:0.7rem; color:var(--fg2, #888); text-align:center; margin-top:0.75rem;">© 2026 Diraflow AI. All rights reserved.</p>
   </div>
 </div>
 
@@ -152,54 +218,85 @@
   </div>
 </section>
 
-<!-- Why Diraflow -->
 <section class="block" style="background:var(--bg2);">
   <div class="container">
     <div class="section-label">Why Diraflow</div>
     <h2 class="section-title" style="margin-bottom:3rem;">Where <em>quality obsessives</em> do their best work</h2>
     <div class="grid-3">
-      <div class="card card-glow">
-        <div class="card-icon">🎯</div>
-        <h3>Meaningful work</h3>
-        <p>The data we build today shapes AI models used by millions. Every dataset has real downstream impact on how AI systems reason, behave, and stay safe.</p>
-      </div>
-      <div class="card card-glow">
-        <div class="card-icon">🌍</div>
-        <h3>Remote-first, globally diverse</h3>
-        <p>Our team spans four continents. We work asynchronously with thoughtful documentation, and meet in person twice a year.</p>
-      </div>
-      <div class="card card-glow">
-        <div class="card-icon">📈</div>
-        <h3>Real ownership</h3>
-        <p>Early-stage means real responsibility. You'll own problems end-to-end, work directly with clients, and have a direct line to leadership on every decision.</p>
-      </div>
-      <div class="card card-glow">
-        <div class="card-icon">🧠</div>
-        <h3>Expert colleagues</h3>
-        <p>Work alongside PhDs, former AI lab researchers, and seasoned ML engineers who take their craft seriously and love sharing what they know.</p>
-      </div>
-      <div class="card card-glow">
-        <div class="card-icon">💰</div>
-        <h3>Competitive compensation</h3>
-        <p>Salary benchmarked to top-tier tech, equity, learning budget, health coverage, and generous leave. We invest in our people.</p>
-      </div>
-      <div class="card card-glow">
-        <div class="card-icon">⚖️</div>
-        <h3>Safety-first culture</h3>
-        <p>We take AI safety seriously at the company level. Ethical considerations are part of every project decision — not an afterthought.</p>
-      </div>
+      <div class="card card-glow"><div class="card-icon">🎯</div><h3>Meaningful work</h3><p>The data we build today shapes AI models used by millions. Every dataset has real downstream impact on how AI systems reason, behave, and stay safe.</p></div>
+      <div class="card card-glow"><div class="card-icon">🌍</div><h3>Remote-first, globally diverse</h3><p>Our team spans four continents. We work asynchronously with thoughtful documentation, and meet in person twice a year.</p></div>
+      <div class="card card-glow"><div class="card-icon">📈</div><h3>Real ownership</h3><p>Early-stage means real responsibility. You'll own problems end-to-end, work directly with clients, and have a direct line to leadership on every decision.</p></div>
+      <div class="card card-glow"><div class="card-icon">🧠</div><h3>Expert colleagues</h3><p>Work alongside PhDs, former AI lab researchers, and seasoned ML engineers who take their craft seriously and love sharing what they know.</p></div>
+      <div class="card card-glow"><div class="card-icon">💰</div><h3>Competitive compensation</h3><p>Salary benchmarked to top-tier tech, equity, learning budget, health coverage, and generous leave. We invest in our people.</p></div>
+      <div class="card card-glow"><div class="card-icon">⚖️</div><h3>Safety-first culture</h3><p>We take AI safety seriously at the company level. Ethical considerations are part of every project decision — not an afterthought.</p></div>
     </div>
   </div>
 </section>
 
-
-<!-- Open roles -->
 <section class="block" id="roles" style="background:var(--bg2);">
   <div class="container">
     <div class="section-label">Open positions</div>
     <h2 class="section-title" style="margin-bottom:3rem;">Current <em>openings</em></h2>
-    <p> Oops!!No Openings at the moment🤦‍♀️, Keep checking back!</p>
 
+    <div class="job-card">
+      <h3>Image Annotation Specialist</h3>
+      <p class="job-tagline">Remote · Contract · AI Training Data</p>
+      <p class="job-desc">Join our AI training data team and help improve machine learning models by accurately labeling and reviewing image datasets.</p>
+      <div class="job-card-grid">
+        <div>
+          <h4>Responsibilities</h4>
+          <ul>
+            <li>Annotate images using provided guidelines</li>
+            <li>Identify objects, categories, attributes, and visual elements</li>
+            <li>Maintain high accuracy and consistency across datasets</li>
+            <li>Review annotations and correct mistakes</li>
+            <li>Follow detailed project instructions</li>
+            <li>Provide feedback when guidelines are unclear</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Requirements</h4>
+          <ul>
+            <li>Excellent attention to detail</li>
+            <li>Ability to follow written instructions</li>
+            <li>Strong visual recognition skills</li>
+            <li>Reliable internet connection</li>
+            <li>Basic computer skills</li>
+            <li>Previous annotation experience is an advantage</li>
+          </ul>
+        </div>
+      </div>
+      <button class="btn" onclick="openAssessment('annotation')">Start Assessment →</button>
+    </div>
+
+    <div class="job-card">
+      <h3>Image Quality Assessment Specialist</h3>
+      <p class="job-tagline">Remote · Contract · AI Evaluation</p>
+      <p class="job-desc">Evaluate images and AI-generated visual content to ensure accuracy, realism, and quality standards.</p>
+      <div class="job-card-grid">
+        <div>
+          <h4>Responsibilities</h4>
+          <ul>
+            <li>Compare images and determine quality differences</li>
+            <li>Evaluate realism, clarity, composition, and visual accuracy</li>
+            <li>Identify defects and inconsistencies</li>
+            <li>Provide structured quality feedback</li>
+            <li>Review AI-generated images against evaluation criteria</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Requirements</h4>
+          <ul>
+            <li>Strong visual judgment</li>
+            <li>High attention to small details</li>
+            <li>Ability to make objective decisions</li>
+            <li>Understanding of image quality concepts</li>
+            <li>Experience with digital images or AI evaluation is a plus</li>
+          </ul>
+        </div>
+      </div>
+      <button class="btn" onclick="openAssessment('quality')">Start Assessment →</button>
+    </div>
 
     <div style="margin-top:2.5rem; padding:2.25rem; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); text-align:center; transition:background var(--transition), border-color var(--transition);">
       <h3 style="font-size:1rem; font-weight:600; margin-bottom:.5rem; color:var(--fg);">Don't see the right role?</h3>
@@ -209,22 +306,102 @@
   </div>
 </section>
 
-<!-- Interview process -->
+<div class="modal-overlay" id="assessment-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeAssessment()" aria-label="Close">✕</button>
+    <h3 id="modal-title">Application</h3>
+    <p class="modal-sub" id="modal-sub">Tell us about yourself and complete the short assessment below.</p>
+    <form id="assessment-form">
+      <input type="hidden" id="position-field" name="position">
+      <div class="form-section-label">Personal details</div>
+      <div class="form-row">
+        <div class="form-field"><label>Full name *</label><input type="text" name="full_name" required></div>
+        <div class="form-field"><label>Email address *</label><input type="email" name="email" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label>Phone number *</label><input type="tel" name="phone" required></div>
+        <div class="form-field"><label>Country *</label><input type="text" name="country" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label>City *</label><input type="text" name="city" required></div>
+        <div class="form-field"><label>Time zone *</label><input type="text" name="timezone" placeholder="e.g. GMT+3" required></div>
+      </div>
+      <div class="form-section-label">Professional details</div>
+      <div class="form-row">
+        <div class="form-field"><label>Current occupation *</label><input type="text" name="occupation" required></div>
+        <div class="form-field"><label>Years of experience *</label>
+          <select name="years_experience" required>
+            <option value="">Select…</option>
+            <option>Less than 1 year</option>
+            <option>1–2 years</option>
+            <option>3–5 years</option>
+            <option>5+ years</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Previous work experience *</label>
+        <textarea name="previous_experience" required placeholder="Briefly describe relevant roles or projects"></textarea>
+      </div>
+      <div class="form-field">
+        <label>Experience with (select all that apply)</label>
+        <div class="form-field-checks">
+          <label class="form-check"><input type="checkbox" name="exp_annotation"> Image annotation</label>
+          <label class="form-check"><input type="checkbox" name="exp_labeling"> Data labeling</label>
+          <label class="form-check"><input type="checkbox" name="exp_ai_training"> AI training data</label>
+          <label class="form-check"><input type="checkbox" name="exp_qa"> Quality assurance</label>
+          <label class="form-check"><input type="checkbox" name="exp_image_eval"> Image evaluation</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label>Languages spoken *</label><input type="text" name="languages" placeholder="e.g. English, Swahili" required></div>
+        <div class="form-field"><label>Computer skills *</label>
+          <select name="computer_skills" required>
+            <option value="">Select…</option>
+            <option>Basic</option>
+            <option>Intermediate</option>
+            <option>Advanced</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label>Internet availability *</label>
+          <select name="internet_availability" required>
+            <option value="">Select…</option>
+            <option>Stable, all day</option>
+            <option>Stable, limited hours</option>
+            <option>Occasionally unstable</option>
+          </select>
+        </div>
+        <div class="form-field"><label>Hours available per week *</label><input type="number" name="hours_per_week" min="1" max="80" required></div>
+      </div>
+      <div class="form-field">
+        <label>Resume / CV (PDF, DOC, or DOCX — max 10MB) *</label>
+        <input type="file" name="resume" id="resume-input" accept=".pdf,.doc,.docx" required>
+      </div>
+      <div id="assessment-questions"></div>
+      <div class="modal-submit-row">
+        <button type="button" class="btn btn-outline" onclick="closeAssessment()">Cancel</button>
+        <button type="submit" class="btn" id="submit-btn">Submit application →</button>
+      </div>
+      <p class="form-msg" id="form-msg"></p>
+    </form>
+  </div>
+</div>
+
 <section class="block">
   <div class="container-narrow">
     <div class="section-label">How we hire</div>
     <h2 class="section-title" style="margin-bottom:3rem;">Our <em>interview process</em></h2>
     <div class="process-list">
-      <div class="process-step"><div class="step-num">01</div><div><h3>Application review <span style="color:var(--subtle); font-weight:400; font-size:.875rem; margin-left:.5rem;">~1 week</span></h3><p>We read every application carefully. If it's a fit, we'll reach out within a week for an initial conversation.</p></div></div>
-      <div class="process-step"><div class="step-num">02</div><div><h3>Intro call <span style="color:var(--subtle); font-weight:400; font-size:.875rem; margin-left:.5rem;">30 min</span></h3><p>A relaxed conversation with a team member to learn about you, your background, and answer any questions you have about Diraflow.</p></div></div>
-      <div class="process-step"><div class="step-num">03</div><div><h3>Skills assessment <span style="color:var(--subtle); font-weight:400; font-size:.875rem; margin-left:.5rem;">2–4 hrs, paid</span></h3><p>A focused, paid take-home task that reflects real work you'd do in the role. We respect your time and compensate for it fairly.</p></div></div>
-      <div class="process-step"><div class="step-num">04</div><div><h3>Team interviews <span style="color:var(--subtle); font-weight:400; font-size:.875rem; margin-left:.5rem;">2 conversations</span></h3><p>Two 45-minute conversations: one technical deep-dive, one culture and values conversation with future teammates.</p></div></div>
-      <div class="process-step"><div class="step-num">05</div><div><h3>Offer <span style="color:var(--subtle); font-weight:400; font-size:.875rem; margin-left:.5rem;">within 48 hrs</span></h3><p>We move quickly. Offer includes full compensation details and dedicated time to ask any remaining questions before you decide.</p></div></div>
+      <div class="process-step"><div class="step-num">01</div><div><h3>Application submission</h3><p>Candidate completes their profile and assessment in one sitting — no separate sign-up required.</p></div></div>
+      <div class="process-step"><div class="step-num">02</div><div><h3>Manual review <span style="color:var(--subtle); font-weight:400; font-size:.875rem; margin-left:.5rem;">~1 week</span></h3><p>The Diraflow team reviews assessment answers and resume in detail before reaching a decision.</p></div></div>
+      <div class="process-step"><div class="step-num">03</div><div><h3>Evaluation decision</h3><p>Candidates receive their results and clear next steps by email once review is complete.</p></div></div>
+      <div class="process-step"><div class="step-num">04</div><div><h3>Interview or onboarding</h3><p>Successful candidates proceed to a short interview or directly into onboarding, depending on the role.</p></div></div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
 <section class="block">
   <div class="cta-band">
     <p class="eyebrow"><span>✦</span> Join the team</p>
@@ -245,91 +422,289 @@
           <img src="/assets/logo.jpg" alt="Diraflow" class="nav-logo-img nav-logo-transparent">
         </a>
         <p>Premium training data for AI agents and LLMs. Built by experts, trusted by frontier AI teams worldwide.</p>
-
-        <!-- ── SOCIAL ICONS (replaces old footer-socials) ── -->
         <div style="display:flex; gap:0.6rem; align-items:center; margin-top:1.25rem; flex-wrap:wrap;">
-
-          <!-- LinkedIn -->
           <a href="https://www.linkedin.com/company/diraflow/" target="_blank" rel="noopener" aria-label="LinkedIn"
             style="width:38px; height:38px; border-radius:9px; background:#0A66C2; display:flex; align-items:center; justify-content:center; transition:transform 0.2s, opacity 0.2s; text-decoration:none; flex-shrink:0;"
             onmouseover="this.style.transform='translateY(-3px)'; this.style.opacity='0.85'"
             onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-            </svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
           </a>
-
-          <!-- X / Twitter -->
           <a href="https://x.com/diraflow_" target="_blank" rel="noopener" aria-label="X / Twitter"
             style="width:38px; height:38px; border-radius:9px; background:#000; display:flex; align-items:center; justify-content:center; transition:transform 0.2s, opacity 0.2s; text-decoration:none; flex-shrink:0; border:1px solid #333;"
             onmouseover="this.style.transform='translateY(-3px)'; this.style.opacity='0.85'"
             onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
           </a>
-
-          <!-- Facebook -->
           <a href="https://www.facebook.com/share/1HHQD7LH2U/" target="_blank" rel="noopener" aria-label="Facebook"
             style="width:38px; height:38px; border-radius:9px; background:#1877F2; display:flex; align-items:center; justify-content:center; transition:transform 0.2s, opacity 0.2s; text-decoration:none; flex-shrink:0;"
             onmouseover="this.style.transform='translateY(-3px)'; this.style.opacity='0.85'"
             onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-            </svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
           </a>
-
-          <!-- Instagram -->
           <a href="https://www.instagram.com/diraflow_?utm_source=qr&igsh=MTVkdHRwem92dHQ4cQ==" target="_blank" rel="noopener" aria-label="Instagram"
             style="width:38px; height:38px; border-radius:9px; background:radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); display:flex; align-items:center; justify-content:center; transition:transform 0.2s, opacity 0.2s; text-decoration:none; flex-shrink:0;"
             onmouseover="this.style.transform='translateY(-3px)'; this.style.opacity='0.85'"
             onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
-            </svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
           </a>
-
         </div>
-        <!-- ── END SOCIAL ICONS ── -->
-
       </div>
-
       <div class="footer-col"><h4>Solutions</h4><ul>
         <li><a href="../solutions.html#environment">Environment Generation</a></li>
         <li><a href="../solutions.html#agentic">Agentic Datasets</a></li>
         <li><a href="../solutions.html#redteaming">Red-Teaming</a></li>
         <li><a href="../solutions.html#rlhf">RLHF &amp; Preference</a></li>
       </ul></div>
-
-      <div class="footer-col">
-        <h4>Company</h4>
-        <ul>
-          <li><a href="blog.html">Blog</a></li>
-          <li><a href="careers.html">Careers</a></li>
-          <li><a href="index.html#faq">FAQ</a></li>
-          <li><a href="industries.html">Industries</a></li>
-          <li><a href="contact.html">Contact Us</a></li>
-        </ul>
-      </div>
-      
+      <div class="footer-col"><h4>Company</h4><ul>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="careers.html">Careers</a></li>
+        <li><a href="index.html#faq">FAQ</a></li>
+        <li><a href="industries.html">Industries</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+      </ul></div>
     </div>
-
     <div class="footer-bottom">
-  <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
-    <p>© 2026 Diraflow AI. All rights reserved.</p>
-    <span style="color:var(--subtle); font-size:.8125rem;">·</span>
-    <a href="/code-of-conduct.html" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;"
-      onmouseover="this.style.color='#c8922a'"
-      onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
-    <span style="color:var(--subtle); font-size:.8125rem;">·</span>
-    <a href="/privacy-policy.html" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;"
-      onmouseover="this.style.color='#c8922a'"
-      onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
-  </div>
-  
-</div>
+      <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+        <p>© 2026 Diraflow AI. All rights reserved.</p>
+        <span style="color:var(--subtle); font-size:.8125rem;">·</span>
+        <a href="/code-of-conduct.html" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;"
+          onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Code of Conduct</a>
+        <span style="color:var(--subtle); font-size:.8125rem;">·</span>
+        <a href="/privacy-policy.html" style="font-size:.8125rem; color:var(--subtle); text-decoration:none; transition:color 0.2s;"
+          onmouseover="this.style.color='#c8922a'" onmouseout="this.style.color='var(--subtle)'">Privacy Policy</a>
+      </div>
+    </div>
   </div>
 </footer>
+
 <script src="/assets/main.js" defer></script>
+
+<script>
+  // ── Supabase config (your live project) ──────────────────────────────────────
+  const SUPABASE_URL = "https://kwxlfuygotdcabhkqbdd.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3eGxmdXlnb3RkY2FiaGtxYmRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MjY2NzksImV4cCI6MjA5ODQwMjY3OX0.ECebrh77wy-OCa44s10aH1HLsykCRBq4s1rGIFipdm4";
+
+  // ── Edge Function URL — fill this in after deploying ─────────────────────────
+  // Format: https://kwxlfuygotdcabhkqbdd.supabase.co/functions/v1/send-application-email
+  const EDGE_FUNCTION_URL = "https://kwxlfuygotdcabhkqbdd.supabase.co/functions/v1/send-application-email";
+
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ── Assessment question banks ────────────────────────────────────────────────
+  const ANNOTATION_QUESTIONS = [
+    { name: "q1", label: "1. Explain what image annotation means and why accuracy matters.", type: "textarea" },
+    { name: "q2", label: "2. An object is partially hidden in an image. How would you decide whether to annotate it?", type: "textarea" },
+    { name: "q3", label: "3. If annotation instructions are unclear, what steps would you take?", type: "textarea" },
+    { name: "q4", label: "4. Two annotators label the same image differently. How would you resolve the difference?", type: "textarea" },
+    { name: "q5", label: "5. What methods do you use to maintain accuracy during repetitive annotation work?", type: "textarea" },
+    { name: "q6", label: "6. Which approach best describes correct bounding-box annotation?", type: "select", options: [
+      "Box drawn loosely around the general area of the object",
+      "Box drawn tightly to the visible edges of the object, including visible occluded parts",
+      "Box drawn only around the most visible 50% of the object",
+      "Box skipped if the object is partially hidden"
+    ]},
+    { name: "q7", label: "7. You review a labeled image and find an object category is wrong but the box placement is correct. What's the best action?", type: "select", options: [
+      "Leave it as is since the box is correct",
+      "Delete the annotation entirely",
+      "Correct the category label while keeping the accurate box",
+      "Flag the entire image as unusable"
+    ]}
+  ];
+
+  const QUALITY_QUESTIONS = [
+    { name: "q1", label: "1. What makes an image high quality?", type: "textarea" },
+    { name: "q2", label: "2. Compare two images mentally from a recent project you've seen — explain how you'd decide which is better and why.", type: "textarea" },
+    { name: "q3", label: "3. Rate how important each factor is to you when evaluating images (Realism, Sharpness, Lighting, Composition, Accuracy) — explain your priority order.", type: "textarea" },
+    { name: "q4", label: "4. Which of these is NOT typically a visual defect to flag in AI-generated images?", type: "select", options: [
+      "Blur or distortion",
+      "Incorrect or extra objects",
+      "Natural lighting variation across a scene",
+      "Unrealistic anatomical or structural details"
+    ]},
+    { name: "q5", label: "5. When two images are close in quality, what should guide your final decision?", type: "select", options: [
+      "Personal preference only",
+      "Whichever image was generated first",
+      "Objective criteria: realism, clarity, composition, and accuracy against the brief",
+      "Image file size"
+    ]},
+    { name: "q6", label: "6. Explain your reasoning process when selecting the better of two similar images.", type: "textarea" }
+  ];
+
+  // ── Build dynamic assessment questions ──────────────────────────────────────
+  function buildQuestions(list) {
+    const container = document.getElementById('assessment-questions');
+    container.innerHTML = '<div class="form-section-label">Assessment</div>';
+    list.forEach(q => {
+      const block = document.createElement('div');
+      block.className = 'question-block';
+      const label = document.createElement('label');
+      label.textContent = q.label;
+      block.appendChild(label);
+      if (q.type === 'textarea') {
+        const ta = document.createElement('textarea');
+        ta.name = q.name; ta.required = true;
+        block.appendChild(ta);
+      } else if (q.type === 'select') {
+        const sel = document.createElement('select');
+        sel.name = q.name; sel.required = true;
+        sel.innerHTML = '<option value="">Select…</option>' + q.options.map(o => `<option>${o}</option>`).join('');
+        block.appendChild(sel);
+      }
+      container.appendChild(block);
+    });
+  }
+
+  // ── Open modal (checks job_settings table first) ─────────────────────────────
+  async function openAssessment(type) {
+    const jobName = type === "annotation"
+      ? "Image Annotation Specialist"
+      : "Image Quality Assessment Specialist";
+
+    const { data, error } = await supabaseClient
+      .from("job_settings")
+      .select("is_open")
+      .eq("job_name", jobName)
+      .single();
+
+    if (error) {
+      console.error(error);
+      alert("Unable to check application status. Please try again.");
+      return;
+    }
+
+    if (!data.is_open) {
+      alert("Applications for this position are currently closed.");
+      return;
+    }
+
+    const titleEl = document.getElementById('modal-title');
+    const subEl   = document.getElementById('modal-sub');
+    const posField = document.getElementById('position-field');
+    document.getElementById('assessment-form').reset();
+    document.getElementById('form-msg').className = 'form-msg';
+
+    if (type === 'annotation') {
+      titleEl.textContent = 'Image Annotation Specialist — Application';
+      subEl.textContent   = 'Tell us about yourself and complete the annotation assessment below.';
+      posField.value      = 'Image Annotation Specialist';
+      buildQuestions(ANNOTATION_QUESTIONS);
+    } else {
+      titleEl.textContent = 'Image Quality Assessment Specialist — Application';
+      subEl.textContent   = 'Tell us about yourself and complete the image quality assessment below.';
+      posField.value      = 'Image Quality Assessment Specialist';
+      buildQuestions(QUALITY_QUESTIONS);
+    }
+
+    document.getElementById('assessment-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeAssessment() {
+    document.getElementById('assessment-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('assessment-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeAssessment();
+  });
+
+  // ── Form submission ──────────────────────────────────────────────────────────
+  document.getElementById('assessment-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const msg       = document.getElementById('form-msg');
+    const submitBtn = document.getElementById('submit-btn');
+
+    submitBtn.disabled    = true;
+    submitBtn.textContent = 'Submitting…';
+    msg.className         = 'form-msg';
+
+    try {
+      const form       = e.target;
+      const formData   = new FormData(form);
+      const resumeFile = document.getElementById('resume-input').files[0];
+
+      // File size guard
+      if (resumeFile && resumeFile.size > 10 * 1024 * 1024) {
+        throw new Error('Resume file exceeds 10MB. Please upload a smaller file.');
+      }
+
+      // Upload resume to Supabase Storage
+      let resumePath = null;
+      if (resumeFile) {
+        const safeName = `${Date.now()}_${resumeFile.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
+        const { data: uploadData, error: uploadError } = await supabaseClient
+          .storage.from('resumes').upload(safeName, resumeFile);
+        if (uploadError) throw uploadError;
+        resumePath = uploadData.path;
+      }
+
+      // Collect assessment answers
+      const answers = {};
+      formData.forEach((value, key) => {
+        if (/^q\d+$/.test(key)) answers[key] = value;
+      });
+
+      const now = new Date().toISOString();
+
+      const payload = {
+        position:             formData.get('position'),
+        full_name:            formData.get('full_name'),
+        email:                formData.get('email'),
+        phone:                formData.get('phone'),
+        country:              formData.get('country'),
+        city:                 formData.get('city'),
+        timezone:             formData.get('timezone'),
+        occupation:           formData.get('occupation'),
+        previous_experience:  formData.get('previous_experience'),
+        years_experience:     formData.get('years_experience'),
+        exp_annotation:       !!formData.get('exp_annotation'),
+        exp_labeling:         !!formData.get('exp_labeling'),
+        exp_ai_training:      !!formData.get('exp_ai_training'),
+        exp_qa:               !!formData.get('exp_qa'),
+        exp_image_eval:       !!formData.get('exp_image_eval'),
+        languages:            formData.get('languages'),
+        computer_skills:      formData.get('computer_skills'),
+        internet_availability: formData.get('internet_availability'),
+        hours_per_week:       formData.get('hours_per_week'),
+        resume_path:          resumePath,
+        assessment_answers:   answers,
+        status:               'Submitted',
+        submitted_at:         now
+      };
+
+      // 1. Insert into applications table
+      const { error: insertError } = await supabaseClient.from('applications').insert([payload]);
+      if (insertError) throw insertError;
+
+      // 2. Fire Edge Function to send emails (non-blocking — submission is safe even if this fails)
+      fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          full_name:    payload.full_name,
+          email:        payload.email,
+          position:     payload.position,
+          submitted_at: now
+        })
+      }).catch(err => console.warn('Email notification failed (non-blocking):', err));
+
+      msg.textContent = 'Thank you — your application and assessment have been received. We will be in touch by email.';
+      msg.className   = 'form-msg success show';
+      form.reset();
+      setTimeout(closeAssessment, 2500);
+
+    } catch (err) {
+      msg.textContent = 'Something went wrong: ' + (err.message || 'please try again or contact us directly.');
+      msg.className   = 'form-msg error show';
+    } finally {
+      submitBtn.disabled    = false;
+      submitBtn.textContent = 'Submit application →';
+    }
+  });
+</script>
+
 </body>
 </html>
