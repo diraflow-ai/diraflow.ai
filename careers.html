@@ -34,7 +34,7 @@
     if (a.getAttribute('href') === current) a.classList.add('active');
   });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
   .job-card {
     background: var(--card);
@@ -488,7 +488,12 @@
   // Format: https://kwxlfuygotdcabhkqbdd.supabase.co/functions/v1/send-application-email
   const EDGE_FUNCTION_URL = "https://kwxlfuygotdcabhkqbdd.supabase.co/functions/v1/send-application-email";
 
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  let supabaseClient;
+try {
+  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch(e) {
+  console.error('Supabase failed to load — check CDN or CSP:', e);
+}
 
   // ── Assessment question banks ────────────────────────────────────────────────
   const ANNOTATION_QUESTIONS = [
