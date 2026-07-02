@@ -829,13 +829,34 @@ checkTeamAccess(window.pendingUser);
 
 }
 
-  function showDashboard(user,member) {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('admin-shell').style.display = 'block';
+  async function showDashboard(user) {
+
+    const {data:member,error}=await sb
+        .from('team_members')
+        .select('*')
+        .eq('id',user.id)
+        .eq('active',true)
+        .single();
+
+
+    if(error || !member){
+
+        alert("Your account is not authorized to access this portal.");
+
+        await sb.auth.signOut();
+
+        return;
+    }
+
+
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('admin-shell').style.display='block';
+
     document.getElementById('user-email').textContent =
-`${user.email} (${member.role})`;
+        `${member.email} (${member.role})`;
+
     loadApplications();
-  }
+}
 
   // Allow Enter key on login
   document.getElementById('login-password').addEventListener('keydown', e => {
