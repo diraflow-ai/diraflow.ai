@@ -1,0 +1,1367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Log In — Diraflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/logo.jpg">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0f0f0f;
+    --bg2:      #161616;
+    --card:     #1c1c1c;
+    --border:   #2a2a2a;
+    --fg:       #f0f0f0;
+    --fg2:      #aaaaaa;
+    --subtle:   #666;
+    --gold:     #c8922a;
+    --gold-dim: rgba(200,146,42,.15);
+    --green:    #2e8b57;
+    --red:      #c0392b;
+    --radius:   10px;
+    --radius-lg:14px;
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── LOGIN SCREEN ── */
+  #login-screen {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      rgba(255,255,255,.25),
+      rgba(255,255,255,.35)
+    ),
+    url("/assets/AutonomousTrucks-970.jpg");
+
+  background-size: cover;
+  background-position: center;
+}
+
+
+/* Soft AI glow effect */
+#login-screen::before {
+
+  content:"";
+  position:absolute;
+  inset:0;
+
+  background:
+    radial-gradient(
+      circle at 20% 30%,
+      rgba(200,146,42,.25),
+      transparent 35%
+    ),
+
+    radial-gradient(
+      circle at 80% 70%,
+      rgba(46,139,87,.18),
+      transparent 35%
+    );
+
+  animation: ambientMove 12s infinite alternate;
+
+}
+
+
+@keyframes ambientMove {
+
+  from {
+    transform:translateY(0px);
+  }
+
+  to {
+    transform:translateY(-15px);
+  }
+
+}
+
+
+/* Glass login card */
+.login-card {
+
+  position:relative;
+  z-index:2;
+
+  background:
+    rgba(255,255,255,.88);
+
+  color:#111;
+
+  backdrop-filter:
+    blur(12px);
+
+  border:
+    1px solid rgba(255,255,255,.6);
+
+  box-shadow:
+    0 25px 80px rgba(0,0,0,.35);
+
+  border-radius:20px;
+
+  padding:3rem;
+
+}
+
+  .login-logo { display: flex; align-items: center; gap: .625rem; margin-bottom: 2rem; }
+  .login-logo img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; }
+  .login-logo span { font-weight: 700; font-size: 1rem; }
+  .login-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--gold); font-weight: 600; margin-bottom: 1.25rem; }
+  .login-card h2 { font-size: 1.375rem; font-weight: 700; margin-bottom: 1.75rem; }
+  .field { display: flex; flex-direction: column; gap: .375rem; margin-bottom: 1rem; }
+  .field label { font-size: .8125rem; font-weight: 600; color: var(--fg2); }
+  .field input {
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: .625rem .875rem; font-family: inherit; font-size: .9375rem; color: var(--fg);
+    transition: border-color .2s;
+  }
+  .field input:focus { outline: none; border-color: var(--gold); }
+  .btn-primary {
+    width: 100%; background: var(--gold); color: #fff; border: none; border-radius: var(--radius);
+    padding: .75rem; font-family: inherit; font-size: .9375rem; font-weight: 600; cursor: pointer;
+    margin-top: .5rem; transition: opacity .2s;
+  }
+  .btn-primary:hover { opacity: .88; }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+  .login-err { color: #e74c3c; font-size: .8125rem; margin-top: .75rem; display: none; }
+  .login-err.show { display: block; }
+
+
+/* ── VERIFICATION SCREEN ── */
+
+#verify-screen {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  padding:2rem;
+
+  background:
+  linear-gradient(
+    rgba(255,255,255,.65),
+    rgba(255,255,255,.65)
+  ),
+  url('/assets/autonomus.jpeg');
+
+  background-size:cover;
+  background-position:center;
+}
+
+
+.verify-card {
+
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(12px);
+
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:14px;
+
+  padding:2.5rem;
+
+  width:100%;
+  max-width:420px;
+
+  box-shadow:
+  0 20px 50px rgba(0,0,0,.15);
+
+}
+
+
+.verify-logo {
+
+display:flex;
+align-items:center;
+gap:.625rem;
+margin-bottom:2rem;
+
+}
+
+
+.verify-logo img{
+
+width:32px;
+height:32px;
+border-radius:6px;
+
+}
+
+
+.verify-logo span{
+
+font-weight:700;
+font-size:1rem;
+
+}
+
+
+.verify-label{
+
+font-size:.7rem;
+text-transform:uppercase;
+letter-spacing:.08em;
+
+color:var(--gold);
+
+font-weight:600;
+
+margin-bottom:1.25rem;
+
+}
+
+
+.verify-card h2{
+
+font-size:1.375rem;
+font-weight:700;
+margin-bottom:1.75rem;
+
+}
+
+
+.verify-card input{
+
+background:#111;
+
+border:1px solid #333;
+
+border-radius:10px;
+
+padding:.75rem;
+
+font-family:inherit;
+
+font-size:1rem;
+
+color:white;
+
+width:100%;
+
+}
+
+
+.verify-card input:focus{
+
+outline:none;
+border-color:var(--gold);
+
+}
+
+
+.verify-error{
+
+display:none;
+
+color:#c0392b;
+
+font-size:.8125rem;
+
+margin-top:.75rem;
+
+}
+
+
+.verify-error.show{
+
+display:block;
+
+}
+  /* ── ADMIN SHELL ── */
+  #admin-shell { display: none; min-height: 100vh; }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 0 1.5rem; height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-left { display: flex; align-items: center; gap: .75rem; }
+  .topbar-left img { width: 28px; height: 28px; border-radius: 6px; object-fit: cover; }
+  .topbar-title { font-weight: 700; font-size: .9375rem; }
+  .topbar-badge {
+    background: var(--gold-dim); color: var(--gold);
+    font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+    padding: .2rem .5rem; border-radius: 4px;
+  }
+  .topbar-right { display: flex; align-items: center; gap: 1rem; }
+  .team-email { font-size: .8125rem; color: var(--fg2); }
+  .btn-logout {
+    background: none; border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--fg2); font-family: inherit; font-size: .8125rem; padding: .375rem .75rem;
+    cursor: pointer; transition: border-color .2s, color .2s;
+  }
+  .btn-logout:hover { border-color: var(--fg2); color: var(--fg); }
+
+  /* ── MAIN CONTENT ── */
+  .main { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
+
+  /* Stats row */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+  }
+  .stat-card .stat-num { font-size: 1.75rem; font-weight: 800; color: var(--gold); line-height: 1; }
+  .stat-card .stat-label { font-size: .75rem; color: var(--fg2); margin-top: .25rem; }
+
+  /* Filters */
+  .filters-row {
+    display: flex; gap: .75rem; flex-wrap: wrap; align-items: center;
+    margin-bottom: 1.25rem;
+  }
+  .filter-select, .filter-input {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--fg); font-family: inherit; font-size: .875rem; padding: .5rem .875rem;
+    cursor: pointer;
+  }
+  .filter-select:focus, .filter-input:focus { outline: none; border-color: var(--gold); }
+  .filter-input { min-width: 220px; }
+  .btn-refresh {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--fg2); font-family: inherit; font-size: .875rem; padding: .5rem .875rem;
+    cursor: pointer; transition: border-color .2s;
+  }
+  .btn-refresh:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* Table */
+  .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--bg2); text-align: left; padding: .75rem 1rem;
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--fg2);
+    font-weight: 600; border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; cursor: pointer; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(200,146,42,.05); }
+  td { padding: .75rem 1rem; font-size: .875rem; vertical-align: middle; }
+  .td-name { font-weight: 600; }
+  .td-email { color: var(--fg2); font-size: .8125rem; }
+  .td-pos { font-size: .8125rem; }
+  .td-date { color: var(--fg2); font-size: .8rem; white-space: nowrap; }
+
+  /* Status badge */
+  .status-badge {
+    display: inline-block; padding: .2rem .6rem; border-radius: 20px;
+    font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  .s-submitted        { background: rgba(100,100,255,.15); color: #8888ff; }
+  .s-under-review     { background: rgba(200,146,42,.15);  color: #c8922a; }
+  .s-passed           { background: rgba(46,139,87,.18);   color: #3dbb72; }
+  .s-failed           { background: rgba(192,57,43,.18);   color: #e74c3c; }
+  .s-interview-required { background: rgba(155,89,182,.18); color: #c39bd3; }
+  .s-accepted         { background: rgba(46,139,87,.3);    color: #2ecc71; }
+
+  .empty-state { text-align: center; padding: 3rem; color: var(--fg2); }
+
+  /* ── DETAIL PANEL ── */
+  .panel-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6);
+    z-index: 200; align-items: flex-start; justify-content: flex-end;
+  }
+  .panel-overlay.open { display: flex; }
+  .panel {
+    background: var(--bg2); border-left: 1px solid var(--border);
+    width: 100%; max-width: 580px; height: 100vh; overflow-y: auto;
+    animation: slideIn .25s ease;
+  }
+  @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .panel-header {
+    position: sticky; top: 0; background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; z-index: 10;
+  }
+  .panel-header h3 { font-size: 1rem; font-weight: 700; }
+  .btn-close-panel {
+    background: none; border: none; color: var(--fg2); font-size: 1.25rem;
+    cursor: pointer; line-height: 1; padding: .25rem;
+  }
+  .btn-close-panel:hover { color: var(--fg); }
+  .panel-body { padding: 1.25rem; }
+
+  .panel-section { margin-bottom: 1.5rem; }
+  .panel-section-title {
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--gold); font-weight: 700; margin-bottom: .875rem;
+    padding-bottom: .5rem; border-bottom: 1px solid var(--border);
+  }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .625rem; }
+  .info-item {}
+  .info-item .info-key { font-size: .7rem; color: var(--fg2); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .125rem; }
+  .info-item .info-val { font-size: .875rem; font-weight: 500; }
+  .exp-tags { display: flex; flex-wrap: wrap; gap: .375rem; margin-top: .25rem; }
+  .exp-tag {
+    background: var(--gold-dim); color: var(--gold);
+    font-size: .7rem; font-weight: 600; padding: .2rem .5rem; border-radius: 4px;
+  }
+
+  .qa-item { margin-bottom: 1rem; }
+  .qa-q { font-size: .8125rem; font-weight: 600; color: var(--fg2); margin-bottom: .375rem; }
+  .qa-a {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: .75rem; font-size: .875rem; line-height: 1.6;
+  }
+
+  .btn-secondary{
+    background:transparent;
+    color:var(--fg);
+    border:1px solid var(--border);
+    border-radius:10px;
+    cursor:pointer;
+    font-family:inherit;
+    font-weight:600;
+    transition:.2s;
+}
+
+.btn-secondary:hover{
+    border-color:var(--gold);
+    color:var(--gold);
+}
+
+  /* Reviewer actions */
+  .action-row { display: flex; flex-direction: column; gap: .875rem; }
+  .action-field label { display: block; font-size: .75rem; font-weight: 600; color: var(--fg2); margin-bottom: .375rem; }
+  .action-field select, .action-field textarea, .action-field input[type=number] {
+    width: 100%; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--fg); font-family: inherit;
+    font-size: .875rem; padding: .5rem .75rem;
+  }
+  .action-field select:focus, .action-field textarea:focus, .action-field input:focus {
+    outline: none; border-color: var(--gold);
+  }
+  .action-field textarea { min-height: 100px; resize: vertical; }
+  .btn-save {
+    background: var(--gold); color: #fff; border: none; border-radius: var(--radius);
+    padding: .625rem 1.25rem; font-family: inherit; font-size: .875rem; font-weight: 600;
+    cursor: pointer; transition: opacity .2s;
+  }
+  .btn-save:hover { opacity: .88; }
+  .btn-save:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-resume {
+    display: inline-flex; align-items: center; gap: .375rem;
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--fg); font-family: inherit; font-size: .875rem; padding: .5rem .875rem;
+    text-decoration: none; cursor: pointer; transition: border-color .2s;
+  }
+  .btn-resume:hover { border-color: var(--gold); color: var(--gold); }
+  .save-msg { font-size: .8125rem; margin-top: .5rem; display: none; }
+  .save-msg.show { display: block; }
+  .save-msg.ok { color: var(--green); }
+  .save-msg.err { color: var(--red); }
+
+.modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.65);
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+}
+
+.modal{
+    width:min(700px, 90vw);
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:36px;
+    box-shadow:0 25px 60px rgba(0,0,0,.45);
+}
+
+.modal.show{
+    display:flex;
+}
+
+/* Heading */
+.modal h2{
+    margin-bottom:28px;
+    font-size:2rem;
+    font-weight:700;
+}
+
+/* Form spacing */
+.modal .field{
+    margin-bottom:22px;
+}
+
+.modal .field label{
+    display:block;
+    margin-bottom:8px;
+    color:var(--fg2);
+    font-weight:600;
+    font-size:.85rem;
+}
+
+/* Inputs */
+.modal input,
+.modal select{
+    width:100%;
+    height:52px;
+    background:var(--bg);
+    color:var(--fg);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:0 16px;
+    font-size:15px;
+    font-family:inherit;
+    transition:border-color .2s;
+}
+
+.modal input:focus,
+.modal select:focus{
+    outline:none;
+    border-color:var(--gold);
+}
+
+/* Buttons */
+.modal-actions{
+    display:flex;
+    gap:12px;
+    margin-top:28px;
+}
+
+.modal-actions button{
+    flex:1;
+    height:48px;
+}
+
+  /* Loading spinner */
+  .spinner {
+    width: 20px; height: 20px; border: 2px solid var(--border);
+    border-top-color: var(--gold); border-radius: 50%;
+    animation: spin .7s linear infinite; margin: 3rem auto; display: block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 768px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .panel { max-width: 100%; }
+    td:nth-child(3), th:nth-child(3),
+    td:nth-child(5), th:nth-child(5) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN SCREEN ─────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="/assets/logo.jpg" alt="Diraflow">
+      <span>Diraflow</span>
+    </div>
+    <div class="login-label">Authorized Access</div>
+    <h2>Team sign in</h2>
+    <div class="field">
+      <label>Email address</label>
+      <input type="email" id="login-email" placeholder="you@diraflowai.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Sign in →</button>
+    <p class="login-err" id="login-err"></p>
+    <p style="margin-top:1.25rem; font-size:.8125rem; color:var(--subtle);">
+      Access is restricted to Diraflow team members only.
+    </p>
+  </div>
+</div>
+
+<div id="verify-screen" style="display:none">
+
+
+<div class="verify-card">
+
+
+<div class="verify-logo">
+
+<img src="/assets/logo.jpg">
+
+<span>Diraflow</span>
+
+</div>
+
+
+<div class="verify-label">
+Security Verification
+</div>
+
+
+<h2>
+Enter verification code
+</h2>
+
+
+<div class="field">
+
+<label>
+Verification code
+</label>
+
+<input 
+type="text"
+id="verification-code"
+maxlength="6"
+placeholder="Enter 6 digit code">
+
+</div>
+
+
+<button 
+class="btn-primary"
+onclick="verifyCode()">
+
+Verify →
+
+</button>
+
+
+<p 
+class="verify-error"
+id="verify-error">
+</p>
+
+
+</div>
+
+
+</div>
+
+<!-- ── ADMIN SHELL ────────────────────────────────────────────── -->
+<div id="admin-shell" style="display:none;">
+
+    <div class="admin-nav">
+
+        <a href="/admin/application.html">Applications</a>
+
+        <a href="/admin/members.html">Team</a>
+
+    </div>
+
+    <div class="topbar-right">
+        <span class="team-email" id="user-email"></span>
+        <button class="btn-logout" onclick="doLogout()">Sign out</button>
+    </div>
+
+    <div class="main">
+
+<h1>Team Members</h1>
+
+<button class="btn-primary" onclick="openInvite()">
++ Invite Member
+</button>
+
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Email</th>
+<th>Role</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+
+<tbody id="team-table">
+
+</tbody>
+
+
+</table>
+
+</div>
+
+
+
+<div id="invite-modal" class="modal-overlay">
+
+    <div class="modal">
+
+        <h2>Invite Team Member</h2>
+
+        <div class="field">
+            <label>Email</label>
+            <input
+                id="invite-email"
+                type="email"
+                placeholder="member@example.com">
+        </div>
+
+        <div class="field">
+            <label>Role</label>
+
+            <select id="invite-role">
+
+                <option value="reviewer">
+                    Reviewer
+                </option>
+
+                <option value="viewer">
+                    Viewer
+                </option>
+
+                <option value="admin">
+                    Admin
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="modal-actions">
+
+            <button class="btn-primary" onclick="sendInvite()">Send Invite</button>
+
+            <button type="button" onclick="closeInvite()">Cancel</button>
+        </div>
+
+    </div>
+
+    
+
+</div>
+
+
+
+<script>
+  // ── Supabase config ──────────────────────────────────────────
+  const SUPABASE_URL      = "https://kwxlfuygotdcabhkqbdd.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3eGxmdXlnb3RkY2FiaGtxYmRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MjY2NzksImV4cCI6MjA5ODQwMjY3OX0.ECebrh77wy-OCa44s10aH1HLsykCRBq4s1rGIFipdm4";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let allApplications = [];
+  let currentApp = null;
+
+  // ── Auth ─────────────────────────────────────────────────────
+  async function init() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) checkTeamAccess(session.user);
+  }
+
+  async function doLogin() {
+
+  const email =
+    document.getElementById('login-email').value.trim();
+
+  const password =
+    document.getElementById('login-password').value;
+
+  const btn =
+    document.getElementById('login-btn');
+
+  const errEl =
+    document.getElementById('login-err');
+
+
+  errEl.className = 'login-err';
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+
+
+  const { data, error } =
+    await sb.auth.signInWithPassword({
+      email,
+      password
+    });
+
+
+  if (error) {
+
+    errEl.textContent = error.message;
+    errEl.className = 'login-err show';
+
+    btn.disabled = false;
+    btn.textContent = 'Sign in →';
+
+    return;
+
+  }
+
+
+  window.pendingUser = data.user;
+
+
+  const { error: codeError } =
+    await sb.functions.invoke(
+      "send-login-code",
+      {
+        body:{
+          userId:data.user.id,
+          email:data.user.email
+        }
+      }
+    );
+
+
+  if(codeError){
+
+    errEl.textContent =
+    "Could not send verification code.";
+
+    errEl.className =
+    "login-err show";
+
+    btn.disabled = false;
+    btn.textContent = 'Sign in →';
+
+    return;
+
+  }
+
+
+  document.getElementById(
+    "login-screen"
+  ).style.display="none";
+
+
+  document.getElementById(
+    "verify-screen"
+  ).style.display="flex";
+
+
+}
+
+async function verifyCode(){
+
+const code =
+document.getElementById(
+"verification-code"
+).value.trim();
+
+
+const errorBox =
+document.getElementById(
+"verify-error"
+);
+
+
+errorBox.className="verify-error";
+
+
+if(!code){
+
+errorBox.textContent =
+"Enter verification code.";
+
+errorBox.className =
+"verify-error show";
+
+return;
+
+}
+
+
+const {data,error}=await sb.functions.invoke(
+"verify-login-code",
+{
+body:{
+user_id:window.pendingUser.id,
+code:code
+}
+});
+
+
+if(error){
+
+console.error(error);
+
+errorBox.textContent =
+"Invalid or expired verification code.";
+
+errorBox.className =
+"verify-error show";
+
+return;
+
+}
+
+
+// verification successful
+checkTeamAccess(window.pendingUser);
+
+}
+
+
+  async function doLogout() {
+    await sb.auth.signOut();
+    document.getElementById('admin-shell').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-password').value = '';
+  }
+
+  async function checkTeamAccess(user){
+
+ const {data,error}=await sb
+ .from('team_members')
+ .select('*')
+ .eq('id',user.id)
+ .eq('active',true)
+ .single();
+
+
+ if(error || !data){
+
+    await sb.auth.signOut();
+
+    alert(
+      "Your account is not authorized to access this portal."
+    );
+
+    return;
+ }
+
+
+ showDashboard(user,data);
+
+}
+
+  async function showDashboard(user) {
+
+    const { data: member, error } = await sb
+        .from("team_members")
+        .select("*")
+        .eq("id", user.id)
+        .eq("active", true)
+        .single();
+
+    if (error || !member) {
+        alert("Your account is not authorized to access this portal.");
+        await sb.auth.signOut();
+        return;
+    }
+
+    if (member.role !== "admin") {
+        alert("Admins only.");
+        window.location.href = "/admin/application";
+        return;
+    }
+
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("admin-shell").style.display = "block";
+    document.getElementById("user-email").textContent =
+        `${member.email} (${member.role})`;
+
+    loadTeamMembers();
+}
+
+  // Allow Enter key on login
+  document.getElementById('login-password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  // ── Load data ─────────────────────────────────────────────────
+  async function loadApplications() {
+    document.getElementById('table-loading').style.display = 'block';
+    document.getElementById('table-container').style.display = 'none';
+
+    const { data, error } = await sb
+      .from('applications')
+      .select('*')
+      .order('submitted_at', { ascending: false });
+
+    document.getElementById('table-loading').style.display = 'none';
+    document.getElementById('table-container').style.display = 'block';
+
+    if (error) { console.error(error); return; }
+    allApplications = data || [];
+    updateStats();
+    renderTable();
+  }
+
+  // ── Stats ─────────────────────────────────────────────────────
+  function updateStats() {
+    const a = allApplications;
+    document.getElementById('stat-total').textContent     = a.length;
+    document.getElementById('stat-submitted').textContent = a.filter(r => r.status === 'Submitted').length;
+    document.getElementById('stat-review').textContent    = a.filter(r => r.status === 'Under Review').length;
+    document.getElementById('stat-passed').textContent    = a.filter(r => r.status === 'Passed').length;
+    document.getElementById('stat-accepted').textContent  = a.filter(r => r.status === 'Accepted').length;
+  }
+
+  // ── Render table ──────────────────────────────────────────────
+  function renderTable() {
+    const search   = document.getElementById('search-input').value.toLowerCase();
+    const posFilter = document.getElementById('filter-position').value;
+    const stFilter  = document.getElementById('filter-status').value;
+
+    let rows = allApplications.filter(r => {
+      const matchSearch = !search ||
+        (r.full_name || '').toLowerCase().includes(search) ||
+        (r.email || '').toLowerCase().includes(search);
+      const matchPos = !posFilter || r.position === posFilter;
+      const matchSt  = !stFilter  || r.status === stFilter;
+      return matchSearch && matchPos && matchSt;
+    });
+
+    const tbody = document.getElementById('table-body');
+    const empty = document.getElementById('empty-state');
+
+    if (rows.length === 0) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = rows.map(r => `
+      <tr onclick="openPanel('${r.id}')">
+        <td>
+          <div class="td-name">${esc(r.full_name)}</div>
+          <div class="td-email">${esc(r.email)}</div>
+        </td>
+        <td class="td-pos">${shortPos(r.position)}</td>
+        <td>${esc(r.country || '—')}</td>
+        <td><span class="status-badge ${statusClass(r.status)}">${esc(r.status)}</span></td>
+        <td class="td-date">${fmtDate(r.submitted_at)}</td>
+        <td>${r.reviewer_score != null ? r.reviewer_score + '/10' : '—'}</td>
+      </tr>
+    `).join('');
+  }
+
+  // ── Detail panel ─────────────────────────────────────────────
+  function openPanel(id) {
+    const app = allApplications.find(r => r.id == id);
+    if (!app) return;
+    currentApp = app;
+    document.getElementById('panel-name').textContent = app.full_name;
+
+    const answers = app.assessment_answers || {};
+    const expList = [
+      app.exp_annotation  ? 'Image annotation'  : null,
+      app.exp_labeling    ? 'Data labeling'      : null,
+      app.exp_ai_training ? 'AI training data'   : null,
+      app.exp_qa          ? 'Quality assurance'  : null,
+      app.exp_image_eval  ? 'Image evaluation'   : null,
+    ].filter(Boolean);
+
+    document.getElementById('panel-body').innerHTML = `
+
+      <!-- Personal -->
+      <div class="panel-section">
+        <div class="panel-section-title">Personal details</div>
+        <div class="info-grid">
+          <div class="info-item"><div class="info-key">Full name</div><div class="info-val">${esc(app.full_name)}</div></div>
+          <div class="info-item"><div class="info-key">Email</div><div class="info-val"><a href="mailto:${esc(app.email)}" style="color:var(--gold)">${esc(app.email)}</a></div></div>
+          <div class="info-item"><div class="info-key">Phone</div><div class="info-val">${esc(app.phone || '—')}</div></div>
+          <div class="info-item"><div class="info-key">Location</div><div class="info-val">${esc(app.city || '')}${app.city && app.country ? ', ' : ''}${esc(app.country || '')}</div></div>
+          <div class="info-item"><div class="info-key">Time zone</div><div class="info-val">${esc(app.timezone || '—')}</div></div>
+          <div class="info-item"><div class="info-key">Submitted</div><div class="info-val">${fmtDate(app.submitted_at)}</div></div>
+        </div>
+      </div>
+
+      <!-- Professional -->
+      <div class="panel-section">
+        <div class="panel-section-title">Professional details</div>
+        <div class="info-grid">
+          <div class="info-item"><div class="info-key">Position</div><div class="info-val">${esc(app.position)}</div></div>
+          <div class="info-item"><div class="info-key">Occupation</div><div class="info-val">${esc(app.occupation || '—')}</div></div>
+          <div class="info-item"><div class="info-key">Experience</div><div class="info-val">${esc(app.years_experience || '—')}</div></div>
+          <div class="info-item"><div class="info-key">Hours/week</div><div class="info-val">${esc(String(app.hours_per_week || '—'))}</div></div>
+          <div class="info-item"><div class="info-key">Languages</div><div class="info-val">${esc(app.languages || '—')}</div></div>
+          <div class="info-item"><div class="info-key">Computer skills</div><div class="info-val">${esc(app.computer_skills || '—')}</div></div>
+          <div class="info-item"><div class="info-key">Internet</div><div class="info-val">${esc(app.internet_availability || '—')}</div></div>
+        </div>
+        ${expList.length ? `<div style="margin-top:.875rem;"><div class="info-key" style="margin-bottom:.375rem;">Experience areas</div><div class="exp-tags">${expList.map(t=>`<span class="exp-tag">${t}</span>`).join('')}</div></div>` : ''}
+        <div style="margin-top:.875rem;"><div class="info-key" style="margin-bottom:.375rem;">Previous experience</div><div class="qa-a">${esc(app.previous_experience || '—')}</div></div>
+      </div>
+
+      <!-- Resume -->
+      <div class="panel-section">
+        <div class="panel-section-title">Resume / CV</div>
+        ${app.resume_path
+          ? `<button class="btn-resume" onclick="downloadResume('${esc(app.resume_path)}')">⬇ Download resume</button>`
+          : '<p style="color:var(--fg2);font-size:.875rem;">No resume uploaded.</p>'
+        }
+      </div>
+
+      <!-- Assessment answers -->
+      <div class="panel-section">
+        <div class="panel-section-title">Assessment answers</div>
+        ${Object.keys(answers).length
+          ? Object.entries(answers).map(([k, v]) => `
+              <div class="qa-item">
+                <div class="qa-q">Question ${k.replace('q','')}</div>
+                <div class="qa-a">${esc(v)}</div>
+              </div>`).join('')
+          : '<p style="color:var(--fg2);font-size:.875rem;">No answers recorded.</p>'
+        }
+      </div>
+
+      <!-- Reviewer actions -->
+      <div class="panel-section">
+        <div class="panel-section-title">Reviewer actions</div>
+        <div class="action-row">
+          <div class="action-field">
+            <label>Status</label>
+            <select id="action-status">
+              <option ${app.status==='Submitted'         ?'selected':''}>Submitted</option>
+              <option ${app.status==='Under Review'      ?'selected':''}>Under Review</option>
+              <option ${app.status==='Passed'            ?'selected':''}>Passed</option>
+              <option ${app.status==='Failed'            ?'selected':''}>Failed</option>
+              <option ${app.status==='Interview Required'?'selected':''}>Interview Required</option>
+              <option ${app.status==='Accepted'          ?'selected':''}>Accepted</option>
+            </select>
+          </div>
+          <div class="action-field">
+            <label>Score (1–10)</label>
+            <input type="number" id="action-score" min="1" max="10" value="${app.reviewer_score != null ? app.reviewer_score : ''}">
+          </div>
+          <div class="action-field">
+            <label>Reviewer notes</label>
+            <textarea id="action-notes" placeholder="Internal notes visible only to the team…">${esc(app.reviewer_notes || '')}</textarea>
+          </div>
+          <div>
+            <button class="btn-save" id="save-btn" onclick="saveReview()">Save changes</button>
+            <p class="save-msg" id="save-msg"></p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('panel-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closePanel() {
+    document.getElementById('panel-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+    currentApp = null;
+  }
+
+  // ── Save review ───────────────────────────────────────────────
+  async function saveReview() {
+    if (!currentApp) return;
+    const saveBtn = document.getElementById('save-btn');
+    const saveMsg = document.getElementById('save-msg');
+    saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+    saveMsg.className = 'save-msg';
+
+    const status = document.getElementById('action-status').value;
+    const score  = document.getElementById('action-score').value;
+    const notes  = document.getElementById('action-notes').value;
+
+    const { error } = await sb.from('applications').update({
+      status,
+      reviewer_score: score ? parseInt(score) : null,
+      reviewer_notes: notes || null
+    }).eq('id', currentApp.id);
+
+    if (error) {
+      saveMsg.textContent = 'Error saving: ' + error.message;
+      saveMsg.className = 'save-msg err show';
+    } else {
+      // Update local cache
+      const idx = allApplications.findIndex(r => r.id === currentApp.id);
+      if (idx !== -1) {
+        allApplications[idx].status = status;
+        allApplications[idx].reviewer_score = score ? parseInt(score) : null;
+        allApplications[idx].reviewer_notes = notes || null;
+        currentApp = allApplications[idx];
+      }
+      updateStats();
+      renderTable();
+      saveMsg.textContent = 'Changes saved.';
+      saveMsg.className = 'save-msg ok show';
+    }
+
+    saveBtn.disabled = false; saveBtn.textContent = 'Save changes';
+    setTimeout(() => { saveMsg.className = 'save-msg'; }, 3000);
+  }
+
+  // ── Resume download (signed URL) ──────────────────────────────
+  async function downloadResume(path) {
+    const { data, error } = await sb.storage.from('resumes').createSignedUrl(path, 60);
+    if (error) { alert('Could not generate download link: ' + error.message); return; }
+    window.open(data.signedUrl, '_blank');
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function shortPos(p) {
+    if (!p) return '—';
+    if (p.includes('Annotation')) return 'Annotation Specialist';
+    if (p.includes('Quality'))    return 'Quality Specialist';
+    return p;
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  }
+
+  function statusClass(s) {
+    const map = {
+      'Submitted':          's-submitted',
+      'Under Review':       's-under-review',
+      'Passed':             's-passed',
+      'Failed':             's-failed',
+      'Interview Required': 's-interview-required',
+      'Accepted':           's-accepted'
+    };
+    return map[s] || 's-submitted';
+  }
+
+  async function loadTeamMembers(){
+
+const {data,error}=await sb
+.from("team_members")
+.select("*")
+.order("created_at",{ascending:false});
+
+
+if(error){
+
+console.error(error);
+return;
+
+}
+
+
+const table=document.getElementById("team-table");
+
+
+table.innerHTML=data.map(member=>`
+
+<tr>
+
+<td>
+${member.email}
+</td>
+
+
+<td>
+${member.email}
+</td>
+
+
+<td>
+
+<select onchange="changeRole('${member.id}',this.value)">
+
+<option ${member.role==="admin"?"selected":""}>
+admin
+</option>
+
+<option ${member.role==="reviewer"?"selected":""}>
+reviewer
+</option>
+
+<option ${member.role==="viewer"?"selected":""}>
+viewer
+</option>
+
+
+</select>
+
+</td>
+
+
+<td>
+
+${member.active ? 
+"Active" :
+"Disabled"}
+
+</td>
+
+
+<td>
+
+<button onclick="toggleMember('${member.id}',${member.active})">
+
+${member.active ? "Disable":"Activate"}
+
+</button>
+
+</td>
+
+
+</tr>
+
+`).join("");
+
+}
+
+
+
+init();
+
+loadTeamMembers();
+
+
+async function sendInvite() {
+
+    const email = document.getElementById("invite-email").value;
+    const role = document.getElementById("invite-role").value;
+
+    const { data, error } = await sb.functions.invoke(
+        "invite-team-member",
+        {
+            body: { email, role }
+        }
+    );
+
+    console.log("DATA:", data);
+    console.log("ERROR:", error);
+
+    if (error) {
+        alert(error.message);
+        return;
+    }
+
+    alert(JSON.stringify(data));
+
+}
+
+
+function openInvite() {
+    const modal = document.getElementById("invite-modal");
+
+    console.log(modal);
+
+    if (!modal) {
+        alert("Invite modal not found");
+        return;
+    }
+
+    modal.style.display = "flex";
+}
+
+function closeInvite() {
+    document.getElementById("invite-modal").style.display = "none";
+}
+
+  // ── Boot ──────────────────────────────────────────────────────
+  init();
+</script>
+</body>
+</html>

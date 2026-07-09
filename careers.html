@@ -298,12 +298,14 @@
       <button class="btn" onclick="openAssessment('quality')">Start Assessment →</button>
     </div>
 
-    <div style="margin-top:2.5rem; padding:2.25rem; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); text-align:center; transition:background var(--transition), border-color var(--transition);">
-      <h3 style="font-size:1rem; font-weight:600; margin-bottom:.5rem; color:var(--fg);">Don't see the right role?</h3>
-      <p style="margin-bottom:1.375rem; font-size:.9375rem;">We're always looking for exceptional people. Send us a note and tell us how you'd contribute.</p>
-      <a href="https://forms.gle/3r7haD9L9yuwzTgo8" target="_blank" class="btn btn-outline btn-lg">Send an open application →</a>
-    </div>
-  </div>
+
+<div class="job-card" style="border-color:#c8922a;">
+  <h3>Join Our Talent Pool</h3>
+  <p class="job-tagline">Remote · All roles · Ongoing</p>
+  <p class="job-desc">Not seeing an open role that fits right now? Join our talent pool so we can reach out directly the moment a matching position opens.</p>
+  <button class="btn" onclick="openTalentPool()">Join the Talent Pool →</button>
+</div>
+
 </section>
 
 <div class="modal-overlay" id="assessment-modal">
@@ -385,6 +387,70 @@
         <button type="submit" class="btn" id="submit-btn">Submit application →</button>
       </div>
       <p class="form-msg" id="form-msg"></p>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="talentpool-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeTalentPool()" aria-label="Close">✕</button>
+    <h3>Join Our Talent Pool</h3>
+    <p class="modal-sub">Fill this out once and we'll reach out when a role matching your background opens up.</p>
+    <form id="talentpool-form">
+      <div class="form-field">
+        <label>Full name *</label>
+        <input type="text" name="full_name" required>
+      </div>
+
+      <div class="form-field">
+        <label>Education background *</label>
+        <textarea name="education_background" required placeholder="Degrees, certifications, institutions, and years"></textarea>
+      </div>
+
+      <div class="form-field">
+        <label>Areas of expertise*</label>
+        <textarea name="areas_of_expertise" required placeholder="List all areas you have hands-on experience in (e.g. image annotation, data labeling, transcription, QA, LiDAR, RLHF...)"></textarea>
+      </div>
+
+      <div class="form-field">
+        <label>Computer specifications (Go to System>> About >> Device Specifications>> copy. This is the format we require)*</label>
+        <textarea name="computer_spec" required placeholder="Processor, RAM, year/generation, OS — we require a newer-generation computer"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label>Who referred you? *</label>
+          <input type="text" name="referred_by" placeholder="Name of referrer, or 'None'" required>
+        </div>
+        <div class="form-field">
+          <label>Country of application *</label>
+          <input type="text" name="country" required>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>EF SET English test certificate *</label>
+        <input type="url" name="efset_certificate_url" required placeholder="Paste your certificate link here">
+        <p style="font-size:.8125rem; color:var(--subtle); margin-top:.375rem;">
+          Take the free test at <a href="https://www.efset.org/" target="_blank" style="color:#c8922a;">efset.org</a> and paste the link to your results certificate above. N/B — we require a minimum score of 70/100 (B1/C1 level) to be considered for our talent pool.
+        </p>
+      </div>
+
+      <div class="form-field">
+        <label>Resume / CV (PDF, DOC, or DOCX — max 10MB) *</label>
+        <input type="file" name="resume" id="talentpool-resume-input" accept=".pdf,.doc,.docx" required>
+      </div>
+
+      <div class="form-field">
+        <label>Additional experience (optional)</label>
+        <textarea name="additional_experience" placeholder="Anything else that would be an advantage"></textarea>
+      </div>
+
+      <div class="modal-submit-row">
+        <button type="button" class="btn btn-outline" onclick="closeTalentPool()">Cancel</button>
+        <button type="submit" class="btn" id="talentpool-submit-btn">Submit to talent pool →</button>
+      </div>
+      <p class="form-msg" id="talentpool-form-msg"></p>
     </form>
   </div>
 </div>
@@ -702,6 +768,83 @@
     } finally {
       submitBtn.disabled    = false;
       submitBtn.textContent = 'Submit application →';
+    }
+  });
+
+// ── Talent pool modal ────────────────────────────────────────────────────────
+  function openTalentPool() {
+    document.getElementById('talentpool-form').reset();
+    document.getElementById('talentpool-form-msg').className = 'form-msg';
+    document.getElementById('talentpool-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeTalentPool() {
+    document.getElementById('talentpool-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('talentpool-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeTalentPool();
+  });
+
+  document.getElementById('talentpool-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const msg       = document.getElementById('talentpool-form-msg');
+    const submitBtn = document.getElementById('talentpool-submit-btn');
+
+    submitBtn.disabled    = true;
+    submitBtn.textContent = 'Submitting…';
+    msg.className         = 'form-msg';
+
+    try {
+      const form       = e.target;
+      const formData   = new FormData(form);
+      const resumeFile = document.getElementById('talentpool-resume-input').files[0];
+
+      if (resumeFile && resumeFile.size > 10 * 1024 * 1024) {
+        throw new Error('Resume file exceeds 10MB. Please upload a smaller file.');
+      }
+
+      let resumePath = null;
+      if (resumeFile) {
+        const safeName = `${Date.now()}_${resumeFile.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
+        const { data: uploadData, error: uploadError } = await supabaseClient
+          .storage.from('resumes').upload(safeName, resumeFile);
+        if (uploadError) throw uploadError;
+        resumePath = uploadData.path;
+      }
+
+      const now = new Date().toISOString();
+
+      const payload = {
+        full_name:              formData.get('full_name'),
+        education_background:   formData.get('education_background'),
+        areas_of_expertise:     formData.get('areas_of_expertise'),
+        computer_spec:          formData.get('computer_spec'),
+        referred_by:            formData.get('referred_by'),
+        country:                formData.get('country'),
+        efset_certificate_url:  formData.get('efset_certificate_url'),
+        resume_path:            resumePath,
+        additional_experience:  formData.get('additional_experience') || null,
+        status:                 'In pool',
+        submitted_at:           now
+      };
+
+      const { error: insertError } = await supabaseClient.from('talent_pool').insert([payload]);
+      if (insertError) throw insertError;
+
+      msg.textContent = 'Thank you — you\'ve been added to our talent pool. We\'ll reach out when a matching role opens.';
+      msg.className   = 'form-msg success show';
+      form.reset();
+      setTimeout(closeTalentPool, 2500);
+
+    } catch (err) {
+      msg.textContent = 'Something went wrong: ' + (err.message || 'please try again or contact us directly.');
+      msg.className   = 'form-msg error show';
+    } finally {
+      submitBtn.disabled    = false;
+      submitBtn.textContent = 'Submit to talent pool →';
     }
   });
 </script>
