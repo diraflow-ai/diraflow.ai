@@ -1,0 +1,1441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin — Diraflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/logo.jpg">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0f0f0f;
+    --bg2:      #161616;
+    --card:     #1c1c1c;
+    --border:   #2a2a2a;
+    --fg:       #f0f0f0;
+    --fg2:      #aaaaaa;
+    --subtle:   #666;
+    --gold:     #c8922a;
+    --gold-dim: rgba(200,146,42,.15);
+    --green:    #2e8b57;
+    --red:      #c0392b;
+    --radius:   10px;
+    --radius-lg:14px;
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── LOGIN SCREEN ── */
+  #login-screen {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    overflow: hidden;
+    background:
+      linear-gradient(rgba(255,255,255,.25), rgba(255,255,255,.35)),
+      url("/assets/AutonomousTrucks-970.jpg");
+    background-size: cover;
+    background-position: center;
+  }
+  #login-screen::before {
+    content:""; position:absolute; inset:0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(200,146,42,.25), transparent 35%),
+      radial-gradient(circle at 80% 70%, rgba(46,139,87,.18), transparent 35%);
+    animation: ambientMove 12s infinite alternate;
+  }
+  @keyframes ambientMove { from { transform:translateY(0px); } to { transform:translateY(-15px); } }
+
+  .login-card {
+    position:relative; z-index:2;
+    background: rgba(255,255,255,.88);
+    color:#111;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,.6);
+    box-shadow: 0 25px 80px rgba(0,0,0,.35);
+    border-radius:20px;
+    padding:3rem;
+    width:100%;
+    max-width:420px;
+  }
+  .login-logo { display: flex; align-items: center; gap: .625rem; margin-bottom: 2rem; }
+  .login-logo img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; }
+  .login-logo span { font-weight: 700; font-size: 1rem; }
+  .login-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--gold); font-weight: 600; margin-bottom: 1.25rem; }
+  .login-card h2 { font-size: 1.375rem; font-weight: 700; margin-bottom: 1.75rem; }
+  .field { display: flex; flex-direction: column; gap: .375rem; margin-bottom: 1rem; }
+  .field label { font-size: .8125rem; font-weight: 600; color: var(--fg2); }
+  .field input {
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: .625rem .875rem; font-family: inherit; font-size: .9375rem; color: var(--fg);
+    transition: border-color .2s;
+  }
+  .field input:focus { outline: none; border-color: var(--gold); }
+  .btn-primary {
+    width: 100%; background: var(--gold); color: #fff; border: none; border-radius: var(--radius);
+    padding: .75rem; font-family: inherit; font-size: .9375rem; font-weight: 600; cursor: pointer;
+    margin-top: .5rem; transition: opacity .2s;
+  }
+  .btn-primary:hover { opacity: .88; }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+  .login-err, .verify-error { color: #e74c3c; font-size: .8125rem; margin-top: .75rem; display: none; }
+  .login-err.show, .verify-error.show { display: block; }
+
+  /* ── VERIFY SCREEN ── */
+  #verify-screen {
+    display:none; align-items:center; justify-content:center; min-height:100vh; padding:2rem;
+    background: linear-gradient(rgba(255,255,255,.65), rgba(255,255,255,.65)), url('/assets/autonomus.jpeg');
+    background-size:cover; background-position:center;
+  }
+  .verify-card {
+    background:rgba(255,255,255,.92); backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,.5); border-radius:14px; padding:2.5rem;
+    width:100%; max-width:420px; box-shadow:0 20px 50px rgba(0,0,0,.15);
+  }
+  .verify-logo { display:flex; align-items:center; gap:.625rem; margin-bottom:2rem; }
+  .verify-logo img { width:32px; height:32px; border-radius:6px; }
+  .verify-logo span { font-weight:700; font-size:1rem; }
+  .verify-label { font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:var(--gold); font-weight:600; margin-bottom:1.25rem; }
+  .verify-card h2 { font-size:1.375rem; font-weight:700; margin-bottom:1.75rem; }
+  .verify-card input {
+    background:#111; border:1px solid #333; border-radius:10px; padding:.75rem;
+    font-family:inherit; font-size:1rem; color:white; width:100%;
+  }
+  .verify-card input:focus { outline:none; border-color:var(--gold); }
+
+  /* ── ADMIN SHELL ── */
+  #admin-shell { display: none; min-height: 100vh; }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 0 1.5rem; height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-left { display: flex; align-items: center; gap: .75rem; }
+  .topbar-left img { width: 28px; height: 28px; border-radius: 6px; object-fit: cover; }
+  .topbar-title { font-weight: 700; font-size: .9375rem; }
+  .topbar-badge, .role-badge {
+    background: var(--gold-dim); color: var(--gold);
+    font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+    padding: .2rem .5rem; border-radius: 4px;
+  }
+  .role-badge.reviewer { background: rgba(100,100,255,.15); color: #8888ff; }
+  .role-badge.viewer   { background: rgba(150,150,150,.15); color: #bbb; }
+  .topbar-right { display: flex; align-items: center; gap: 1rem; }
+  .team-email { font-size: .8125rem; color: var(--fg2); }
+  .btn-logout {
+    background: none; border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--fg2); font-family: inherit; font-size: .8125rem; padding: .375rem .75rem;
+    cursor: pointer; transition: border-color .2s, color .2s;
+  }
+  .btn-logout:hover { border-color: var(--fg2); color: var(--fg); }
+
+  /* Tabs */
+  .tabs-bar {
+    display:flex; gap:.25rem; padding:0 1.5rem; background:var(--bg);
+    border-bottom:1px solid var(--border); position:sticky; top:56px; z-index:40;
+    overflow-x:auto;
+  }
+  .tab-btn {
+    background:none; border:none; color:var(--fg2); font-family:inherit;
+    font-size:.875rem; font-weight:600; padding:.85rem 1.1rem; cursor:pointer;
+    border-bottom:2px solid transparent; white-space:nowrap; transition:.15s;
+  }
+  .tab-btn:hover { color: var(--fg); }
+  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+
+  /* ── MAIN CONTENT ── */
+  .main { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+  }
+  .stat-card .stat-num { font-size: 1.75rem; font-weight: 800; color: var(--gold); line-height: 1; }
+  .stat-card .stat-label { font-size: .75rem; color: var(--fg2); margin-top: .25rem; }
+  .stat-card.clickable { cursor: pointer; transition: border-color .15s; }
+  .stat-card.clickable:hover { border-color: var(--gold); }
+  .stat-card.clickable.active { border-color: var(--gold); background: rgba(200,146,42,.08); }
+
+  .filters-row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; margin-bottom: 1.25rem; }
+  .filter-select, .filter-input {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--fg); font-family: inherit; font-size: .875rem; padding: .5rem .875rem;
+    cursor: pointer;
+  }
+  .filter-select:focus, .filter-input:focus { outline: none; border-color: var(--gold); }
+  .filter-input { min-width: 220px; }
+  .btn-refresh {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--fg2); font-family: inherit; font-size: .875rem; padding: .5rem .875rem;
+    cursor: pointer; transition: border-color .2s;
+  }
+  .btn-refresh:hover { border-color: var(--gold); color: var(--gold); }
+
+  .section-header {
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;
+  }
+  .section-header h2 { font-size:1.125rem; font-weight:700; }
+
+  .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; overflow-x:auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--bg2); text-align: left; padding: .75rem 1rem;
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--fg2);
+    font-weight: 600; border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr.clickable { cursor: pointer; }
+  tbody tr.clickable:hover { background: rgba(200,146,42,.05); }
+  td { padding: .75rem 1rem; font-size: .875rem; vertical-align: middle; }
+  .td-name { font-weight: 600; }
+  .td-email { color: var(--fg2); font-size: .8125rem; }
+  .td-sub { color: var(--fg2); font-size: .8rem; white-space: nowrap; }
+
+  .status-badge {
+    display: inline-block; padding: .2rem .6rem; border-radius: 20px;
+    font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  .s-submitted        { background: rgba(100,100,255,.15); color: #8888ff; }
+  .s-under-review     { background: rgba(200,146,42,.15);  color: #c8922a; }
+  .s-passed           { background: rgba(46,139,87,.18);   color: #3dbb72; }
+  .s-failed           { background: rgba(192,57,43,.18);   color: #e74c3c; }
+  .s-interview-required { background: rgba(155,89,182,.18); color: #c39bd3; }
+  .s-accepted         { background: rgba(46,139,87,.3);    color: #2ecc71; }
+  .s-in-pool          { background: rgba(100,100,255,.15); color: #8888ff; }
+  .s-shortlisted      { background: rgba(200,146,42,.15);  color: #c8922a; }
+  .s-contacted        { background: rgba(155,89,182,.18);  color: #c39bd3; }
+  .s-assigned         { background: rgba(46,139,87,.18);   color: #3dbb72; }
+  .s-inactive          { background: rgba(150,150,150,.15); color: #bbb; }
+  .p-active           { background: rgba(46,139,87,.18);   color: #3dbb72; }
+  .p-paused           { background: rgba(200,146,42,.15);  color: #c8922a; }
+  .p-completed        { background: rgba(150,150,150,.15); color: #bbb; }
+
+  .empty-state { text-align: center; padding: 3rem; color: var(--fg2); }
+
+  /* ── DETAIL PANEL (side drawer) ── */
+  .panel-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6);
+    z-index: 200; align-items: flex-start; justify-content: flex-end;
+  }
+  .panel-overlay.open { display: flex; }
+  .panel {
+    background: var(--bg2); border-left: 1px solid var(--border);
+    width: 100%; max-width: 580px; height: 100vh; overflow-y: auto;
+    animation: slideIn .25s ease;
+  }
+  @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .panel-header {
+    position: sticky; top: 0; background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; z-index: 10;
+  }
+  .panel-header h3 { font-size: 1rem; font-weight: 700; }
+  .btn-close-panel {
+    background: none; border: none; color: var(--fg2); font-size: 1.25rem;
+    cursor: pointer; line-height: 1; padding: .25rem;
+  }
+  .btn-close-panel:hover { color: var(--fg); }
+  .panel-body { padding: 1.25rem; }
+
+  .panel-section { margin-bottom: 1.5rem; }
+  .panel-section-title {
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--gold); font-weight: 700; margin-bottom: .875rem;
+    padding-bottom: .5rem; border-bottom: 1px solid var(--border);
+  }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .625rem; }
+  .info-item .info-key { font-size: .7rem; color: var(--fg2); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .125rem; }
+  .info-item .info-val { font-size: .875rem; font-weight: 500; }
+  .exp-tags { display: flex; flex-wrap: wrap; gap: .375rem; margin-top: .25rem; }
+  .exp-tag { background: var(--gold-dim); color: var(--gold); font-size: .7rem; font-weight: 600; padding: .2rem .5rem; border-radius: 4px; }
+
+  .qa-item { margin-bottom: 1rem; }
+  .qa-q { font-size: .8125rem; font-weight: 600; color: var(--fg2); margin-bottom: .375rem; }
+  .qa-a { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: .75rem; font-size: .875rem; line-height: 1.6; }
+
+  .btn-secondary {
+    background:transparent; color:var(--fg); border:1px solid var(--border); border-radius:10px;
+    cursor:pointer; font-family:inherit; font-weight:600; padding:.5rem .875rem; font-size:.8125rem; transition:.2s;
+  }
+  .btn-secondary:hover { border-color:var(--gold); color:var(--gold); }
+
+  .action-row { display: flex; flex-direction: column; gap: .875rem; }
+  .action-field label { display: block; font-size: .75rem; font-weight: 600; color: var(--fg2); margin-bottom: .375rem; }
+  .action-field select, .action-field textarea, .action-field input[type=number] {
+    width: 100%; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--fg); font-family: inherit;
+    font-size: .875rem; padding: .5rem .75rem;
+  }
+  .action-field select:focus, .action-field textarea:focus, .action-field input:focus { outline: none; border-color: var(--gold); }
+  .action-field textarea { min-height: 100px; resize: vertical; }
+  .btn-save {
+    background: var(--gold); color: #fff; border: none; border-radius: var(--radius);
+    padding: .625rem 1.25rem; font-family: inherit; font-size: .875rem; font-weight: 600;
+    cursor: pointer; transition: opacity .2s;
+  }
+  .btn-save:hover { opacity: .88; }
+  .btn-save:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-resume {
+    display: inline-flex; align-items: center; gap: .375rem;
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--fg); font-family: inherit; font-size: .875rem; padding: .5rem .875rem;
+    text-decoration: none; cursor: pointer; transition: border-color .2s;
+  }
+  .btn-resume:hover { border-color: var(--gold); color: var(--gold); }
+  .save-msg { font-size: .8125rem; margin-top: .5rem; display: none; }
+  .save-msg.show { display: block; }
+  .save-msg.ok { color: var(--green); }
+  .save-msg.err { color: var(--red); }
+
+  /* ── MODALS ── */
+  .modal-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.65);
+    align-items:center; justify-content:center; z-index:9999; padding:1rem;
+  }
+  .modal-overlay.show { display:flex; }
+  .modal {
+    width:min(600px, 92vw); max-height:90vh; overflow-y:auto;
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:2rem; box-shadow:0 25px 60px rgba(0,0,0,.45);
+  }
+  .modal h2 { margin-bottom:1.5rem; font-size:1.5rem; font-weight:700; }
+  .modal .field { margin-bottom:1.25rem; }
+  .modal .field label { display:block; margin-bottom:.5rem; color:var(--fg2); font-weight:600; font-size:.85rem; }
+  .modal input, .modal select, .modal textarea {
+    width:100%; background:var(--bg); color:var(--fg); border:1px solid var(--border);
+    border-radius:10px; padding:.75rem 1rem; font-size:.9rem; font-family:inherit; transition:border-color .2s;
+  }
+  .modal textarea { min-height:80px; resize:vertical; }
+  .modal input:focus, .modal select:focus, .modal textarea:focus { outline:none; border-color:var(--gold); }
+  .modal-actions { display:flex; gap:.75rem; margin-top:1.5rem; }
+  .modal-actions button { flex:1; height:44px; }
+
+  /* Project cards */
+  .project-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:1rem; margin-bottom:2rem; }
+  .project-card {
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg);
+    padding:1.25rem; cursor:pointer; transition:border-color .15s;
+  }
+  .project-card:hover { border-color: var(--gold); }
+  .project-card-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:.5rem; }
+  .project-card h3 { font-size:1rem; font-weight:700; }
+  .project-card p { font-size:.8125rem; color:var(--fg2); margin-top:.375rem; }
+  .project-card .member-count { font-size:.75rem; color:var(--fg2); margin-top:.75rem; }
+
+  .assign-list { display:flex; flex-direction:column; gap:.625rem; }
+  .assign-row {
+    display:flex; align-items:center; justify-content:space-between; gap:.75rem;
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:.625rem .875rem;
+  }
+  .assign-row .assign-info { flex:1; min-width:0; }
+  .assign-row .assign-name { font-weight:600; font-size:.875rem; }
+  .assign-row .assign-role { font-size:.75rem; color:var(--fg2); }
+  .assign-row select { background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--fg); font-family:inherit; font-size:.8125rem; padding:.4rem .6rem; }
+
+  .add-member-row { display:flex; gap:.5rem; margin-top:1rem; }
+  .add-member-row select, .add-member-row input { flex:1; }
+
+  .spinner {
+    width: 20px; height: 20px; border: 2px solid var(--border);
+    border-top-color: var(--gold); border-radius: 50%;
+    animation: spin .7s linear infinite; margin: 3rem auto; display: block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 768px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .panel { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN SCREEN ─────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo"><img src="/assets/logo.jpg" alt="Diraflow"><span>Diraflow</span></div>
+    <div class="login-label">Authorized Access</div>
+    <h2>Team sign in</h2>
+    <div class="field">
+      <label>Email address</label>
+      <input type="email" id="login-email" placeholder="you@diraflowai.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Sign in →</button>
+    <p class="login-err" id="login-err"></p>
+    <p style="margin-top:1.25rem; font-size:.8125rem; color:var(--subtle);">Access is restricted to Diraflow team members only.</p>
+  </div>
+</div>
+
+<!-- ── VERIFY SCREEN ─────────────────────────────────────────── -->
+<div id="verify-screen">
+  <div class="verify-card">
+    <div class="verify-logo"><img src="/assets/logo.jpg"><span>Diraflow</span></div>
+    <div class="verify-label">Security Verification</div>
+    <h2>Enter verification code</h2>
+    <div class="field">
+      <label>Verification code</label>
+      <input type="text" id="verification-code" maxlength="6" placeholder="Enter 6 digit code">
+    </div>
+    <button class="btn-primary" onclick="verifyCode()">Verify →</button>
+    <p class="verify-error" id="verify-error"></p>
+  </div>
+</div>
+
+<!-- ── ADMIN SHELL ──────────────────────────────────────────── -->
+<div id="admin-shell">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <img src="/assets/logo.jpg" alt="Diraflow">
+      <span class="topbar-title">Diraflow Admin</span>
+    </div>
+    <div class="topbar-right">
+      <span class="role-badge" id="role-badge"></span>
+      <span class="team-email" id="user-email"></span>
+      <button class="btn-logout" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="tabs-bar">
+    <button class="tab-btn active" id="tab-btn-applications" onclick="switchTab('applications')">Applications</button>
+    <button class="tab-btn" id="tab-btn-talent" onclick="switchTab('talent')">Talent Pool</button>
+    <button class="tab-btn" id="tab-btn-members" onclick="switchTab('members')" style="display:none;">Members</button>
+    <button class="tab-btn" id="tab-btn-assignments" onclick="switchTab('assignments')" style="display:none;">Assignments</button>
+  </div>
+
+  <div class="main">
+
+    <!-- ═══════════ APPLICATIONS TAB ═══════════ -->
+    <div class="tab-panel active" id="panel-applications">
+      <div class="stats-row">
+        <div class="stat-card clickable" id="stat-card-total" onclick="filterByStatCard('')"><div class="stat-num" id="stat-total">–</div><div class="stat-label">Total</div></div>
+        <div class="stat-card clickable" id="stat-card-submitted" onclick="filterByStatCard('Submitted')"><div class="stat-num" id="stat-submitted">–</div><div class="stat-label">Submitted</div></div>
+        <div class="stat-card clickable" id="stat-card-review" onclick="filterByStatCard('Under Review')"><div class="stat-num" id="stat-review">–</div><div class="stat-label">Under Review</div></div>
+        <div class="stat-card clickable" id="stat-card-passed" onclick="filterByStatCard('Passed')"><div class="stat-num" id="stat-passed">–</div><div class="stat-label">Passed</div></div>
+        <div class="stat-card clickable" id="stat-card-failed" onclick="filterByStatCard('Failed')"><div class="stat-num" id="stat-failed">–</div><div class="stat-label">Failed</div></div>
+        <div class="stat-card clickable" id="stat-card-interview" onclick="filterByStatCard('Interview Required')"><div class="stat-num" id="stat-interview">–</div><div class="stat-label">Interview Required</div></div>
+        <div class="stat-card clickable" id="stat-card-accepted" onclick="filterByStatCard('Accepted')"><div class="stat-num" id="stat-accepted">–</div><div class="stat-label">Accepted</div></div>
+      </div>
+
+      <div class="filters-row">
+        <input class="filter-input" id="app-search" placeholder="Search name or email…" oninput="renderApplications()">
+        <select class="filter-select" id="app-filter-position" onchange="renderApplications()"><option value="">All positions</option></select>
+        <select class="filter-select" id="app-filter-status" onchange="renderApplications()">
+          <option value="">All statuses</option>
+          <option>Submitted</option><option>Under Review</option><option>Passed</option>
+          <option>Failed</option><option>Interview Required</option><option>Accepted</option>
+        </select>
+        <select class="filter-select" id="app-filter-reviewer" onchange="renderApplications()" style="display:none;">
+          <option value="">All reviewers</option>
+        </select>
+        <button class="btn-refresh" onclick="loadApplications()">↻ Refresh</button>
+      </div>
+
+      <div id="applications-loading"><span class="spinner"></span></div>
+      <div class="table-wrap" id="applications-table-wrap" style="display:none;">
+        <table>
+          <thead><tr>
+            <th>Name</th><th>Position</th><th>Country</th><th>Status</th>
+            <th>Assigned reviewer</th><th>Submitted</th><th>Score</th>
+          </tr></thead>
+          <tbody id="applications-tbody"></tbody>
+        </table>
+        <div class="empty-state" id="applications-empty" style="display:none;">No applications match your filters.</div>
+      </div>
+    </div>
+
+    <!-- ═══════════ TALENT POOL TAB ═══════════ -->
+    <div class="tab-panel" id="panel-talent">
+      <div class="filters-row">
+        <input class="filter-input" id="talent-search" placeholder="Search name or country…" oninput="renderTalentPool()">
+        <select class="filter-select" id="talent-filter-status" onchange="renderTalentPool()">
+          <option value="">All statuses</option>
+          <option>In pool</option><option>Shortlisted</option><option>Contacted</option>
+          <option>Assigned</option><option>Inactive</option>
+        </select>
+        <button class="btn-refresh" onclick="loadTalentPool()">↻ Refresh</button>
+      </div>
+
+      <div id="talent-loading"><span class="spinner"></span></div>
+      <div class="table-wrap" id="talent-table-wrap" style="display:none;">
+        <table>
+          <thead><tr><th>Name</th><th>Country</th><th>Areas of expertise</th><th>Status</th><th>Submitted</th></tr></thead>
+          <tbody id="talent-tbody"></tbody>
+        </table>
+        <div class="empty-state" id="talent-empty" style="display:none;">No talent pool entries match your filters.</div>
+      </div>
+    </div>
+
+    <!-- ═══════════ MEMBERS TAB (admin only) ═══════════ -->
+    <div class="tab-panel" id="panel-members">
+      <div class="section-header">
+        <h2>Team Members</h2>
+        <button class="btn-primary" style="width:auto;" onclick="openInvite()">+ Invite Member</button>
+      </div>
+
+      <div id="members-loading"><span class="spinner"></span></div>
+      <div class="table-wrap" id="members-table-wrap" style="display:none;">
+        <table>
+          <thead><tr><th>Email</th><th>Role</th><th>Status</th><th>Projects</th><th>Action</th></tr></thead>
+          <tbody id="members-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ ASSIGNMENTS TAB (admin only) ═══════════ -->
+    <div class="tab-panel" id="panel-assignments">
+
+      <div class="section-header">
+        <h2>Projects</h2>
+        <button class="btn-primary" style="width:auto;" onclick="openProjectModal()">+ New Project</button>
+      </div>
+      <div id="projects-loading"><span class="spinner"></span></div>
+      <div class="project-grid" id="projects-grid"></div>
+
+      <div class="section-header" style="margin-top:1rem;">
+        <h2>Reviewer Assignment</h2>
+        <button class="btn-refresh" onclick="loadApplications()">↻ Refresh</button>
+      </div>
+      <p style="color:var(--fg2); font-size:.8125rem; margin-bottom:1rem;">
+        Quickly assign or reassign which reviewer is responsible for each application. A reviewer only sees applications assigned to them.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Applicant</th><th>Position</th><th>Status</th><th>Assigned reviewer</th></tr></thead>
+          <tbody id="assign-apps-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── APPLICATION DETAIL PANEL ── -->
+<div class="panel-overlay" id="app-panel-overlay">
+  <div class="panel">
+    <div class="panel-header">
+      <h3 id="app-panel-name">Applicant</h3>
+      <button class="btn-close-panel" onclick="closeAppPanel()">✕</button>
+    </div>
+    <div class="panel-body" id="app-panel-body"></div>
+  </div>
+</div>
+
+<!-- ── TALENT POOL DETAIL PANEL ── -->
+<div class="panel-overlay" id="talent-panel-overlay">
+  <div class="panel">
+    <div class="panel-header">
+      <h3 id="talent-panel-name">Candidate</h3>
+      <button class="btn-close-panel" onclick="closeTalentPanel()">✕</button>
+    </div>
+    <div class="panel-body" id="talent-panel-body"></div>
+  </div>
+</div>
+
+<!-- ── PROJECT DETAIL / MANAGE MODAL ── -->
+<div class="modal-overlay" id="project-manage-modal">
+  <div class="modal">
+    <h2 id="project-manage-title">Project</h2>
+    <div class="field">
+      <label>Status</label>
+      <select id="project-status-select" onchange="updateProjectStatus()">
+        <option>Active</option><option>Paused</option><option>Completed</option>
+      </select>
+    </div>
+    <div class="panel-section-title" style="margin-top:1rem;">Members on this project</div>
+    <div class="assign-list" id="project-members-list"></div>
+    <div class="add-member-row">
+      <select id="add-member-select"></select>
+      <input type="text" id="add-member-role" placeholder="Role on project (optional)">
+      <button class="btn-primary" style="width:auto;" onclick="addProjectMember()">Add</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" type="button" onclick="closeProjectModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── NEW PROJECT MODAL ── -->
+<div class="modal-overlay" id="project-new-modal">
+  <div class="modal">
+    <h2>New Project</h2>
+    <div class="field"><label>Project name</label><input id="new-project-name" type="text" placeholder="e.g. Autonomous Vehicle Labeling"></div>
+    <div class="field"><label>Description</label><textarea id="new-project-desc" placeholder="Optional description"></textarea></div>
+    <div class="field">
+      <label>Status</label>
+      <select id="new-project-status"><option>Active</option><option>Paused</option><option>Completed</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="createProject()">Create</button>
+      <button class="btn-secondary" type="button" onclick="closeProjectNewModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── INVITE MEMBER MODAL ── -->
+<div class="modal-overlay" id="invite-modal">
+  <div class="modal">
+    <h2>Invite Team Member</h2>
+    <div class="field"><label>Email</label><input id="invite-email" type="email" placeholder="member@example.com"></div>
+    <div class="field">
+      <label>Role</label>
+      <select id="invite-role">
+        <option value="reviewer">Reviewer</option>
+        <option value="viewer">Viewer</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="sendInvite()">Send Invite</button>
+      <button class="btn-secondary" type="button" onclick="closeInvite()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Supabase config ──────────────────────────────────────────
+  const SUPABASE_URL      = "https://kwxlfuygotdcabhkqbdd.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3eGxmdXlnb3RkY2FiaGtxYmRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MjY2NzksImV4cCI6MjA5ODQwMjY3OX0.ECebrh77wy-OCa44s10aH1HLsykCRBq4s1rGIFipdm4";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ── State ─────────────────────────────────────────────────────
+  let currentUser   = null;
+  let currentMember = null;   // row from team_members for the logged-in user
+  let allApplications = [];
+  let allTalentPool    = [];
+  let allTeamMembers   = [];
+  let allProjects      = [];
+  let allProjectMembers = [];
+  let currentApp = null;
+  let currentTalent = null;
+  let currentProjectId = null;
+
+  const loadedTabs = { applications:false, talent:false, members:false, assignments:false };
+
+  // ── Auth bootstrap ───────────────────────────────────────────
+  async function init() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) checkTeamAccess(session.user);
+  }
+
+  async function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btn = document.getElementById('login-btn');
+    const errEl = document.getElementById('login-err');
+    errEl.className = 'login-err';
+    btn.disabled = true; btn.textContent = 'Signing in…';
+
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      errEl.textContent = error.message; errEl.className = 'login-err show';
+      btn.disabled = false; btn.textContent = 'Sign in →';
+      return;
+    }
+
+    window.pendingUser = data.user;
+    const { error: codeError } = await sb.functions.invoke("send-login-code", {
+      body: { userId: data.user.id, email: data.user.email }
+    });
+    if (codeError) {
+      errEl.textContent = "Could not send verification code.";
+      errEl.className = "login-err show";
+      btn.disabled = false; btn.textContent = 'Sign in →';
+      return;
+    }
+
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("verify-screen").style.display = "flex";
+  }
+
+  async function verifyCode() {
+    const code = document.getElementById("verification-code").value.trim();
+    const errorBox = document.getElementById("verify-error");
+    errorBox.className = "verify-error";
+
+    if (!code) {
+      errorBox.textContent = "Enter verification code.";
+      errorBox.className = "verify-error show";
+      return;
+    }
+
+    const { error } = await sb.functions.invoke("verify-login-code", {
+      body: { user_id: window.pendingUser.id, code: code }
+    });
+
+    if (error) {
+      errorBox.textContent = "Invalid or expired verification code.";
+      errorBox.className = "verify-error show";
+      return;
+    }
+
+    checkTeamAccess(window.pendingUser);
+  }
+
+  async function doLogout() {
+    await sb.auth.signOut();
+    document.getElementById('admin-shell').style.display = 'none';
+    document.getElementById('verify-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-password').value = '';
+    currentUser = null; currentMember = null;
+    for (const k in loadedTabs) loadedTabs[k] = false;
+  }
+
+  document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('verification-code').addEventListener('keydown', e => { if (e.key === 'Enter') verifyCode(); });
+
+  async function checkTeamAccess(user) {
+    const { data, error } = await sb.from('team_members').select('*').eq('id', user.id).eq('active', true).single();
+    if (error || !data) {
+      await sb.auth.signOut();
+      alert("Your account is not authorized to access this portal.");
+      return;
+    }
+    currentUser = user;
+    currentMember = data;
+    showDashboard();
+  }
+
+  function showDashboard() {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("verify-screen").style.display = "none";
+    document.getElementById("admin-shell").style.display = "block";
+    document.getElementById("user-email").textContent = currentMember.email;
+
+    const roleBadge = document.getElementById("role-badge");
+    roleBadge.textContent = currentMember.role;
+    roleBadge.className = "role-badge " + currentMember.role;
+
+    const isAdmin = currentMember.role === 'admin';
+    document.getElementById('tab-btn-members').style.display     = isAdmin ? 'inline-block' : 'none';
+    document.getElementById('tab-btn-assignments').style.display = isAdmin ? 'inline-block' : 'none';
+    document.getElementById('app-filter-reviewer').style.display = isAdmin ? 'inline-block' : 'none';
+
+    switchTab('applications');
+  }
+
+  // ── Tabs ──────────────────────────────────────────────────────
+  function switchTab(name) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    document.getElementById('tab-btn-' + name).classList.add('active');
+
+    if (name === 'applications' && !loadedTabs.applications) loadApplications();
+    if (name === 'talent' && !loadedTabs.talent) loadTalentPool();
+    if (name === 'members' && !loadedTabs.members) loadTeamMembers();
+    if (name === 'assignments') {
+      if (!loadedTabs.assignments) loadProjects();
+      if (!loadedTabs.applications) loadApplications(); else renderAssignApps();
+      if (allTeamMembers.length === 0) loadTeamMembersForDropdowns();
+    }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  }
+  function statusClass(s) {
+    const map = {
+      'Submitted':'s-submitted','Under Review':'s-under-review','Passed':'s-passed','Failed':'s-failed',
+      'Interview Required':'s-interview-required','Accepted':'s-accepted',
+      'In pool':'s-in-pool','Shortlisted':'s-shortlisted','Contacted':'s-contacted','Assigned':'s-assigned','Inactive':'s-inactive'
+    };
+    return map[s] || 's-submitted';
+  }
+  function projectStatusClass(s) {
+    const map = { 'Active':'p-active', 'Paused':'p-paused', 'Completed':'p-completed' };
+    return map[s] || 'p-active';
+  }
+
+  // Make sure we have a lightweight roster of reviewers/admins for dropdowns,
+  // even on a session where the Members tab itself hasn't been opened yet.
+  async function loadTeamMembersForDropdowns() {
+    const { data, error } = await sb.from('team_members').select('id,email,role,active').eq('active', true);
+    if (!error && data) allTeamMembers = data;
+  }
+
+  function reviewerLabel(id) {
+    if (!id) return 'Unassigned';
+    const m = allTeamMembers.find(t => t.id === id);
+    return m ? m.email : 'Unassigned';
+  }
+
+  // ══════════════════════ APPLICATIONS TAB ══════════════════════
+  async function loadApplications() {
+    document.getElementById('applications-loading').style.display = 'block';
+    document.getElementById('applications-table-wrap').style.display = 'none';
+
+    if (allTeamMembers.length === 0) await loadTeamMembersForDropdowns();
+
+    const { data, error } = await sb.from('applications').select('*').order('submitted_at', { ascending: false });
+
+    document.getElementById('applications-loading').style.display = 'none';
+    document.getElementById('applications-table-wrap').style.display = 'block';
+
+    if (error) { console.error(error); return; }
+    allApplications = data || [];
+    loadedTabs.applications = true;
+
+    populatePositionFilter();
+    populateReviewerFilter();
+    updateAppStats();
+    renderApplications();
+    if (document.getElementById('panel-assignments').classList.contains('active')) renderAssignApps();
+  }
+
+  function populatePositionFilter() {
+    const sel = document.getElementById('app-filter-position');
+    const current = sel.value;
+    const positions = [...new Set(allApplications.map(a => a.position).filter(Boolean))];
+    sel.innerHTML = '<option value="">All positions</option>' + positions.map(p => `<option ${p===current?'selected':''}>${esc(p)}</option>`).join('');
+  }
+
+  function populateReviewerFilter() {
+    const sel = document.getElementById('app-filter-reviewer');
+    const current = sel.value;
+    const reviewers = allTeamMembers.filter(m => m.role === 'reviewer' || m.role === 'admin');
+    sel.innerHTML = '<option value="">All reviewers</option><option value="unassigned">Unassigned</option>' +
+      reviewers.map(r => `<option value="${r.id}" ${r.id===current?'selected':''}>${esc(r.email)}</option>`).join('');
+  }
+
+  function updateAppStats() {
+    const a = allApplications;
+    document.getElementById('stat-total').textContent     = a.length;
+    document.getElementById('stat-submitted').textContent = a.filter(r => r.status === 'Submitted').length;
+    document.getElementById('stat-review').textContent    = a.filter(r => r.status === 'Under Review').length;
+    document.getElementById('stat-passed').textContent    = a.filter(r => r.status === 'Passed').length;
+    document.getElementById('stat-failed').textContent    = a.filter(r => r.status === 'Failed').length;
+    document.getElementById('stat-interview').textContent = a.filter(r => r.status === 'Interview Required').length;
+    document.getElementById('stat-accepted').textContent  = a.filter(r => r.status === 'Accepted').length;
+  }
+
+  // Clicking a stat card sets the status filter to that bucket (and highlights the active card).
+  // Clicking "Total" (empty status) clears the filter back to "All statuses".
+  function filterByStatCard(status) {
+    document.getElementById('app-filter-status').value = status;
+    document.querySelectorAll('.stat-card.clickable').forEach(c => c.classList.remove('active'));
+    const idMap = {
+      '': 'stat-card-total', 'Submitted': 'stat-card-submitted', 'Under Review': 'stat-card-review',
+      'Passed': 'stat-card-passed', 'Failed': 'stat-card-failed',
+      'Interview Required': 'stat-card-interview', 'Accepted': 'stat-card-accepted'
+    };
+    const el = document.getElementById(idMap[status]);
+    if (el) el.classList.add('active');
+    renderApplications();
+  }
+
+  function renderApplications() {
+    const search = document.getElementById('app-search').value.toLowerCase();
+    const posFilter = document.getElementById('app-filter-position').value;
+    const stFilter  = document.getElementById('app-filter-status').value;
+    const revFilter = document.getElementById('app-filter-reviewer').value;
+
+    // Keep stat-card highlighting in sync even when the status dropdown is changed directly.
+    document.querySelectorAll('.stat-card.clickable').forEach(c => c.classList.remove('active'));
+    const idMap = {
+      '': 'stat-card-total', 'Submitted': 'stat-card-submitted', 'Under Review': 'stat-card-review',
+      'Passed': 'stat-card-passed', 'Failed': 'stat-card-failed',
+      'Interview Required': 'stat-card-interview', 'Accepted': 'stat-card-accepted'
+    };
+    const activeCard = document.getElementById(idMap[stFilter]);
+    if (activeCard) activeCard.classList.add('active');
+
+    let rows = allApplications.filter(r => {
+      const matchSearch = !search || (r.full_name||'').toLowerCase().includes(search) || (r.email||'').toLowerCase().includes(search);
+      const matchPos = !posFilter || r.position === posFilter;
+      const matchSt  = !stFilter  || r.status === stFilter;
+      let matchRev = true;
+      if (revFilter === 'unassigned') matchRev = !r.assigned_reviewer_id;
+      else if (revFilter) matchRev = r.assigned_reviewer_id === revFilter;
+      return matchSearch && matchPos && matchSt && matchRev;
+    });
+
+    const tbody = document.getElementById('applications-tbody');
+    const empty = document.getElementById('applications-empty');
+    if (rows.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = rows.map(r => `
+      <tr class="clickable" onclick="openAppPanel('${r.id}')">
+        <td><div class="td-name">${esc(r.full_name)}</div><div class="td-email">${esc(r.email)}</div></td>
+        <td>${esc(r.position)}</td>
+        <td>${esc(r.country || '—')}</td>
+        <td><span class="status-badge ${statusClass(r.status)}">${esc(r.status)}</span></td>
+        <td>${esc(reviewerLabel(r.assigned_reviewer_id))}</td>
+        <td class="td-sub">${fmtDate(r.submitted_at)}</td>
+        <td>${r.reviewer_score != null ? r.reviewer_score + '/10' : '—'}</td>
+      </tr>
+    `).join('');
+  }
+
+  function openAppPanel(id) {
+    const app = allApplications.find(r => r.id == id);
+    if (!app) return;
+    currentApp = app;
+    document.getElementById('app-panel-name').textContent = app.full_name;
+
+    const answers = app.assessment_answers || {};
+    const expList = [
+      app.exp_annotation  ? 'Image annotation'  : null,
+      app.exp_labeling    ? 'Data labeling'      : null,
+      app.exp_ai_training ? 'AI training data'   : null,
+      app.exp_qa          ? 'Quality assurance'  : null,
+      app.exp_image_eval  ? 'Image evaluation'   : null,
+    ].filter(Boolean);
+
+    const isAdmin = currentMember.role === 'admin';
+    const canEdit = isAdmin || (currentMember.role === 'reviewer' && app.assigned_reviewer_id === currentUser.id);
+
+    const reviewerOptions = allTeamMembers.filter(m => m.role === 'reviewer' || m.role === 'admin')
+      .map(m => `<option value="${m.id}" ${app.assigned_reviewer_id===m.id?'selected':''}>${esc(m.email)}</option>`).join('');
+
+    document.getElementById('app-panel-body').innerHTML = `
+      <div class="panel-section">
+        <div class="panel-section-title">Personal details</div>
+        <div class="info-grid">
+          <div class="info-item"><div class="info-key">Full name</div><div class="info-val">${esc(app.full_name)}</div></div>
+          <div class="info-item"><div class="info-key">Email</div><div class="info-val"><a href="mailto:${esc(app.email)}" style="color:var(--gold)">${esc(app.email)}</a></div></div>
+          <div class="info-item"><div class="info-key">Phone</div><div class="info-val">${esc(app.phone || '—')}</div></div>
+          <div class="info-item"><div class="info-key">Location</div><div class="info-val">${esc(app.city||'')}${app.city && app.country ? ', ' : ''}${esc(app.country||'')}</div></div>
+          <div class="info-item"><div class="info-key">Time zone</div><div class="info-val">${esc(app.timezone || '—')}</div></div>
+          <div class="info-item"><div class="info-key">Submitted</div><div class="info-val">${fmtDate(app.submitted_at)}</div></div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-section-title">Professional details</div>
+        <div class="info-grid">
+          <div class="info-item"><div class="info-key">Position</div><div class="info-val">${esc(app.position)}</div></div>
+          <div class="info-item"><div class="info-key">Occupation</div><div class="info-val">${esc(app.occupation || '—')}</div></div>
+          <div class="info-item"><div class="info-key">Experience</div><div class="info-val">${esc(app.years_experience || '—')}</div></div>
+          <div class="info-item"><div class="info-key">Hours/week</div><div class="info-val">${esc(String(app.hours_per_week || '—'))}</div></div>
+          <div class="info-item"><div class="info-key">Languages</div><div class="info-val">${esc(app.languages || '—')}</div></div>
+          <div class="info-item"><div class="info-key">Computer skills</div><div class="info-val">${esc(app.computer_skills || '—')}</div></div>
+          <div class="info-item"><div class="info-key">Internet</div><div class="info-val">${esc(app.internet_availability || '—')}</div></div>
+        </div>
+        ${expList.length ? `<div style="margin-top:.875rem;"><div class="info-key" style="margin-bottom:.375rem;">Experience areas</div><div class="exp-tags">${expList.map(t=>`<span class="exp-tag">${t}</span>`).join('')}</div></div>` : ''}
+        <div style="margin-top:.875rem;"><div class="info-key" style="margin-bottom:.375rem;">Previous experience</div><div class="qa-a">${esc(app.previous_experience || '—')}</div></div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-section-title">Resume / CV</div>
+        ${app.resume_path
+          ? `<button class="btn-resume" onclick="downloadFile('resumes','${esc(app.resume_path)}')">⬇ Download resume</button>`
+          : '<p style="color:var(--fg2);font-size:.875rem;">No resume uploaded.</p>'}
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-section-title">Assessment answers</div>
+        ${Object.keys(answers).length
+          ? Object.entries(answers).map(([k,v]) => `<div class="qa-item"><div class="qa-q">Question ${k.replace('q','')}</div><div class="qa-a">${esc(v)}</div></div>`).join('')
+          : '<p style="color:var(--fg2);font-size:.875rem;">No answers recorded.</p>'}
+      </div>
+
+      ${isAdmin ? `
+      <div class="panel-section">
+        <div class="panel-section-title">Assignment</div>
+        <div class="action-field">
+          <label>Assigned reviewer</label>
+          <select id="app-action-reviewer">
+            <option value="">Unassigned</option>
+            ${reviewerOptions}
+          </select>
+        </div>
+      </div>` : ''}
+
+      ${canEdit ? `
+      <div class="panel-section">
+        <div class="panel-section-title">Reviewer actions</div>
+        <div class="action-row">
+          <div class="action-field">
+            <label>Status</label>
+            <select id="app-action-status">
+              <option ${app.status==='Submitted'?'selected':''}>Submitted</option>
+              <option ${app.status==='Under Review'?'selected':''}>Under Review</option>
+              <option ${app.status==='Passed'?'selected':''}>Passed</option>
+              <option ${app.status==='Failed'?'selected':''}>Failed</option>
+              <option ${app.status==='Interview Required'?'selected':''}>Interview Required</option>
+              <option ${app.status==='Accepted'?'selected':''}>Accepted</option>
+            </select>
+          </div>
+          <div class="action-field">
+            <label>Score (1–10)</label>
+            <input type="number" id="app-action-score" min="1" max="10" value="${app.reviewer_score != null ? app.reviewer_score : ''}">
+          </div>
+          <div class="action-field">
+            <label>Reviewer notes</label>
+            <textarea id="app-action-notes" placeholder="Internal notes visible only to the team…">${esc(app.reviewer_notes || '')}</textarea>
+          </div>
+          <div>
+            <button class="btn-save" id="app-save-btn" onclick="saveApplication()">Save changes</button>
+            <p class="save-msg" id="app-save-msg"></p>
+          </div>
+        </div>
+      </div>` : '<p style="color:var(--fg2);font-size:.8125rem;">You have view-only access to this application.</p>'}
+    `;
+
+    document.getElementById('app-panel-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeAppPanel() {
+    document.getElementById('app-panel-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+    currentApp = null;
+  }
+
+  async function saveApplication() {
+    if (!currentApp) return;
+    const saveBtn = document.getElementById('app-save-btn');
+    const saveMsg = document.getElementById('app-save-msg');
+    saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+    saveMsg.className = 'save-msg';
+
+    const update = {
+      status: document.getElementById('app-action-status').value,
+      reviewer_score: document.getElementById('app-action-score').value ? parseInt(document.getElementById('app-action-score').value) : null,
+      reviewer_notes: document.getElementById('app-action-notes').value || null
+    };
+    const reviewerSel = document.getElementById('app-action-reviewer');
+    if (reviewerSel) update.assigned_reviewer_id = reviewerSel.value || null;
+
+    const { error } = await sb.from('applications').update(update).eq('id', currentApp.id);
+
+    if (error) {
+      saveMsg.textContent = 'Error saving: ' + error.message;
+      saveMsg.className = 'save-msg err show';
+    } else {
+      const idx = allApplications.findIndex(r => r.id === currentApp.id);
+      if (idx !== -1) { allApplications[idx] = { ...allApplications[idx], ...update }; currentApp = allApplications[idx]; }
+      updateAppStats(); renderApplications();
+      if (document.getElementById('panel-assignments').classList.contains('active')) renderAssignApps();
+      saveMsg.textContent = 'Changes saved.';
+      saveMsg.className = 'save-msg ok show';
+    }
+    saveBtn.disabled = false; saveBtn.textContent = 'Save changes';
+    setTimeout(() => { saveMsg.className = 'save-msg'; }, 3000);
+  }
+
+  // ══════════════════════ TALENT POOL TAB ══════════════════════
+  async function loadTalentPool() {
+    document.getElementById('talent-loading').style.display = 'block';
+    document.getElementById('talent-table-wrap').style.display = 'none';
+
+    const { data, error } = await sb.from('talent_pool').select('*').order('submitted_at', { ascending: false });
+
+    document.getElementById('talent-loading').style.display = 'none';
+    document.getElementById('talent-table-wrap').style.display = 'block';
+
+    if (error) { console.error(error); return; }
+    allTalentPool = data || [];
+    loadedTabs.talent = true;
+    renderTalentPool();
+  }
+
+  function renderTalentPool() {
+    const search = document.getElementById('talent-search').value.toLowerCase();
+    const stFilter = document.getElementById('talent-filter-status').value;
+
+    let rows = allTalentPool.filter(r => {
+      const matchSearch = !search || (r.full_name||'').toLowerCase().includes(search) || (r.country||'').toLowerCase().includes(search);
+      const matchSt = !stFilter || r.status === stFilter;
+      return matchSearch && matchSt;
+    });
+
+    const tbody = document.getElementById('talent-tbody');
+    const empty = document.getElementById('talent-empty');
+    if (rows.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = rows.map(r => `
+      <tr class="clickable" onclick="openTalentPanel('${r.id}')">
+        <td class="td-name">${esc(r.full_name)}</td>
+        <td>${esc(r.country || '—')}</td>
+        <td>${esc((r.areas_of_expertise||'').slice(0,60))}${(r.areas_of_expertise||'').length>60?'…':''}</td>
+        <td><span class="status-badge ${statusClass(r.status)}">${esc(r.status || 'In pool')}</span></td>
+        <td class="td-sub">${fmtDate(r.submitted_at)}</td>
+      </tr>
+    `).join('');
+  }
+
+  function openTalentPanel(id) {
+    const t = allTalentPool.find(r => r.id == id);
+    if (!t) return;
+    currentTalent = t;
+    document.getElementById('talent-panel-name').textContent = t.full_name;
+
+    const isAdmin = currentMember.role === 'admin';
+
+    document.getElementById('talent-panel-body').innerHTML = `
+      <div class="panel-section">
+        <div class="panel-section-title">Candidate details</div>
+        <div class="info-grid">
+          <div class="info-item"><div class="info-key">Full name</div><div class="info-val">${esc(t.full_name)}</div></div>
+          <div class="info-item"><div class="info-key">Country</div><div class="info-val">${esc(t.country || '—')}</div></div>
+          <div class="info-item"><div class="info-key">Referred by</div><div class="info-val">${esc(t.referred_by || '—')}</div></div>
+          <div class="info-item"><div class="info-key">Submitted</div><div class="info-val">${fmtDate(t.submitted_at)}</div></div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-section-title">Background</div>
+        <div style="margin-bottom:.875rem;"><div class="info-key" style="margin-bottom:.375rem;">Education background</div><div class="qa-a">${esc(t.education_background || '—')}</div></div>
+        <div style="margin-bottom:.875rem;"><div class="info-key" style="margin-bottom:.375rem;">Areas of expertise</div><div class="qa-a">${esc(t.areas_of_expertise || '—')}</div></div>
+        <div style="margin-bottom:.875rem;"><div class="info-key" style="margin-bottom:.375rem;">Computer spec</div><div class="qa-a">${esc(t.computer_spec || '—')}</div></div>
+        <div><div class="info-key" style="margin-bottom:.375rem;">Additional experience</div><div class="qa-a">${esc(t.additional_experience || '—')}</div></div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-section-title">Documents</div>
+        <div style="display:flex; gap:.625rem; flex-wrap:wrap;">
+          ${t.efset_certificate_url ? `<a class="btn-resume" href="${esc(t.efset_certificate_url)}" target="_blank" rel="noopener">⬇ EFSET certificate</a>` : ''}
+          ${t.resume_path ? `<button class="btn-resume" onclick="downloadFile('resumes','${esc(t.resume_path)}')">⬇ Download resume</button>` : ''}
+          ${(!t.efset_certificate_url && !t.resume_path) ? '<p style="color:var(--fg2);font-size:.875rem;">No documents on file.</p>' : ''}
+        </div>
+      </div>
+
+      ${isAdmin ? `
+      <div class="panel-section">
+        <div class="panel-section-title">Status</div>
+        <div class="action-row">
+          <div class="action-field">
+            <select id="talent-action-status">
+              <option ${t.status==='In pool'?'selected':''}>In pool</option>
+              <option ${t.status==='Shortlisted'?'selected':''}>Shortlisted</option>
+              <option ${t.status==='Contacted'?'selected':''}>Contacted</option>
+              <option ${t.status==='Assigned'?'selected':''}>Assigned</option>
+              <option ${t.status==='Inactive'?'selected':''}>Inactive</option>
+            </select>
+          </div>
+          <div>
+            <button class="btn-save" id="talent-save-btn" onclick="saveTalent()">Save changes</button>
+            <p class="save-msg" id="talent-save-msg"></p>
+          </div>
+        </div>
+      </div>` : ''}
+    `;
+
+    document.getElementById('talent-panel-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeTalentPanel() {
+    document.getElementById('talent-panel-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+    currentTalent = null;
+  }
+
+  async function saveTalent() {
+    if (!currentTalent) return;
+    const saveBtn = document.getElementById('talent-save-btn');
+    const saveMsg = document.getElementById('talent-save-msg');
+    saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+    saveMsg.className = 'save-msg';
+
+    const status = document.getElementById('talent-action-status').value;
+    const { error } = await sb.from('talent_pool').update({ status }).eq('id', currentTalent.id);
+
+    if (error) {
+      saveMsg.textContent = 'Error saving: ' + error.message;
+      saveMsg.className = 'save-msg err show';
+    } else {
+      const idx = allTalentPool.findIndex(r => r.id === currentTalent.id);
+      if (idx !== -1) { allTalentPool[idx].status = status; currentTalent = allTalentPool[idx]; }
+      renderTalentPool();
+      saveMsg.textContent = 'Changes saved.';
+      saveMsg.className = 'save-msg ok show';
+    }
+    saveBtn.disabled = false; saveBtn.textContent = 'Save changes';
+    setTimeout(() => { saveMsg.className = 'save-msg'; }, 3000);
+  }
+
+  // ══════════════════════ FILE DOWNLOADS ══════════════════════
+  async function downloadFile(bucket, path) {
+    const { data, error } = await sb.storage.from(bucket).createSignedUrl(path, 60);
+    if (error) { alert('Could not generate download link: ' + error.message); return; }
+    window.open(data.signedUrl, '_blank');
+  }
+
+  // ══════════════════════ MEMBERS TAB ══════════════════════
+  async function loadTeamMembers() {
+    document.getElementById('members-loading').style.display = 'block';
+    document.getElementById('members-table-wrap').style.display = 'none';
+
+    const { data, error } = await sb.from('team_members').select('*').order('created_at', { ascending: false });
+    if (error) { console.error(error); return; }
+    allTeamMembers = data || [];
+    loadedTabs.members = true;
+
+    if (allProjects.length === 0 || allProjectMembers.length === 0) await loadProjectsRaw();
+
+    document.getElementById('members-loading').style.display = 'none';
+    document.getElementById('members-table-wrap').style.display = 'block';
+    renderTeamMembers();
+    populateReviewerFilter();
+  }
+
+  function renderTeamMembers() {
+    const table = document.getElementById('members-tbody');
+    table.innerHTML = allTeamMembers.map(member => {
+      const projectNames = allProjectMembers
+        .filter(pm => pm.team_member_id === member.id)
+        .map(pm => (allProjects.find(p => p.id === pm.project_id) || {}).name)
+        .filter(Boolean);
+      return `
+      <tr>
+        <td class="td-name">${esc(member.email)}</td>
+        <td>
+          <select onchange="changeRole('${member.id}', this.value)">
+            <option ${member.role==='admin'?'selected':''}>admin</option>
+            <option ${member.role==='reviewer'?'selected':''}>reviewer</option>
+            <option ${member.role==='viewer'?'selected':''}>viewer</option>
+          </select>
+        </td>
+        <td>${member.active ? '<span class="status-badge s-accepted">Active</span>' : '<span class="status-badge s-failed">Disabled</span>'}</td>
+        <td>${projectNames.length ? projectNames.map(n=>`<span class="exp-tag">${esc(n)}</span>`).join(' ') : '<span style="color:var(--fg2)">—</span>'}</td>
+        <td><button class="btn-secondary" onclick="toggleMember('${member.id}', ${member.active})">${member.active ? 'Disable' : 'Activate'}</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  async function changeRole(id, role) {
+    const { error } = await sb.from('team_members').update({ role }).eq('id', id);
+    if (error) { alert('Error updating role: ' + error.message); return; }
+    const idx = allTeamMembers.findIndex(m => m.id === id);
+    if (idx !== -1) allTeamMembers[idx].role = role;
+    populateReviewerFilter();
+  }
+
+  async function toggleMember(id, active) {
+    const { error } = await sb.from('team_members').update({ active: !active }).eq('id', id);
+    if (error) { alert('Error updating status: ' + error.message); return; }
+    const idx = allTeamMembers.findIndex(m => m.id === id);
+    if (idx !== -1) allTeamMembers[idx].active = !active;
+    renderTeamMembers();
+  }
+
+  function openInvite() { document.getElementById("invite-modal").classList.add('show'); }
+  function closeInvite() { document.getElementById("invite-modal").classList.remove('show'); }
+
+  async function sendInvite() {
+    const email = document.getElementById("invite-email").value;
+    const role = document.getElementById("invite-role").value;
+    const { data, error } = await sb.functions.invoke("invite-team-member", { body: { email, role } });
+    if (error) { alert(error.message); return; }
+    alert('Invitation sent to ' + email);
+    closeInvite();
+    document.getElementById('invite-email').value = '';
+    loadTeamMembers();
+  }
+
+  // ══════════════════════ ASSIGNMENTS TAB (Projects) ══════════════════════
+  async function loadProjectsRaw() {
+    const [projRes, pmRes] = await Promise.all([
+      sb.from('projects').select('*').order('created_at', { ascending: false }),
+      sb.from('project_members').select('*')
+    ]);
+    if (!projRes.error) allProjects = projRes.data || [];
+    if (!pmRes.error) allProjectMembers = pmRes.data || [];
+  }
+
+  async function loadProjects() {
+    document.getElementById('projects-loading').style.display = 'block';
+    await loadProjectsRaw();
+    if (allTeamMembers.length === 0) await loadTeamMembersForDropdowns();
+    document.getElementById('projects-loading').style.display = 'none';
+    loadedTabs.assignments = true;
+    renderProjects();
+  }
+
+  function renderProjects() {
+    const grid = document.getElementById('projects-grid');
+    if (allProjects.length === 0) {
+      grid.innerHTML = '<div class="empty-state">No projects yet. Create one to start assigning team members.</div>';
+      return;
+    }
+    grid.innerHTML = allProjects.map(p => {
+      const count = allProjectMembers.filter(pm => pm.project_id === p.id).length;
+      return `
+      <div class="project-card" onclick="openProjectModal('${p.id}')">
+        <div class="project-card-top">
+          <h3>${esc(p.name)}</h3>
+          <span class="status-badge ${projectStatusClass(p.status)}">${esc(p.status || 'Active')}</span>
+        </div>
+        <p>${esc(p.description || 'No description')}</p>
+        <div class="member-count">${count} member${count===1?'':'s'} assigned</div>
+      </div>`;
+    }).join('');
+  }
+
+  function openProjectNewModal() { document.getElementById('project-new-modal').classList.add('show'); }
+  function closeProjectNewModal() {
+    document.getElementById('project-new-modal').classList.remove('show');
+    document.getElementById('new-project-name').value = '';
+    document.getElementById('new-project-desc').value = '';
+  }
+
+  async function createProject() {
+    const name = document.getElementById('new-project-name').value.trim();
+    const description = document.getElementById('new-project-desc').value.trim() || null;
+    const status = document.getElementById('new-project-status').value;
+    if (!name) { alert('Project name is required.'); return; }
+
+    const { data, error } = await sb.from('projects').insert({ name, description, status }).select().single();
+    if (error) { alert('Error creating project: ' + error.message); return; }
+    allProjects.unshift(data);
+    renderProjects();
+    closeProjectNewModal();
+  }
+
+  function openProjectModal(id) {
+    if (!id) { openProjectNewModal(); return; }
+    currentProjectId = id;
+    const project = allProjects.find(p => p.id === id);
+    if (!project) return;
+
+    document.getElementById('project-manage-title').textContent = project.name;
+    document.getElementById('project-status-select').value = project.status || 'Active';
+    renderProjectMembers();
+
+    const assignedIds = allProjectMembers.filter(pm => pm.project_id === id).map(pm => pm.team_member_id);
+    const available = allTeamMembers.filter(m => m.active && !assignedIds.includes(m.id));
+    document.getElementById('add-member-select').innerHTML = available.length
+      ? available.map(m => `<option value="${m.id}">${esc(m.email)} (${m.role})</option>`).join('')
+      : '<option value="">No available members</option>';
+
+    document.getElementById('project-manage-modal').classList.add('show');
+  }
+
+  function closeProjectModal() {
+    document.getElementById('project-manage-modal').classList.remove('show');
+    currentProjectId = null;
+  }
+
+  function renderProjectMembers() {
+    const list = document.getElementById('project-members-list');
+    const members = allProjectMembers.filter(pm => pm.project_id === currentProjectId);
+    if (members.length === 0) {
+      list.innerHTML = '<p style="color:var(--fg2); font-size:.875rem;">No members assigned yet.</p>';
+      return;
+    }
+    list.innerHTML = members.map(pm => {
+      const member = allTeamMembers.find(m => m.id === pm.team_member_id);
+      return `
+      <div class="assign-row">
+        <div class="assign-info">
+          <div class="assign-name">${esc(member ? member.email : 'Unknown member')}</div>
+          <div class="assign-role">${esc(pm.role_on_project || (member ? member.role : ''))}</div>
+        </div>
+        <button class="btn-secondary" onclick="removeProjectMember('${pm.id}')">Remove</button>
+      </div>`;
+    }).join('');
+  }
+
+  async function addProjectMember() {
+    const memberId = document.getElementById('add-member-select').value;
+    const roleOnProject = document.getElementById('add-member-role').value.trim() || null;
+    if (!memberId) { alert('Select a member to add.'); return; }
+
+    const { data, error } = await sb.from('project_members')
+      .insert({ project_id: currentProjectId, team_member_id: memberId, role_on_project: roleOnProject })
+      .select().single();
+    if (error) { alert('Error adding member: ' + error.message); return; }
+
+    allProjectMembers.push(data);
+    document.getElementById('add-member-role').value = '';
+    renderProjectMembers();
+    renderProjects();
+    if (loadedTabs.members) renderTeamMembers();
+
+    const assignedIds = allProjectMembers.filter(pm => pm.project_id === currentProjectId).map(pm => pm.team_member_id);
+    const available = allTeamMembers.filter(m => m.active && !assignedIds.includes(m.id));
+    document.getElementById('add-member-select').innerHTML = available.length
+      ? available.map(m => `<option value="${m.id}">${esc(m.email)} (${m.role})</option>`).join('')
+      : '<option value="">No available members</option>';
+  }
+
+  async function removeProjectMember(pmId) {
+    const { error } = await sb.from('project_members').delete().eq('id', pmId);
+    if (error) { alert('Error removing member: ' + error.message); return; }
+    allProjectMembers = allProjectMembers.filter(pm => pm.id !== pmId);
+    renderProjectMembers();
+    renderProjects();
+    if (loadedTabs.members) renderTeamMembers();
+    openProjectModal(currentProjectId);
+  }
+
+  async function updateProjectStatus() {
+    const status = document.getElementById('project-status-select').value;
+    const { error } = await sb.from('projects').update({ status }).eq('id', currentProjectId);
+    if (error) { alert('Error updating status: ' + error.message); return; }
+    const idx = allProjects.findIndex(p => p.id === currentProjectId);
+    if (idx !== -1) allProjects[idx].status = status;
+    renderProjects();
+  }
+
+  // ══════════════════ ASSIGNMENTS TAB (Reviewer quick-assign) ══════════════════
+  function renderAssignApps() {
+    const tbody = document.getElementById('assign-apps-tbody');
+    const reviewers = allTeamMembers.filter(m => m.role === 'reviewer' || m.role === 'admin');
+    const rows = allApplications.filter(a => a.status !== 'Accepted' && a.status !== 'Failed');
+
+    tbody.innerHTML = rows.map(a => `
+      <tr class="clickable" onclick="openAppPanel('${a.id}')">
+        <td><div class="td-name">${esc(a.full_name)}</div><div class="td-email">${esc(a.email)}</div></td>
+        <td>${esc(a.position)}</td>
+        <td><span class="status-badge ${statusClass(a.status)}">${esc(a.status)}</span></td>
+        <td>
+          <select onclick="event.stopPropagation()" onchange="event.stopPropagation(); quickAssignReviewer('${a.id}', this.value)">
+            <option value="">Unassigned</option>
+            ${reviewers.map(r => `<option value="${r.id}" ${a.assigned_reviewer_id===r.id?'selected':''}>${esc(r.email)}</option>`).join('')}
+          </select>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  async function quickAssignReviewer(appId, reviewerId) {
+    const { error } = await sb.from('applications').update({ assigned_reviewer_id: reviewerId || null }).eq('id', appId);
+    if (error) { alert('Error assigning reviewer: ' + error.message); return; }
+    const idx = allApplications.findIndex(a => a.id === appId);
+    if (idx !== -1) allApplications[idx].assigned_reviewer_id = reviewerId || null;
+    if (document.getElementById('panel-applications').classList.contains('active')) renderApplications();
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────
+  init();
+</script>
+</body>
+</html>
