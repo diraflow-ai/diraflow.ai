@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Healthcare & Life Sciences — Diraflow</title>
+<meta name="description" content="Diraflow AI supports healthcare and life sciences with high-quality, trusted training data for medical AI applications.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="assets/logo.jpg">
+<style>
+:root {
+  --bg:#f7f6f2; --bg2:#eeecea; --fg:#111110; --fg2:#666460; --border:#d8d6d0; --card:#ffffff; --gold:#c8922a; --radius:0.75rem; --radius-lg:1.25rem;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sora',sans-serif;background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);color:var(--fg);line-height:1.7;-webkit-font-smoothing:antialiased;}
+a{color:inherit;text-decoration:none;}
+.container{max-width:1120px;margin:0 auto;padding:0 1.5rem;}
+nav.top{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);height:68px;display:flex;align-items:center;}
+nav.top .inner{max-width:1160px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;gap:1.25rem;width:100%;}
+.brand{display:inline-flex;align-items:center;gap:0.625rem;font-weight:700;color:var(--fg);white-space:nowrap;flex-shrink:0;}
+.nav-logo-img{width:36px;height:36px;border-radius:8px;object-fit:contain;}
+.hero{padding:5rem 0 3rem;background:linear-gradient(135deg,#f2efe7 0%,#f8f6ef 100%);border-bottom:1px solid var(--border);}
+.hero-grid{display:grid;grid-template-columns:1.05fr 0.95fr;gap:1.5rem;align-items:center;}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2.2rem,4vw,3rem);font-weight:400;line-height:1.1;letter-spacing:-0.03em;margin-bottom:0.8rem;}
+.hero h2{font-size:1.15rem;font-weight:600;color:var(--gold);margin-bottom:1rem;}
+.hero p{font-size:1rem;color:var(--fg2);max-width:760px;}
+.hero-card{background:rgba(255,255,255,0.88);border:1px solid var(--border);border-radius:1.4rem;padding:1.1rem;box-shadow:0 16px 40px rgba(0,0,0,0.06);backdrop-filter:blur(8px);}
+.hero-card img{width:100%;height:280px;object-fit:cover;border-radius:1rem;display:block;}
+.hero-card .meta{font-size:0.74rem;text-transform:uppercase;letter-spacing:0.16em;font-weight:700;color:var(--gold);margin:0.8rem 0 0.35rem;}
+.hero-card h3{font-size:1rem;font-weight:700;margin-bottom:0.4rem;}
+.hero-card p{font-size:0.9rem;color:var(--fg2);margin:0;}
+.content{padding:3rem 0 5rem;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;box-shadow:0 18px 45px rgba(0,0,0,0.05);}
+.card h3{font-size:1.2rem;font-weight:700;margin-bottom:1rem;}
+.card p{margin-bottom:1rem;color:var(--fg2);}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem;}
+.item{background:linear-gradient(135deg,#fefcf7 0%,var(--bg2) 100%);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;}
+.item h4{font-size:0.95rem;font-weight:700;margin-bottom:0.35rem;}
+.item p{margin:0;font-size:0.9rem;color:var(--fg2);}
+.highlight-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem;}
+.highlight-box{background:linear-gradient(135deg,rgba(200,146,42,0.12) 0%,#fff 100%);border:1px solid var(--border);border-radius:1rem;padding:1rem 1.1rem;}
+.highlight-box h4{font-size:0.96rem;font-weight:700;margin-bottom:0.35rem;}
+.highlight-box p{margin:0;font-size:0.9rem;color:var(--fg2);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:0.4rem;padding:0.7rem 1.25rem;border-radius:2rem;font-size:0.82rem;font-weight:700;font-family:'Sora',sans-serif;border:1.5px solid var(--border);background:transparent;color:var(--fg);transition:background 0.25s ease,border-color 0.25s ease,color 0.25s ease;margin-top:1.5rem;}
+.btn:hover{background:var(--gold);border-color:var(--gold);color:#fff;}
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:2rem 0;}
+footer p{font-size:0.85rem;color:var(--fg2);}
+@media(max-width:700px){.hero-grid,.grid,.highlight-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<nav class="top">
+  <div class="inner">
+    <a href="/" class="brand">
+      <img src="assets/logo.jpg" alt="Diraflow" class="nav-logo-img">
+      <span>Diraflow</span>
+    </a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <h1>Healthcare & Life Sciences</h1>
+      <h2>Enabling Smarter Healthcare Through Trusted Data</h2>
+      <p>Artificial intelligence is transforming healthcare by improving diagnostics, accelerating medical research, enhancing patient care, and streamlining clinical workflows. From medical imaging to intelligent document processing, AI solutions depend on highly accurate and consistently labeled datasets.</p>
+    </div>
+    <div class="hero-card">
+      <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1000&q=80&auto=format&fit=crop" alt="Healthcare AI data review">
+      <div class="meta">Specialist-first</div>
+      <h3>Clinical-grade data for sensitive, high-impact workflows</h3>
+      <p>Every data pipeline is shaped around the realities of patient care, research rigor, and regulatory context.</p>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container">
+    <div class="card">
+      <p>Diraflow AI partners with healthcare providers, research institutions, and medical technology companies to prepare reliable datasets that support the development of safe, effective, and trustworthy AI solutions. Our quality-first approach ensures every dataset meets the precision required for healthcare applications.</p>
+      <div class="highlight-row">
+        <div class="highlight-box">
+          <h4>Built for patient safety</h4>
+          <p>We blend medical expertise, clear QA rubrics, and documented review paths so the data reflects the stakes of real healthcare decisions.</p>
+        </div>
+        <div class="highlight-box">
+          <h4>Flexible for research and deployment</h4>
+          <p>Whether you are validating a pilot model or supporting a full-scale clinical workflow, the same quality discipline applies.</p>
+        </div>
+      </div>
+      <h3>How We Create Value</h3>
+      <div class="grid">
+        <div class="item">
+          <h4>Improve Diagnostic Accuracy</h4>
+          <p>We prepare high-quality annotated medical datasets that help AI models identify diseases, abnormalities, and clinical patterns with greater accuracy, supporting healthcare professionals in making informed decisions.</p>
+        </div>
+        <div class="item">
+          <h4>Accelerate Medical AI Innovation</h4>
+          <p>Our scalable annotation workflows reduce the time required to prepare healthcare datasets, enabling researchers and technology providers to bring innovative AI solutions to market faster.</p>
+        </div>
+        <div class="item">
+          <h4>Support Reliable Clinical Research</h4>
+          <p>We create structured, consistent datasets that enable researchers to train and evaluate AI models with confidence, improving the reliability of clinical studies and medical discoveries.</p>
+        </div>
+        <div class="item">
+          <h4>Ensure Exceptional Data Quality</h4>
+          <p>Every healthcare dataset undergoes rigorous quality assurance to maintain the consistency, precision, and reliability required for mission-critical medical applications.</p>
+        </div>
+        <div class="item">
+          <h4>Scale Securely with Growing Projects</h4>
+          <p>Whether supporting a pilot project or a large-scale healthcare initiative, our experienced teams can efficiently manage increasing data volumes while maintaining high standards of quality and confidentiality.</p>
+        </div>
+      </div>
+      <a href="industries.html" class="btn">← Back to industries</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>© 2026 Diraflow AI. All rights reserved.</p>
+  </div>
+</footer>
+</body>
+</html>

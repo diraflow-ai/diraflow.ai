@@ -253,6 +253,10 @@ nav.top ul li a:hover, nav.top ul li a.active {
   scroll-margin-top: 7rem;
   cursor: default;
 }
+.industry-card.expanded {
+  box-shadow: 0 18px 48px rgba(0,0,0,0.12);
+  border-color: rgba(200,146,42,0.35);
+}
 .industry-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 16px 48px rgba(0,0,0,0.09);
@@ -313,22 +317,71 @@ nav.top ul li a:hover, nav.top ul li a.active {
 }
 .industry-cta:hover { gap: 0.65rem; }
 
-/* ── Featured wide card ── */
-.industry-card-featured {
-  grid-column: span 2;
-  display: grid; grid-template-columns: 1fr 1fr;
+.industry-summary {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-height: 1.75;
+  max-height: calc(1.75rem * 3);
+  transition: max-height 0.25s ease, opacity 0.2s ease;
 }
-.industry-card-featured .industry-card-media { aspect-ratio: auto; min-height: 320px; }
-.industry-card-featured .industry-card-body {
-  padding: 2.25rem; display: flex;
-  flex-direction: column; justify-content: center;
+.industry-summary.open {
+  overflow: visible;
+  display: block;
+  -webkit-box-orient: unset;
+  -webkit-line-clamp: unset;
+  max-height: 500px;
 }
-@media (max-width: 900px) {
-  .industry-card-featured { grid-column: span 2; grid-template-columns: 1fr; }
-  .industry-card-featured .industry-card-media { min-height: 200px; }
+.industry-hidden {
+  display: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
-@media (max-width: 560px) {
-  .industry-card-featured { grid-column: span 1; grid-template-columns: 1fr; }
+.industry-hidden.open {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+.industry-toggle {
+  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1.25rem;
+  border-radius: 2rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: 'Sora', sans-serif;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, gap 0.2s ease;
+}
+.industry-toggle:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
+  gap: 0.65rem;
+}
+.industry-toggle .industry-toggle-arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.industry-toggle:hover .industry-toggle-arrow,
+.industry-toggle.open .industry-toggle-arrow { transform: translateX(3px); }
+.industry-card-dark .industry-toggle {
+  border-color: rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.85);
+}
+.industry-card-dark .industry-toggle:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
 }
 
 /* ── Dark accent card ── */
@@ -348,36 +401,10 @@ nav.top ul li a:hover, nav.top ul li a.active {
    SIDEBAR LAYOUT
 ════════════════════════════════ */
 .industries-layout {
-  display: grid; grid-template-columns: 220px 1fr;
-  gap: 3rem; align-items: start;
+  display: block;
 }
 @media (max-width: 860px) {
-  .industries-layout { grid-template-columns: 1fr; }
-  .industries-sidebar { display: none; }
-}
-.industries-sidebar { position: sticky; top: 6rem; }
-.industries-sidebar h4 {
-  font-size: 0.72rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--fg2); margin-bottom: 0.875rem;
-}
-.industries-sidebar nav a {
-  display: flex; align-items: center; gap: 0.6rem;
-  font-size: 0.82rem; color: var(--fg2); text-decoration: none;
-  padding: 0.45rem 0.75rem; border-left: 2px solid var(--border);
-  transition: color 0.2s, border-color 0.2s;
-  margin-bottom: 0.15rem; line-height: 1.4;
-}
-.industries-sidebar nav a:hover,
-.industries-sidebar nav a.active { color: var(--gold); border-left-color: var(--gold); }
-.sidebar-cta {
-  margin-top: 2rem; padding: 1rem;
-  background: var(--bg2); border-radius: 0.875rem;
-  border: 1px solid var(--border);
-}
-.sidebar-cta p {
-  font-size: 0.78rem; color: var(--fg2);
-  line-height: 1.6; margin-bottom: 0.75rem;
+  .industries-layout { display: block; }
 }
 
 /* ════════════════════════════════
@@ -604,52 +631,30 @@ footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 4
   <div class="container">
     <div class="industries-layout">
 
-      <!-- ── Sidebar ── -->
-      <aside class="industries-sidebar">
-        <h4>Jump to</h4>
-        <nav id="industries-nav">
-          <a href="#software"      class="active">💻 Software Engineering</a>
-          <a href="#healthcare">          🏥 Healthcare &amp; Life Sciences</a>
-          <a href="#legal">               ⚖️ Legal &amp; Compliance</a>
-          <a href="#finance">             💹 Finance &amp; Economics</a>
-          <a href="#cybersecurity">       🔐 Cybersecurity</a>
-          <a href="#multilingual">        🌐 Multilingual AI</a>
-          <a href="#education">           🎓 Education &amp; EdTech</a>
-          <a href="#autonomous">          🚗 Autonomous Systems</a>
-          <a href="#research">            🔬 AI Safety Research</a>
-          <a href="#custom">              ✦ Your Industry</a>
-        </nav>
-        <div class="sidebar-cta">
-          <p>Don't see your industry? We work across many more verticals.</p>
-          <a href="contact.html" class="btn btn-sm" style="width:100%; justify-content:center; display:flex;">Talk to us →</a>
-        </div>
-      </aside>
 
-      <!-- ── Industry cards ── -->
-      <div>
 
         <!-- ROW 1 -->
         <div class="industries-grid" style="margin-bottom:1.5rem;">
 
-          <!-- SOFTWARE ENGINEERING — Featured -->
-          <div class="industry-card industry-card-featured" id="software">
+          <!-- AUTOMOTIVE & MOBILITY -->
+          <div class="industry-card" id="automotive">
             <div class="industry-card-media">
-              <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80&auto=format&fit=crop" alt="Software engineering AI" loading="lazy">
+              <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80&auto=format&fit=crop" alt="Automotive and mobility AI" loading="lazy">
             </div>
             <div class="industry-card-body">
               <div class="industry-tags">
-                <span class="industry-tag">Most requested</span>
-                <span class="industry-tag">Agentic</span>
+                <span class="industry-tag">Vision</span>
+                <span class="industry-tag">Perception</span>
               </div>
-              <div class="industry-icon">💻</div>
-              <h3>Software Engineering AI</h3>
-              <p>Code generation, debugging, and software architecture tasks — built for the messy reality of real codebases. Multi-file environments, repository-level reasoning, and real dev workflows that actually test agent capability.</p>
+              <div class="industry-icon">🚗</div>
+              <h3>Automotive &amp; Mobility</h3>
+              <p>We build training data for ADAS, in-cabin monitoring, fleet intelligence, and autonomous mobility systems — with rich labels for road scenes, hazards, driver behavior, and vehicle decisions.</p>
               <ul class="industry-features">
-                <li>Multi-file, multi-language coding task environments (Python, TypeScript, Go, Rust, Java)</li>
-                <li>Repository-level reasoning — not just isolated functions</li>
-                <li>Debugging traces with deliberate bug injections and gold-standard fixes</li>
-                <li>Code review and refactoring datasets annotated by senior engineers</li>
-                <li>Test generation, documentation, and architecture decision datasets</li>
+                <li>Scene understanding and object detection for complex traffic environments</li>
+                <li>Multi-modal perception datasets combining vision, LiDAR, and telemetry</li>
+                <li>Edge-case annotation for weather, occlusion, and rare events</li>
+                <li>Driver monitoring and safety behavior classification</li>
+                <li>Fleet and mobility analytics datasets for operations teams</li>
               </ul>
               <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
             </div>
@@ -670,10 +675,34 @@ footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 4
               <p>Clinical reasoning, medical literature annotation, and drug discovery datasets — built with licensed medical professionals and researchers who understand the stakes of getting it wrong.</p>
               <ul class="industry-features">
                 <li>Clinical reasoning chains annotated by licensed physicians and nurses</li>
-                <li>Medical QA datasets across specialties: oncology, cardiology, neurology</li>
-                <li>Drug interaction and pharmacology annotation</li>
+                <li>Medical QA datasets across specialties like oncology, cardiology, and neurology</li>
+                <li>Drug interaction, pharmacology, and biomedical literature annotation</li>
                 <li>Medical imaging description and radiology report datasets</li>
                 <li>Patient communication and triage dialogue corpora</li>
+              </ul>
+              <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
+            </div>
+          </div>
+
+          <!-- RETAIL & E-COMMERCE -->
+          <div class="industry-card" id="retail">
+            <div class="industry-card-media">
+              <img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80&auto=format&fit=crop" alt="Retail and e-commerce AI" loading="lazy">
+            </div>
+            <div class="industry-card-body">
+              <div class="industry-tags">
+                <span class="industry-tag">Commerce</span>
+                <span class="industry-tag">Customer experience</span>
+              </div>
+              <div class="industry-icon">🛍️</div>
+              <h3>Retail &amp; E-commerce</h3>
+              <p>We support retail teams with product understanding, customer support data, merchandising insights, and search relevance training — helping AI systems better serve shoppers and operators.</p>
+              <ul class="industry-features">
+                <li>Product categorisation and attribute extraction datasets</li>
+                <li>Search relevance and recommendation tuning data</li>
+                <li>Customer support and returns reasoning conversations</li>
+                <li>Pricing, inventory, and merchandising decision datasets</li>
+                <li>Personalisation and sentiment annotation for shopper journeys</li>
               </ul>
               <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
             </div>
@@ -684,73 +713,73 @@ footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 4
         <!-- ROW 2 -->
         <div class="industries-grid" style="margin-bottom:1.5rem;">
 
-          <!-- LEGAL -->
-          <div class="industry-card" id="legal">
+          <!-- AGRICULTURE -->
+          <div class="industry-card" id="agriculture">
             <div class="industry-card-media">
-              <img src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=700&q=80&auto=format&fit=crop" alt="Legal AI data" loading="lazy">
+              <img src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=700&q=80&auto=format&fit=crop" alt="Agriculture AI data" loading="lazy">
             </div>
             <div class="industry-card-body">
               <div class="industry-tags">
-                <span class="industry-tag">Multi-jurisdiction</span>
-                <span class="industry-tag">Expert-verified</span>
+                <span class="industry-tag">Field data</span>
+                <span class="industry-tag">Vision</span>
               </div>
-              <div class="industry-icon">⚖️</div>
-              <h3>Legal &amp; Compliance</h3>
-              <p>Contract analysis, regulatory classification, and legal reasoning tasks annotated by qualified lawyers across multiple jurisdictions. We understand that legal AI needs precision, not approximation.</p>
+              <div class="industry-icon">🌾</div>
+              <h3>Agriculture</h3>
+              <p>We create datasets for crop monitoring, precision farming, pest detection, and field operations — helping AI systems interpret agricultural environments with high accuracy.</p>
               <ul class="industry-features">
-                <li>Contract clause extraction and analysis datasets</li>
-                <li>Regulatory compliance classification across US, EU, and African jurisdictions</li>
-                <li>Case law reasoning and precedent matching</li>
-                <li>Legal document summarisation with expert verification</li>
-                <li>Due diligence checklists and M&amp;A document review tasks</li>
+                <li>Crop health and disease classification datasets</li>
+                <li>Satellite and drone imagery annotation for field analysis</li>
+                <li>Weed, soil, and irrigation condition labelling</li>
+                <li>Harvest and farm operation workflow annotation</li>
+                <li>Supply chain and yield prediction support data</li>
               </ul>
               <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
             </div>
           </div>
 
-          <!-- FINANCE -->
-          <div class="industry-card" id="finance">
+          <!-- LOGISTICS & SUPPLY CHAIN -->
+          <div class="industry-card" id="logistics">
             <div class="industry-card-media">
-              <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=700&q=80&auto=format&fit=crop" alt="Finance AI data" loading="lazy">
+              <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=700&q=80&auto=format&fit=crop" alt="Logistics and supply chain AI data" loading="lazy">
             </div>
             <div class="industry-card-body">
               <div class="industry-tags">
-                <span class="industry-tag">CFA-level</span>
-                <span class="industry-tag">Quantitative</span>
+                <span class="industry-tag">Operations</span>
+                <span class="industry-tag">Planning</span>
               </div>
-              <div class="industry-icon">💹</div>
-              <h3>Finance &amp; Economics</h3>
-              <p>Financial analysis, market reasoning, and economic modelling datasets built by contributors with CFA, FRM credentials and real-world trading and investment experience. Built for precision at every decimal place.</p>
+              <div class="industry-icon">🚚</div>
+              <h3>Logistics &amp; Supply Chain</h3>
+              <p>From warehouse operations to route planning and shipment coordination, we build data that helps logistics AI reason about moving goods more reliably across complex networks.</p>
               <ul class="industry-features">
-                <li>Financial statement analysis and earnings interpretation datasets</li>
-                <li>Market sentiment annotation and macro-economic reasoning</li>
-                <li>Risk assessment and scenario analysis tasks</li>
-                <li>Investment thesis generation and critique datasets</li>
-                <li>Regulatory filing (10-K, 10-Q, prospectus) annotation</li>
+                <li>Route optimisation and delivery planning datasets</li>
+                <li>Warehouse task and asset tracking annotation</li>
+                <li>Demand forecasting and inventory decision data</li>
+                <li>Freight document classification and exception handling</li>
+                <li>Operational incident and escalation reasoning corpora</li>
               </ul>
               <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
             </div>
           </div>
 
-          <!-- CYBERSECURITY -->
-          <div class="industry-card" id="cybersecurity">
+          <!-- MANUFACTURING -->
+          <div class="industry-card" id="manufacturing">
             <div class="industry-card-media">
-              <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=700&q=80&auto=format&fit=crop" alt="Cybersecurity AI data" loading="lazy">
+              <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=700&q=80&auto=format&fit=crop" alt="Manufacturing AI data" loading="lazy">
             </div>
             <div class="industry-card-body">
               <div class="industry-tags">
-                <span class="industry-tag">Red-team</span>
-                <span class="industry-tag">Threat intel</span>
+                <span class="industry-tag">Industrial</span>
+                <span class="industry-tag">Quality</span>
               </div>
-              <div class="industry-icon">🔐</div>
-              <h3>Cybersecurity</h3>
-              <p>Threat detection, vulnerability analysis, and adversarial security datasets — with red-team expertise built in from day one. We help your models understand attacks so they can defend against them.</p>
+              <div class="industry-icon">🏭</div>
+              <h3>Manufacturing</h3>
+              <p>We support industrial AI with quality inspection, predictive maintenance, robotics, and process documentation data that mirrors the realities of factory floors and production lines.</p>
               <ul class="industry-features">
-                <li>CVE analysis and vulnerability description datasets</li>
-                <li>Phishing and social engineering detection training data</li>
-                <li>Malware behaviour description and classification</li>
-                <li>Penetration testing scenario datasets with expert annotations</li>
-                <li>Security incident response reasoning chains</li>
+                <li>Visual defect detection and quality assurance datasets</li>
+                <li>Predictive maintenance and failure mode annotation</li>
+                <li>Robotics perception and assembly workflow data</li>
+                <li>Standard operating procedure and SOP reasoning corpora</li>
+                <li>Safety compliance and incident review datasets</li>
               </ul>
               <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
             </div>
@@ -761,73 +790,73 @@ footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 4
         <!-- ROW 3 -->
         <div class="industries-grid" style="margin-bottom:1.5rem;">
 
-          <!-- MULTILINGUAL -->
-          <div class="industry-card" id="multilingual">
+          <!-- FINANCIAL SERVICES & INSURANCE -->
+          <div class="industry-card" id="finance">
             <div class="industry-card-media">
-              <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=700&q=80&auto=format&fit=crop" alt="Multilingual AI" loading="lazy">
+              <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=700&q=80&auto=format&fit=crop" alt="Financial services AI" loading="lazy">
             </div>
             <div class="industry-card-body">
               <div class="industry-tags">
-                <span class="industry-tag">30+ languages</span>
-                <span class="industry-tag">Native speakers</span>
+                <span class="industry-tag">Compliance</span>
+                <span class="industry-tag">Risk</span>
               </div>
-              <div class="industry-icon">🌐</div>
-              <h3>Multilingual &amp; Cross-cultural AI</h3>
-              <p>High-quality data in 30+ languages — never machine-translated. Native-speaker contributors with deep cultural fluency for every target language, including low-resource and underrepresented languages.</p>
+              <div class="industry-icon">💳</div>
+              <h3>Financial Services &amp; Insurance</h3>
+              <p>We create high-precision data for fraud detection, underwriting, claims handling, and compliance workflows — giving financial AI systems the context they need to make defensible decisions.</p>
               <ul class="industry-features">
-                <li>Original human-generated content — zero MT post-edit</li>
-                <li>Coverage: English, French, Spanish, Arabic, Swahili, Amharic, Hindi, Mandarin, Japanese, Korean + more</li>
-                <li>Low-resource language support via in-region partnerships</li>
-                <li>Cultural sensitivity review for safety and localisation</li>
-                <li>Cross-lingual preference annotation and translation quality evaluation</li>
+                <li>Fraud, anomaly, and claims triage annotation</li>
+                <li>Underwriting and policy document understanding datasets</li>
+                <li>Risk assessment and scenario reasoning data</li>
+                <li>Compliance and regulatory document classification</li>
+                <li>Customer support and dispute resolution dialogue data</li>
               </ul>
               <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
             </div>
           </div>
 
-          <!-- EDUCATION -->
-          <div class="industry-card" id="education">
+          <!-- GOVERNMENT & SMART CITIES -->
+          <div class="industry-card" id="government">
             <div class="industry-card-media">
-              <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=700&q=80&auto=format&fit=crop" alt="Education AI data" loading="lazy">
+              <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=700&q=80&auto=format&fit=crop" alt="Government and smart cities AI" loading="lazy">
             </div>
             <div class="industry-card-body">
               <div class="industry-tags">
-                <span class="industry-tag">K-12 to PhD</span>
-                <span class="industry-tag">Curriculum-aligned</span>
+                <span class="industry-tag">Public sector</span>
+                <span class="industry-tag">Urban systems</span>
               </div>
-              <div class="industry-icon">🎓</div>
-              <h3>Education &amp; EdTech</h3>
-              <p>Curriculum-aligned STEM datasets, tutoring dialogue corpora, and adaptive learning feedback data for AI-powered education platforms. Built by teachers, tutors, and subject-matter experts across every level.</p>
+              <div class="industry-icon">🏛️</div>
+              <h3>Government &amp; Smart Cities</h3>
+              <p>We support public-sector AI with civic service data, policy understanding, infrastructure monitoring, and urban planning datasets tuned for real governance needs.</p>
               <ul class="industry-features">
-                <li>Socratic tutoring dialogue datasets across subjects and grade levels</li>
-                <li>Misconception identification and correction datasets</li>
-                <li>Formative assessment question generation with difficulty calibration</li>
-                <li>Essay and writing feedback annotation by qualified educators</li>
-                <li>Adaptive learning path reasoning datasets</li>
+                <li>Public service and permit processing datasets</li>
+                <li>Civic document classification and policy reasoning</li>
+                <li>Urban mobility and infrastructure monitoring data</li>
+                <li>Resident communication and multilingual public support data</li>
+                <li>Safety, planning, and emergency response annotation</li>
               </ul>
               <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
             </div>
           </div>
 
-          <!-- AUTONOMOUS SYSTEMS -->
-          <div class="industry-card" id="autonomous">
+          <!-- SECURITY & SURVEILLANCE -->
+          <div class="industry-card" id="security">
             <div class="industry-card-media">
-              <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80&auto=format&fit=crop" alt="Autonomous systems AI" loading="lazy">
+              <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80&auto=format&fit=crop" alt="Security and surveillance AI" loading="lazy">
             </div>
             <div class="industry-card-body">
               <div class="industry-tags">
-                <span class="industry-tag">LiDAR</span>
-                <span class="industry-tag">Perception</span>
+                <span class="industry-tag">Safety</span>
+                <span class="industry-tag">Monitoring</span>
               </div>
-              <div class="industry-icon">🚗</div>
-              <h3>Autonomous Systems</h3>
-              <p>LiDAR perception pipelines, sensor fusion annotation, and edge-case scenario datasets for autonomous vehicles, robotics, and drone systems. We handle the long tail of rare scenarios that matter most for safety.</p>
+              <div class="industry-icon">🔒</div>
+              <h3>Security &amp; Surveillance</h3>
+              <p>We deliver data for threat detection, surveillance review, incident triage, and access-control systems — designed for high-sensitivity environments where precision is critical.</p>
               <ul class="industry-features">
-                <li>LiDAR point cloud annotation and object segmentation</li>
-                <li>Sensor fusion datasets combining camera, radar, and LiDAR</li>
-                <li>Edge-case scenario generation: adverse weather, occlusion, novel objects</li>
-                <li>Trajectory prediction and behaviour annotation</li>
-                <li>Simulation-to-real domain adaptation datasets</li>
+                <li>Video and image annotation for threat and anomaly detection</li>
+                <li>Incident review and escalation classification datasets</li>
+                <li>Access-control and person-of-interest detection labels</li>
+                <li>Safety event and policy-violation reasoning data</li>
+                <li>Operational monitoring datasets for command centers</li>
               </ul>
               <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
             </div>
@@ -838,48 +867,25 @@ footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 4
         <!-- ROW 4 -->
         <div class="industries-grid">
 
-          <!-- AI SAFETY RESEARCH -->
-          <div class="industry-card industry-card-featured" id="research">
+          <!-- MEDIA & ENTERTAINMENT — Dark card -->
+          <div class="industry-card industry-card-dark" id="media">
             <div class="industry-card-media">
-              <img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80&auto=format&fit=crop" alt="AI safety research" loading="lazy">
+              <img src="https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=700&q=80&auto=format&fit=crop" alt="Media and entertainment AI data" loading="lazy">
             </div>
             <div class="industry-card-body">
               <div class="industry-tags">
-                <span class="industry-tag">Safety-critical</span>
-                <span class="industry-tag">Alignment</span>
+                <span class="industry-tag">Content</span>
+                <span class="industry-tag">Engagement</span>
               </div>
-              <div class="industry-icon">🔬</div>
-              <h3>AI Safety Research</h3>
-              <p>Interpretability datasets, alignment probes, and adversarial evaluation suites built in close collaboration with safety research teams. We understand that safety data requires a different mindset — and different annotators — than standard AI data work.</p>
+              <div class="industry-icon">🎬</div>
+              <h3>Media &amp; Entertainment</h3>
+              <p style="color:rgba(255,255,255,0.6);">We help media companies improve discovery, moderation, localisation, and audience experience with data that reflects how content is actually consumed and judged across platforms.</p>
               <ul class="industry-features">
-                <li>Adversarial prompt datasets with harm severity taxonomy</li>
-                <li>Human preference data for alignment research with rationale capture</li>
-                <li>Interpretability probing datasets across model architectures</li>
-                <li>Sycophancy, deception, and manipulation detection datasets</li>
-                <li>Red-teaming corpora with structured creative variation</li>
-              </ul>
-              <button class="industry-cta" onclick="window.location='contact.html'">Get a quote →</button>
-            </div>
-          </div>
-
-          <!-- YOUR INDUSTRY — Dark card -->
-          <div class="industry-card industry-card-dark" id="custom">
-            <div class="industry-card-media">
-              <img src="https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=700&q=80&auto=format&fit=crop" alt="Custom industry AI data" loading="lazy">
-            </div>
-            <div class="industry-card-body">
-              <div class="industry-tags">
-                <span class="industry-tag">Any domain</span>
-                <span class="industry-tag">Bespoke</span>
-              </div>
-              <div class="industry-icon">✦</div>
-              <h3>Your Industry</h3>
-              <p style="color:rgba(255,255,255,0.6);">Don't see your vertical listed? We work across many more domains — from insurance and real estate to agriculture, energy, and government. Our contributor network covers a remarkable breadth of specialisms.</p>
-              <ul class="industry-features">
-                <li>Domain-specific contributor recruitment for any specialisation</li>
-                <li>Custom taxonomy design for your unique annotation requirements</li>
-                <li>Pilot projects to validate fit before full-scale production</li>
-                <li>Bespoke QA frameworks tailored to your domain's quality standards</li>
+                <li>Content moderation and safety annotation for user-generated media</li>
+                <li>Recommendation and personalisation training datasets</li>
+                <li>Localization, captioning, and cultural context review</li>
+                <li>Audience sentiment and engagement quality data</li>
+                <li>Creator tooling and metadata enrichment support</li>
               </ul>
               <button class="industry-cta" onclick="window.location='contact.html'">Start a conversation →</button>
               <p style="margin-top:0.875rem; font-size:0.78rem; color:rgba(255,255,255,0.4);">
@@ -1125,6 +1131,54 @@ footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 4
       }
     });
   });
+
+  function initIndustrySummaries() {
+    document.querySelectorAll('.industry-card-body').forEach(function(body) {
+      const summary = body.querySelector('p');
+      if (!summary) return;
+
+      const featureList = body.querySelector('.industry-features');
+      const card = body.closest('.industry-card');
+      summary.classList.add('industry-summary');
+      if (featureList) featureList.classList.add('industry-hidden');
+
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'industry-toggle';
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.innerHTML = 'See more details <span class="industry-toggle-arrow">→</span>';
+
+      toggle.addEventListener('click', function() {
+        if (card && card.id === 'healthcare') {
+          window.location.href = 'healthcare-life-sciences.html';
+          return;
+        }
+
+        if (card && card.id) {
+          window.location.href = 'industry-detail.html?industry=' + encodeURIComponent(card.id);
+          return;
+        }
+
+        const isOpen = summary.classList.toggle('open');
+        if (featureList) featureList.classList.toggle('open', isOpen);
+        if (card) card.classList.toggle('expanded', isOpen);
+        toggle.classList.toggle('open', isOpen);
+        toggle.innerHTML = isOpen
+          ? 'Show less details <span class="industry-toggle-arrow">↑</span>'
+          : 'See more details <span class="industry-toggle-arrow">→</span>';
+        toggle.setAttribute('aria-expanded', String(isOpen));
+      });
+
+      const ctaButton = body.querySelector('.industry-cta');
+      if (ctaButton) {
+        body.insertBefore(toggle, ctaButton);
+      } else {
+        body.appendChild(toggle);
+      }
+    });
+  }
+
+  initIndustrySummaries();
 </script>
 
 </body>
