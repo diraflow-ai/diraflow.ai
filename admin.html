@@ -2189,12 +2189,13 @@ renderTalentPool();
     `;
 
     const isAdmin = currentMember.role === 'admin';
+    const canEdit = isAdmin || (currentMember.role === 'reviewer' && t.owner_id === currentUser.id);
     const skills = getCandidateSkills(t);
     const expertise = toList(t.areas_of_expertise);
 
     const tabs = ['personal','employment','education','skills','documents','timeline'];
-    if (isAdmin) tabs.push('admin');
-    const tabLabels = { personal:'Personal', employment:'Employment', education:'Education', skills:'Skills', documents:'Documents', timeline:'Timeline', admin:'Admin' };
+    if (canEdit) tabs.push('admin');
+    const tabLabels = { personal:'Personal', employment:'Employment', education:'Education', skills:'Skills', documents:'Documents', timeline:'Timeline', admin: isAdmin ? 'Admin' : 'Review' };
     document.getElementById('talent-profile-tabs').innerHTML = tabs.map((tb,i) =>
       `<button class="profile-tab-btn ${i===0?'active':''}" id="talent-tabbtn-${tb}" onclick="switchProfileTab('talent','${tb}')">${tabLabels[tb]}</button>`
     ).join('');
@@ -2280,12 +2281,13 @@ renderTalentPool();
         </div>
       </div>
 
-      ${isAdmin ? `
+      ${canEdit ? `
       <div class="profile-tab-content" id="talent-tab-admin">
         <div class="profile-card panel-section">
+          <div class="panel-section-title">${isAdmin ? 'Admin actions' : 'Review this candidate'}</div>
           <div class="action-row">
             <div class="action-field">
-              <label>Status</label>
+              <label>Move to stage</label>
               <select id="talent-action-status">
                 <option ${t.status==='In pool'?'selected':''}>In pool</option>
                 <option ${t.status==='Shortlisted'?'selected':''}>Shortlisted</option>
@@ -2299,16 +2301,21 @@ renderTalentPool();
               ${starRatingHtml('talent-score', t.reviewer_score, true)}
             </div>
             <div class="action-field">
-              <label>Reviewer notes</label>
-              <textarea id="talent-action-notes" placeholder="Internal notes visible only to the team…">${esc(t.reviewer_notes || '')}</textarea>
+              <label>Reviewer comments</label>
+              <textarea id="talent-action-notes" placeholder="Notes on this candidate, visible to the team…">${esc(t.reviewer_notes || '')}</textarea>
             </div>
+            ${isAdmin ? `
             <div class="action-field">
               <label>Owner</label>
               <select id="talent-action-owner">
                 <option value="">Unassigned</option>
                 ${reviewerOptions}
               </select>
-            </div>
+            </div>` : `
+            <div class="action-field">
+              <label>Owner</label>
+              <div class="info-val">${esc(reviewerLabel(t.owner_id))}</div>
+            </div>`}
             <div>
               <button class="btn-save" id="talent-save-btn" onclick="saveTalent()">Save changes</button>
               <p class="save-msg" id="talent-save-msg"></p>
@@ -2335,6 +2342,10 @@ renderTalentPool();
     saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
     saveMsg.className = 'save-msg';
 
+    const previousStatus = currentTalent.status;
+    const candidateName = currentTalent.full_name;
+    const talentId = currentTalent.id;
+
     const status = document.getElementById('talent-action-status').value;
     const scoreEl = document.getElementById('star-rating-talent-score');
     const reviewer_score = scoreEl ? parseInt(scoreEl.dataset.value || '0') || null : null;
@@ -2354,6 +2365,11 @@ renderTalentPool();
       const idx = allTalentPool.findIndex(r => r.id === currentTalent.id);
       if (idx !== -1) { allTalentPool[idx] = { ...allTalentPool[idx], ...update }; currentTalent = allTalentPool[idx]; }
       updateTalentStats(); renderTalentPool();
+
+      if (currentMember.role !== 'admin' && status !== previousStatus) {
+        notifyAdminsReviewCompleted(candidateName, 'talent_pool', talentId);
+      }
+
       saveMsg.textContent = 'Changes saved.';
       saveMsg.className = 'save-msg ok show';
     }
