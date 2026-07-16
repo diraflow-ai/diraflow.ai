@@ -11,20 +11,31 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  /* ══════════════ DESIGN TOKENS — solid colors only, no gradients/glassmorphism ══════════════ */
   :root {
-    --bg:       #0f0f0f;
-    --bg2:      #161616;
-    --card:     #1c1c1c;
-    --border:   #2a2a2a;
-    --fg:       #f0f0f0;
-    --fg2:      #aaaaaa;
-    --subtle:   #666;
-    --gold:     #c8922a;
-    --gold-dim: rgba(200,146,42,.15);
-    --green:    #2e8b57;
-    --red:      #c0392b;
-    --radius:   10px;
-    --radius-lg:14px;
+    --bg:        #F3F4F6;
+    --bg2:       #EEF0F3;
+    --card:      #FFFFFF;
+    --border:    #E5E7EB;
+    --sidebar:   #111827;
+    --fg:        #111827;
+    --fg2:       #6B7280;
+    --subtle:    #9CA3AF;
+
+    --primary:      #2563EB;
+    --primary-dim:  #E8EFFD;
+    --green:        #10B981;
+    --green-dim:    #E4F7F0;
+    --orange:       #F59E0B;
+    --orange-dim:   #FEF3DE;
+    --red:          #EF4444;
+    --red-dim:      #FDECEC;
+    --purple:       #7C3AED;
+    --purple-dim:   #F1E9FD;
+    --purple2:      #8B5CF6;
+
+    --radius:    10px;
+    --radius-lg: 14px;
   }
 
   body {
@@ -36,47 +47,27 @@
     line-height: 1.6;
   }
 
-  /* ── LOGIN SCREEN ── */
-  #login-screen {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 2rem;
-    overflow: hidden;
-    background:
-      linear-gradient(rgba(255,255,255,.25), rgba(255,255,255,.35)),
-      url("/assets/AutonomousTrucks-970.jpg");
-    background-size: cover;
-    background-position: center;
+  /* ── AUTH SCREENS (login / signup / forgot / reset / verify) ── */
+  #login-screen, #signup-screen, #forgot-screen, #reset-screen, #verify-screen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 2rem; background: var(--bg);
   }
-  #login-screen::before {
-    content:""; position:absolute; inset:0;
-    background:
-      radial-gradient(circle at 20% 30%, rgba(200,146,42,.25), transparent 35%),
-      radial-gradient(circle at 80% 70%, rgba(46,139,87,.18), transparent 35%);
-    animation: ambientMove 12s infinite alternate;
-  }
-  @keyframes ambientMove { from { transform:translateY(0px); } to { transform:translateY(-15px); } }
+  #signup-screen, #forgot-screen, #reset-screen, #verify-screen { display: none; }
 
-  .login-card {
-    position:relative; z-index:2;
-    background: rgba(255,255,255,.88);
-    color:#111;
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,.6);
-    box-shadow: 0 25px 80px rgba(0,0,0,.35);
-    border-radius:20px;
-    padding:3rem;
-    width:100%;
-    max-width:420px;
+  .login-card, .verify-card {
+    background: var(--card); color: var(--fg);
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(17,24,39,.06);
+    border-radius: 16px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 420px;
   }
-  .login-logo { display: flex; align-items: center; gap: .625rem; margin-bottom: 2rem; }
-  .login-logo img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; }
-  .login-logo span { font-weight: 700; font-size: 1rem; }
-  .login-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--gold); font-weight: 600; margin-bottom: 1.25rem; }
-  .login-card h2 { font-size: 1.375rem; font-weight: 700; margin-bottom: 1.75rem; }
+  .login-logo, .verify-logo { display: flex; align-items: center; gap: .625rem; margin-bottom: 2rem; }
+  .login-logo img, .verify-logo img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; }
+  .login-logo span, .verify-logo span { font-weight: 700; font-size: 1rem; }
+  .login-label, .verify-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--primary); font-weight: 700; margin-bottom: 1.25rem; }
+  .login-card h2, .verify-card h2 { font-size: 1.375rem; font-weight: 700; margin-bottom: 1.75rem; }
   .field { display: flex; flex-direction: column; gap: .375rem; margin-bottom: 1rem; }
   .field label { font-size: .8125rem; font-weight: 600; color: var(--fg2); }
   .field input, .field select {
@@ -84,74 +75,48 @@
     padding: .625rem .875rem; font-family: inherit; font-size: .9375rem; color: var(--fg);
     transition: border-color .2s;
   }
-  .field input:focus, .field select:focus { outline: none; border-color: var(--gold); }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--primary); }
   .btn-primary {
-    width: 100%; background: var(--gold); color: #fff; border: none; border-radius: var(--radius);
+    width: 100%; background: var(--primary); color: #fff; border: none; border-radius: var(--radius);
     padding: .75rem; font-family: inherit; font-size: .9375rem; font-weight: 600; cursor: pointer;
-    margin-top: .5rem; transition: opacity .2s;
+    margin-top: .5rem; transition: background-color .15s;
   }
-  .btn-primary:hover { opacity: .88; }
+  .btn-primary:hover { background: #1d4ed8; }
   .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
-  .login-err, .verify-error { color: #e74c3c; font-size: .8125rem; margin-top: .75rem; display: none; }
+  .login-err, .verify-error { color: var(--red); font-size: .8125rem; margin-top: .75rem; display: none; }
   .login-err.show, .verify-error.show { display: block; }
-  .login-ok { color: #2e8b57; font-size: .8125rem; margin-top: .75rem; display: none; }
+  .login-ok { color: var(--green); font-size: .8125rem; margin-top: .75rem; display: none; }
   .login-ok.show { display: block; }
 
   .auth-links { display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; font-size: .8125rem; }
-  .auth-links a { color: var(--gold); text-decoration: none; font-weight: 600; cursor: pointer; }
+  .auth-links a { color: var(--primary); text-decoration: none; font-weight: 600; cursor: pointer; }
   .auth-links a:hover { text-decoration: underline; }
 
-  /* ── VERIFY SCREEN ── */
-  #verify-screen {
-    display:none; align-items:center; justify-content:center; min-height:100vh; padding:2rem;
-    background: linear-gradient(rgba(255,255,255,.65), rgba(255,255,255,.65)), url('/assets/autonomus.jpeg');
-    background-size:cover; background-position:center;
-  }
-  .verify-card {
-    background:rgba(255,255,255,.92); backdrop-filter:blur(12px);
-    border:1px solid rgba(255,255,255,.5); border-radius:14px; padding:2.5rem;
-    width:100%; max-width:420px; box-shadow:0 20px 50px rgba(0,0,0,.15);
-  }
-  .verify-logo { display:flex; align-items:center; gap:.625rem; margin-bottom:2rem; }
-  .verify-logo img { width:32px; height:32px; border-radius:6px; }
-  .verify-logo span { font-weight:700; font-size:1rem; }
-  .verify-label { font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:var(--gold); font-weight:600; margin-bottom:1.25rem; }
-  .verify-card h2 { font-size:1.375rem; font-weight:700; margin-bottom:1.75rem; }
   .verify-card input {
-    background:#111; border:1px solid #333; border-radius:10px; padding:.75rem;
-    font-family:inherit; font-size:1rem; color:white; width:100%;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: .75rem;
+    font-family: inherit; font-size: 1rem; color: var(--fg); width: 100%;
   }
-  .verify-card input:focus { outline:none; border-color:var(--gold); }
-
-  /* ── SIGNUP / FORGOT / RESET SCREENS (share login-screen look) ── */
-  #signup-screen, #forgot-screen, #reset-screen {
-    display:none; position:relative; align-items:center; justify-content:center;
-    min-height:100vh; padding:2rem; overflow:hidden;
-    background:
-      linear-gradient(rgba(255,255,255,.25), rgba(255,255,255,.35)),
-      url("/assets/AutonomousTrucks-970.jpg");
-    background-size:cover; background-position:center;
-  }
+  .verify-card input:focus { outline: none; border-color: var(--primary); }
 
   /* ── ADMIN SHELL ── */
   #admin-shell { display: none; min-height: 100vh; }
 
   .topbar {
     position: sticky; top: 0; z-index: 50;
-    background: var(--bg); border-bottom: 1px solid var(--border);
+    background: var(--card); border-bottom: 1px solid var(--border);
     padding: 0 1.5rem; height: 56px;
     display: flex; align-items: center; justify-content: space-between;
   }
   .topbar-left { display: flex; align-items: center; gap: .75rem; }
   .topbar-left img { width: 28px; height: 28px; border-radius: 6px; object-fit: cover; }
   .topbar-title { font-weight: 700; font-size: .9375rem; }
-  .topbar-badge, .role-badge {
-    background: var(--gold-dim); color: var(--gold);
+  .role-badge {
+    background: var(--primary-dim); color: var(--primary);
     font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
     padding: .2rem .5rem; border-radius: 4px;
   }
-  .role-badge.reviewer { background: rgba(100,100,255,.15); color: #8888ff; }
-  .role-badge.viewer   { background: rgba(150,150,150,.15); color: #bbb; }
+  .role-badge.reviewer { background: var(--purple-dim); color: var(--purple); }
+  .role-badge.viewer   { background: var(--bg2); color: var(--fg2); }
   .topbar-right { display: flex; align-items: center; gap: 1rem; }
   .team-email { font-size: .8125rem; color: var(--fg2); }
   .btn-logout {
@@ -163,13 +128,13 @@
 
   .avatar-btn {
     width: 30px; height: 30px; border-radius: 50%;
-    background: var(--gold-dim); color: var(--gold);
+    background: var(--primary-dim); color: var(--primary);
     border: 1px solid var(--border); font-family: inherit;
     font-size: .75rem; font-weight: 700; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: border-color .2s;
   }
-  .avatar-btn:hover { border-color: var(--gold); }
+  .avatar-btn:hover { border-color: var(--primary); }
 
   .profile-section { margin-bottom: 1.5rem; }
   .profile-section:last-child { margin-bottom: 0; }
@@ -177,7 +142,7 @@
 
   /* Tabs */
   .tabs-bar {
-    display:flex; gap:.25rem; padding:0 1.5rem; background:var(--bg);
+    display:flex; gap:.25rem; padding:0 1.5rem; background:var(--card);
     border-bottom:1px solid var(--border); position:sticky; top:56px; z-index:40;
     overflow-x:auto;
   }
@@ -187,23 +152,29 @@
     border-bottom:2px solid transparent; white-space:nowrap; transition:.15s;
   }
   .tab-btn:hover { color: var(--fg); }
-  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
   .tab-panel { display:none; }
   .tab-panel.active { display:block; }
 
   /* ── MAIN CONTENT ── */
   .main { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
 
-  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  /* ── DASHBOARD STAT CARDS (solid colors) ── */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
   .stat-card {
-    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 1rem 1.25rem;
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1.1rem 1.25rem; position: relative; overflow: hidden;
+    transition: box-shadow .15s, transform .15s;
   }
-  .stat-card .stat-num { font-size: 1.75rem; font-weight: 800; color: var(--gold); line-height: 1; }
-  .stat-card .stat-label { font-size: .75rem; color: var(--fg2); margin-top: .25rem; }
-  .stat-card.clickable { cursor: pointer; transition: border-color .15s; }
-  .stat-card.clickable:hover { border-color: var(--gold); }
-  .stat-card.clickable.active { border-color: var(--gold); background: rgba(200,146,42,.08); }
+  .stat-card::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    background: var(--stat-color, var(--primary));
+  }
+  .stat-card .stat-num { font-size: 1.9rem; font-weight: 800; color: var(--stat-color, var(--primary)); line-height: 1; }
+  .stat-card .stat-label { font-size: .78rem; color: var(--fg2); margin-top: .3rem; font-weight: 600; }
+  .stat-card.clickable { cursor: pointer; }
+  .stat-card.clickable:hover { box-shadow: 0 4px 14px rgba(17,24,39,.08); transform: translateY(-2px); }
+  .stat-card.clickable.active { border-color: var(--stat-color, var(--primary)); background: var(--stat-dim, var(--primary-dim)); }
 
   .filters-row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; margin-bottom: 1.25rem; }
   .filter-select, .filter-input {
@@ -211,17 +182,25 @@
     color: var(--fg); font-family: inherit; font-size: .875rem; padding: .5rem .875rem;
     cursor: pointer;
   }
-  .filter-select:focus, .filter-input:focus { outline: none; border-color: var(--gold); }
+  .filter-select:focus, .filter-input:focus { outline: none; border-color: var(--primary); }
   .filter-input { min-width: 220px; }
-  .btn-refresh {
+  .btn-refresh, .btn-filters-toggle {
     background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
     color: var(--fg2); font-family: inherit; font-size: .875rem; padding: .5rem .875rem;
-    cursor: pointer; transition: border-color .2s;
+    cursor: pointer; transition: border-color .2s, color .2s;
   }
-  .btn-refresh:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-refresh:hover, .btn-filters-toggle:hover { border-color: var(--primary); color: var(--primary); }
+  .btn-filters-toggle.active { border-color: var(--primary); color: var(--primary); background: var(--primary-dim); }
+
+  .more-filters-row {
+    display: none; flex-wrap: wrap; gap: .75rem; align-items: center;
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: .875rem; margin-bottom: 1.25rem;
+  }
+  .more-filters-row.open { display: flex; }
 
   .section-header {
-    display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; gap: .75rem; flex-wrap: wrap;
   }
   .section-header h2 { font-size:1.125rem; font-weight:700; }
 
@@ -230,108 +209,188 @@
   thead th {
     background: var(--bg2); text-align: left; padding: .75rem 1rem;
     font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--fg2);
-    font-weight: 600; border-bottom: 1px solid var(--border); white-space: nowrap;
+    font-weight: 700; border-bottom: 1px solid var(--border); white-space: nowrap;
   }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background-color .15s; }
   tbody tr:last-child { border-bottom: none; }
   tbody tr.clickable { cursor: pointer; }
-  tbody tr.clickable:hover { background: rgba(200,146,42,.05); }
+  tbody tr.clickable:hover { background: #F8FAFC; }
+  tbody tr.row-selected { background: var(--primary-dim); }
   td { padding: .75rem 1rem; font-size: .875rem; vertical-align: middle; }
-  .td-name { font-weight: 600; }
+  .td-name { font-weight: 600; display:flex; align-items:center; gap:.5rem; }
   .td-email { color: var(--fg2); font-size: .8125rem; }
   .td-sub { color: var(--fg2); font-size: .8rem; white-space: nowrap; }
+  .row-avatar {
+    width: 28px; height: 28px; border-radius: 50%; background: var(--primary-dim); color: var(--primary);
+    font-size: .75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .icon-btn {
+    background: none; border: none; cursor: pointer; font-size: 1rem; color: var(--fg2);
+    padding: .25rem; border-radius: 6px; transition: color .15s, background-color .15s;
+  }
+  .icon-btn:hover { color: var(--primary); background: var(--primary-dim); }
+  th.th-check, td.td-check { width: 36px; padding-right: 0; }
+  th.th-check input, td.td-check input { width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary); }
 
   .status-badge {
-    display: inline-block; padding: .2rem .6rem; border-radius: 20px;
+    display: inline-flex; align-items:center; gap:.3rem; padding: .2rem .6rem; border-radius: 20px;
     font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
     white-space: nowrap;
   }
-  .s-submitted        { background: rgba(100,100,255,.15); color: #8888ff; }
-  .s-under-review     { background: rgba(200,146,42,.15);  color: #c8922a; }
-  .s-passed           { background: rgba(46,139,87,.18);   color: #3dbb72; }
-  .s-failed           { background: rgba(192,57,43,.18);   color: #e74c3c; }
-  .s-interview-required { background: rgba(155,89,182,.18); color: #c39bd3; }
-  .s-accepted         { background: rgba(46,139,87,.3);    color: #2ecc71; }
-  .s-in-pool          { background: rgba(100,100,255,.15); color: #8888ff; }
-  .s-shortlisted      { background: rgba(200,146,42,.15);  color: #c8922a; }
-  .s-contacted        { background: rgba(155,89,182,.18);  color: #c39bd3; }
-  .s-assigned         { background: rgba(46,139,87,.18);   color: #3dbb72; }
-  .s-inactive          { background: rgba(150,150,150,.15); color: #bbb; }
-  .p-active           { background: rgba(46,139,87,.18);   color: #3dbb72; }
-  .p-paused           { background: rgba(200,146,42,.15);  color: #c8922a; }
-  .p-completed        { background: rgba(150,150,150,.15); color: #bbb; }
+  .status-dot { width:6px; height:6px; border-radius:50%; background:currentColor; display:inline-block; }
+  .s-submitted        { background: var(--primary-dim); color: var(--primary); }
+  .s-under-review     { background: var(--orange-dim);  color: var(--orange); }
+  .s-passed           { background: var(--green-dim);   color: var(--green); }
+  .s-failed           { background: var(--red-dim);     color: var(--red); }
+  .s-interview-required { background: var(--purple-dim); color: var(--purple); }
+  .s-accepted         { background: var(--green-dim);    color: var(--green); }
+  .s-in-pool          { background: var(--primary-dim);  color: var(--primary); }
+  .s-shortlisted      { background: var(--green-dim);    color: var(--green); }
+  .s-contacted        { background: var(--purple-dim);   color: var(--purple); }
+  .s-assigned         { background: var(--purple-dim);   color: var(--purple2); }
+  .s-inactive         { background: var(--red-dim);      color: var(--red); }
+  .p-active           { background: var(--green-dim);    color: var(--green); }
+  .p-paused           { background: var(--orange-dim);   color: var(--orange); }
+  .p-completed        { background: var(--bg2);          color: var(--fg2); }
 
   .empty-state { text-align: center; padding: 3rem; color: var(--fg2); }
 
-  /* ── DETAIL PANEL (side drawer) ── */
-  .panel-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6);
-    z-index: 200; align-items: flex-start; justify-content: flex-end;
+  /* ── BULK ACTIONS TOOLBAR ── */
+  .bulk-toolbar {
+    display: none; align-items: center; gap: .75rem; flex-wrap: wrap;
+    background: var(--sidebar); color: #fff; border-radius: var(--radius);
+    padding: .625rem 1rem; margin-bottom: 1rem;
   }
-  .panel-overlay.open { display: flex; }
-  .panel {
-    background: var(--bg2); border-left: 1px solid var(--border);
-    width: 100%; max-width: 580px; height: 100vh; overflow-y: auto;
-    animation: slideIn .25s ease;
+  .bulk-toolbar.show { display: flex; }
+  .bulk-toolbar .bulk-count { font-weight: 700; font-size: .875rem; margin-right: .5rem; }
+  .bulk-toolbar button {
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: #fff;
+    font-family: inherit; font-size: .8125rem; font-weight: 600; padding: .4rem .75rem;
+    border-radius: 8px; cursor: pointer; transition: background-color .15s;
   }
-  @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-  .panel-header {
-    position: sticky; top: 0; background: var(--bg2); border-bottom: 1px solid var(--border);
-    padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; z-index: 10;
-  }
-  .panel-header h3 { font-size: 1rem; font-weight: 700; }
-  .btn-close-panel {
-    background: none; border: none; color: var(--fg2); font-size: 1.25rem;
-    cursor: pointer; line-height: 1; padding: .25rem;
-  }
-  .btn-close-panel:hover { color: var(--fg); }
-  .panel-body { padding: 1.25rem; }
+  .bulk-toolbar button:hover { background: rgba(255,255,255,.2); }
+  .bulk-toolbar button.danger { background: var(--red); border-color: var(--red); }
+  .bulk-toolbar button.danger:hover { background: #dc2626; }
+  .bulk-toolbar .bulk-clear { margin-left: auto; background: none; border: none; color: rgba(255,255,255,.7); }
 
+  /* ── BADGES (skills / expertise / preferred roles) ── */
+  .badge-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .25rem; }
+  .badge {
+    background: var(--bg2); color: var(--fg); font-size: .78rem; font-weight: 600;
+    padding: .35rem .75rem; border-radius: 20px;
+  }
+  .badge.primary { background: var(--primary-dim); color: var(--primary); }
+  .checkbox-row { display: flex; flex-direction: column; gap: .5rem; }
+  .checkbox-item { display: flex; align-items: center; gap: .5rem; font-size: .875rem; }
+  .checkbox-item input { width: 16px; height: 16px; accent-color: var(--primary); }
+
+  /* ── STAR RATING ── */
+  .star-rating { display: flex; gap: .25rem; font-size: 1.4rem; }
+  .star-rating .star { cursor: pointer; color: var(--border); transition: color .1s; }
+  .star-rating .star.filled { color: var(--orange); }
+
+  /* ── TIMELINE ── */
+  .timeline { display: flex; flex-direction: column; }
+  .timeline-item { display: flex; gap: 1rem; padding-bottom: 1.25rem; position: relative; }
+  .timeline-item:not(:last-child)::before {
+    content: ""; position: absolute; left: 5px; top: 18px; bottom: 0; width: 2px; background: var(--border);
+  }
+  .timeline-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--primary); margin-top: 3px; flex-shrink: 0; }
+  .timeline-date { font-size: .75rem; color: var(--fg2); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+  .timeline-label { font-size: .9rem; font-weight: 600; margin-top: .125rem; }
+
+  /* ── FULL-SCREEN PROFILE VIEW ── */
+  .profile-view { display: none; }
+  .profile-view.open { display: block; }
+  .profile-back {
+    display: inline-flex; align-items: center; gap: .375rem; background: none; border: none;
+    color: var(--fg2); font-family: inherit; font-size: .875rem; font-weight: 600; cursor: pointer;
+    padding: .5rem 0; margin-bottom: 1rem; transition: color .15s;
+  }
+  .profile-back:hover { color: var(--primary); }
+
+  .profile-header {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1.5rem; margin-bottom: 1.25rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  }
+  .profile-header-left { display: flex; align-items: center; gap: 1rem; }
+  .profile-avatar {
+    width: 56px; height: 56px; border-radius: 50%; background: var(--primary-dim); color: var(--primary);
+    font-size: 1.375rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .profile-header h1 { font-size: 1.375rem; font-weight: 800; }
+  .profile-subline { color: var(--fg2); font-size: .875rem; margin-top: .25rem; }
+  .profile-contact-row { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: .5rem; font-size: .8125rem; color: var(--fg2); }
+  .profile-contact-row span { display: flex; align-items: center; gap: .3rem; }
+  .profile-contact-row a { color: var(--primary); text-decoration: none; }
+  .profile-contact-row a:hover { text-decoration: underline; }
+
+  .profile-tabs {
+    display: flex; gap: .25rem; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: .3rem; margin-bottom: 1.25rem; overflow-x: auto;
+  }
+  .profile-tab-btn {
+    background: none; border: none; color: var(--fg2); font-family: inherit; font-size: .8125rem;
+    font-weight: 600; padding: .5rem 1rem; border-radius: 8px; cursor: pointer; white-space: nowrap;
+    transition: background-color .15s, color .15s;
+  }
+  .profile-tab-btn:hover { color: var(--fg); }
+  .profile-tab-btn.active { background: var(--primary); color: #fff; }
+
+  .profile-tab-content { display: none; animation: fadeIn .2s ease; }
+  .profile-tab-content.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .profile-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1.5rem;
+  }
   .panel-section { margin-bottom: 1.5rem; }
+  .panel-section:last-child { margin-bottom: 0; }
   .panel-section-title {
     font-size: .7rem; text-transform: uppercase; letter-spacing: .07em;
-    color: var(--gold); font-weight: 700; margin-bottom: .875rem;
+    color: var(--primary); font-weight: 700; margin-bottom: .875rem;
     padding-bottom: .5rem; border-bottom: 1px solid var(--border);
   }
-  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .625rem; }
-  .info-item .info-key { font-size: .7rem; color: var(--fg2); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .125rem; }
-  .info-item .info-val { font-size: .875rem; font-weight: 500; }
-  .exp-tags { display: flex; flex-wrap: wrap; gap: .375rem; margin-top: .25rem; }
-  .exp-tag { background: var(--gold-dim); color: var(--gold); font-size: .7rem; font-weight: 600; padding: .2rem .5rem; border-radius: 4px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .info-item .info-key { font-size: .7rem; color: var(--fg2); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .2rem; font-weight: 600; }
+  .info-item .info-val { font-size: .9rem; font-weight: 500; }
+  .info-divider { border-top: 1px solid var(--border); margin: 1rem 0; }
 
   .qa-item { margin-bottom: 1rem; }
   .qa-q { font-size: .8125rem; font-weight: 600; color: var(--fg2); margin-bottom: .375rem; }
-  .qa-a { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: .75rem; font-size: .875rem; line-height: 1.6; }
+  .qa-a { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .75rem; font-size: .875rem; line-height: 1.6; }
 
   .btn-secondary {
-    background:transparent; color:var(--fg); border:1px solid var(--border); border-radius:10px;
-    cursor:pointer; font-family:inherit; font-weight:600; padding:.5rem .875rem; font-size:.8125rem; transition:.2s;
+    background: var(--card); color:var(--fg); border:1px solid var(--border); border-radius:10px;
+    cursor:pointer; font-family:inherit; font-weight:600; padding:.5rem .875rem; font-size:.8125rem; transition:.15s;
   }
-  .btn-secondary:hover { border-color:var(--gold); color:var(--gold); }
+  .btn-secondary:hover { border-color:var(--primary); color:var(--primary); }
 
   .action-row { display: flex; flex-direction: column; gap: .875rem; }
   .action-field label { display: block; font-size: .75rem; font-weight: 600; color: var(--fg2); margin-bottom: .375rem; }
-  .action-field select, .action-field textarea, .action-field input[type=number] {
-    width: 100%; background: var(--card); border: 1px solid var(--border);
+  .action-field select, .action-field textarea, .action-field input[type=number], .action-field input[type=text] {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
     border-radius: var(--radius); color: var(--fg); font-family: inherit;
     font-size: .875rem; padding: .5rem .75rem;
   }
-  .action-field select:focus, .action-field textarea:focus, .action-field input:focus { outline: none; border-color: var(--gold); }
+  .action-field select:focus, .action-field textarea:focus, .action-field input:focus { outline: none; border-color: var(--primary); }
   .action-field textarea { min-height: 100px; resize: vertical; }
   .btn-save {
-    background: var(--gold); color: #fff; border: none; border-radius: var(--radius);
+    background: var(--primary); color: #fff; border: none; border-radius: var(--radius);
     padding: .625rem 1.25rem; font-family: inherit; font-size: .875rem; font-weight: 600;
-    cursor: pointer; transition: opacity .2s;
+    cursor: pointer; transition: background-color .15s;
   }
-  .btn-save:hover { opacity: .88; }
+  .btn-save:hover { background: #1d4ed8; }
   .btn-save:disabled { opacity: .5; cursor: not-allowed; }
   .btn-resume {
     display: inline-flex; align-items: center; gap: .375rem;
-    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
     color: var(--fg); font-family: inherit; font-size: .875rem; padding: .5rem .875rem;
     text-decoration: none; cursor: pointer; transition: border-color .2s;
   }
-  .btn-resume:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-resume:hover { border-color: var(--primary); color: var(--primary); }
   .save-msg { font-size: .8125rem; margin-top: .5rem; display: none; }
   .save-msg.show { display: block; }
   .save-msg.ok { color: var(--green); }
@@ -339,14 +398,14 @@
 
   /* ── MODALS ── */
   .modal-overlay {
-    display:none; position:fixed; inset:0; background:rgba(0,0,0,.65);
+    display:none; position:fixed; inset:0; background:rgba(17,24,39,.5);
     align-items:center; justify-content:center; z-index:9999; padding:1rem;
   }
   .modal-overlay.show { display:flex; }
   .modal {
     width:min(600px, 92vw); max-height:90vh; overflow-y:auto;
     background:var(--card); border:1px solid var(--border); border-radius:16px;
-    padding:2rem; box-shadow:0 25px 60px rgba(0,0,0,.45);
+    padding:2rem; box-shadow:0 20px 50px rgba(17,24,39,.2);
   }
   .modal h2 { margin-bottom:1.5rem; font-size:1.5rem; font-weight:700; }
   .modal .field { margin-bottom:1.25rem; }
@@ -356,7 +415,7 @@
     border-radius:10px; padding:.75rem 1rem; font-size:.9rem; font-family:inherit; transition:border-color .2s;
   }
   .modal textarea { min-height:80px; resize:vertical; }
-  .modal input:focus, .modal select:focus, .modal textarea:focus { outline:none; border-color:var(--gold); }
+  .modal input:focus, .modal select:focus, .modal textarea:focus { outline:none; border-color:var(--primary); }
   .modal-actions { display:flex; gap:.75rem; margin-top:1.5rem; }
   .modal-actions button { flex:1; height:44px; }
 
@@ -364,9 +423,9 @@
   .project-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:1rem; margin-bottom:2rem; }
   .project-card {
     background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg);
-    padding:1.25rem; cursor:pointer; transition:border-color .15s;
+    padding:1.25rem; cursor:pointer; transition: box-shadow .15s, transform .15s;
   }
-  .project-card:hover { border-color: var(--gold); }
+  .project-card:hover { box-shadow: 0 4px 14px rgba(17,24,39,.08); transform: translateY(-2px); }
   .project-card-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:.5rem; }
   .project-card h3 { font-size:1rem; font-weight:700; }
   .project-card p { font-size:.8125rem; color:var(--fg2); margin-top:.375rem; }
@@ -375,27 +434,27 @@
   .assign-list { display:flex; flex-direction:column; gap:.625rem; }
   .assign-row {
     display:flex; align-items:center; justify-content:space-between; gap:.75rem;
-    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    background:var(--bg); border:1px solid var(--border); border-radius:var(--radius);
     padding:.625rem .875rem;
   }
   .assign-row .assign-info { flex:1; min-width:0; }
   .assign-row .assign-name { font-weight:600; font-size:.875rem; }
   .assign-row .assign-role { font-size:.75rem; color:var(--fg2); }
-  .assign-row select { background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--fg); font-family:inherit; font-size:.8125rem; padding:.4rem .6rem; }
+  .assign-row select { background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--fg); font-family:inherit; font-size:.8125rem; padding:.4rem .6rem; }
 
   .add-member-row { display:flex; gap:.5rem; margin-top:1rem; }
   .add-member-row select, .add-member-row input { flex:1; }
 
   .spinner {
     width: 20px; height: 20px; border: 2px solid var(--border);
-    border-top-color: var(--gold); border-radius: 50%;
+    border-top-color: var(--primary); border-radius: 50%;
     animation: spin .7s linear infinite; margin: 3rem auto; display: block;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   @media (max-width: 768px) {
     .info-grid { grid-template-columns: 1fr; }
-    .panel { max-width: 100%; }
+    .profile-header { flex-direction: column; align-items: flex-start; }
   }
 </style>
 </head>
@@ -542,62 +601,159 @@
 
     <!-- ═══════════ APPLICATIONS TAB ═══════════ -->
     <div class="tab-panel active" id="panel-applications">
-      <div class="stats-row">
-        <div class="stat-card clickable" id="stat-card-total" onclick="filterByStatCard('')"><div class="stat-num" id="stat-total">–</div><div class="stat-label">Total</div></div>
-        <div class="stat-card clickable" id="stat-card-submitted" onclick="filterByStatCard('Submitted')"><div class="stat-num" id="stat-submitted">–</div><div class="stat-label">Submitted</div></div>
-        <div class="stat-card clickable" id="stat-card-review" onclick="filterByStatCard('Under Review')"><div class="stat-num" id="stat-review">–</div><div class="stat-label">Under Review</div></div>
-        <div class="stat-card clickable" id="stat-card-passed" onclick="filterByStatCard('Passed')"><div class="stat-num" id="stat-passed">–</div><div class="stat-label">Passed</div></div>
-        <div class="stat-card clickable" id="stat-card-failed" onclick="filterByStatCard('Failed')"><div class="stat-num" id="stat-failed">–</div><div class="stat-label">Failed</div></div>
-        <div class="stat-card clickable" id="stat-card-interview" onclick="filterByStatCard('Interview Required')"><div class="stat-num" id="stat-interview">–</div><div class="stat-label">Interview Required</div></div>
-        <div class="stat-card clickable" id="stat-card-accepted" onclick="filterByStatCard('Accepted')"><div class="stat-num" id="stat-accepted">–</div><div class="stat-label">Accepted</div></div>
+
+      <!-- ── list view ── -->
+      <div id="app-list-view">
+        <div class="stats-row">
+          <div class="stat-card clickable" id="stat-card-total" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);" onclick="filterByStatCard('')"><div class="stat-num" id="stat-total">–</div><div class="stat-label">Total</div></div>
+          <div class="stat-card clickable" id="stat-card-submitted" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);" onclick="filterByStatCard('Submitted')"><div class="stat-num" id="stat-submitted">–</div><div class="stat-label">Submitted</div></div>
+          <div class="stat-card clickable" id="stat-card-review" style="--stat-color:var(--orange); --stat-dim:var(--orange-dim);" onclick="filterByStatCard('Under Review')"><div class="stat-num" id="stat-review">–</div><div class="stat-label">Under Review</div></div>
+          <div class="stat-card clickable" id="stat-card-passed" style="--stat-color:var(--green); --stat-dim:var(--green-dim);" onclick="filterByStatCard('Passed')"><div class="stat-num" id="stat-passed">–</div><div class="stat-label">Passed</div></div>
+          <div class="stat-card clickable" id="stat-card-failed" style="--stat-color:var(--red); --stat-dim:var(--red-dim);" onclick="filterByStatCard('Failed')"><div class="stat-num" id="stat-failed">–</div><div class="stat-label">Failed</div></div>
+          <div class="stat-card clickable" id="stat-card-interview" style="--stat-color:var(--purple); --stat-dim:var(--purple-dim);" onclick="filterByStatCard('Interview Required')"><div class="stat-num" id="stat-interview">–</div><div class="stat-label">Interview Required</div></div>
+          <div class="stat-card clickable" id="stat-card-accepted" style="--stat-color:var(--green); --stat-dim:var(--green-dim);" onclick="filterByStatCard('Accepted')"><div class="stat-num" id="stat-accepted">–</div><div class="stat-label">Accepted</div></div>
+        </div>
+
+        <div class="filters-row">
+          <input class="filter-input" id="app-search" placeholder="Search name or email…" oninput="renderApplications()">
+          <select class="filter-select" id="app-filter-position" onchange="renderApplications()"><option value="">All positions</option></select>
+          <select class="filter-select" id="app-filter-status" onchange="renderApplications()">
+            <option value="">All statuses</option>
+            <option>Submitted</option><option>Under Review</option><option>Passed</option>
+            <option>Failed</option><option>Interview Required</option><option>Accepted</option>
+          </select>
+          <select class="filter-select" id="app-filter-reviewer" onchange="renderApplications()" style="display:none;">
+            <option value="">All reviewers</option>
+          </select>
+          <select class="filter-select" id="app-sort" onchange="renderApplications()">
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="score">Highest score</option>
+            <option value="az">A–Z</option>
+          </select>
+          <button class="btn-refresh" onclick="loadApplications()">↻ Refresh</button>
+        </div>
+
+        <div class="bulk-toolbar" id="app-bulk-toolbar">
+          <span class="bulk-count"><span id="app-bulk-count">0</span> selected</span>
+          <button onclick="bulkExport('applications')">Export</button>
+          <button onclick="bulkEmail('applications')">Email</button>
+          <button class="danger" onclick="bulkDelete('applications')">Delete</button>
+          <button class="bulk-clear" onclick="clearSelection('applications')">Clear</button>
+        </div>
+
+        <div id="applications-loading"><span class="spinner"></span></div>
+        <div class="table-wrap" id="applications-table-wrap" style="display:none;">
+          <table>
+            <thead><tr>
+              <th class="th-check"><input type="checkbox" onchange="toggleSelectAll('applications', this.checked)"></th>
+              <th>Name</th><th>Position</th><th>Country</th><th>Status</th>
+              <th>Assigned reviewer</th><th>Submitted</th><th>Score</th>
+            </tr></thead>
+            <tbody id="applications-tbody"></tbody>
+          </table>
+          <div class="empty-state" id="applications-empty" style="display:none;">No applications match your filters.</div>
+        </div>
       </div>
 
-      <div class="filters-row">
-        <input class="filter-input" id="app-search" placeholder="Search name or email…" oninput="renderApplications()">
-        <select class="filter-select" id="app-filter-position" onchange="renderApplications()"><option value="">All positions</option></select>
-        <select class="filter-select" id="app-filter-status" onchange="renderApplications()">
-          <option value="">All statuses</option>
-          <option>Submitted</option><option>Under Review</option><option>Passed</option>
-          <option>Failed</option><option>Interview Required</option><option>Accepted</option>
-        </select>
-        <select class="filter-select" id="app-filter-reviewer" onchange="renderApplications()" style="display:none;">
-          <option value="">All reviewers</option>
-        </select>
-        <button class="btn-refresh" onclick="loadApplications()">↻ Refresh</button>
-      </div>
-
-      <div id="applications-loading"><span class="spinner"></span></div>
-      <div class="table-wrap" id="applications-table-wrap" style="display:none;">
-        <table>
-          <thead><tr>
-            <th>Name</th><th>Position</th><th>Country</th><th>Status</th>
-            <th>Assigned reviewer</th><th>Submitted</th><th>Score</th>
-          </tr></thead>
-          <tbody id="applications-tbody"></tbody>
-        </table>
-        <div class="empty-state" id="applications-empty" style="display:none;">No applications match your filters.</div>
+      <!-- ── full-screen application profile view ── -->
+      <div class="profile-view" id="app-profile-view">
+        <button class="profile-back" onclick="closeAppPanel()">← Back to Applications</button>
+        <div class="profile-header">
+          <div class="profile-header-left">
+            <div class="profile-avatar" id="app-profile-avatar">?</div>
+            <div>
+              <h1 id="app-panel-name">Applicant</h1>
+              <div class="profile-subline" id="app-profile-subline"></div>
+              <div class="profile-contact-row" id="app-profile-contact"></div>
+            </div>
+          </div>
+          <span class="status-badge" id="app-profile-status"></span>
+        </div>
+        <div class="profile-tabs" id="app-profile-tabs"></div>
+        <div id="app-panel-body"></div>
       </div>
     </div>
 
     <!-- ═══════════ TALENT POOL TAB ═══════════ -->
     <div class="tab-panel" id="panel-talent">
-      <div class="filters-row">
-        <input class="filter-input" id="talent-search" placeholder="Search name or country…" oninput="renderTalentPool()">
-        <select class="filter-select" id="talent-filter-status" onchange="renderTalentPool()">
-          <option value="">All statuses</option>
-          <option>In pool</option><option>Shortlisted</option><option>Contacted</option>
-          <option>Assigned</option><option>Inactive</option>
-        </select>
-        <button class="btn-refresh" onclick="loadTalentPool()">↻ Refresh</button>
+
+      <!-- ── list view ── -->
+      <div id="talent-list-view">
+        <div class="stats-row">
+          <div class="stat-card clickable" id="talent-stat-card-all" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);" onclick="filterTalentByStatCard('')"><div class="stat-num" id="talent-stat-all">–</div><div class="stat-label">Talent Pool</div></div>
+          <div class="stat-card clickable" id="talent-stat-card-shortlisted" style="--stat-color:var(--green); --stat-dim:var(--green-dim);" onclick="filterTalentByStatCard('Shortlisted')"><div class="stat-num" id="talent-stat-shortlisted">–</div><div class="stat-label">Shortlisted</div></div>
+          <div class="stat-card clickable" id="talent-stat-card-assigned" style="--stat-color:var(--purple2); --stat-dim:var(--purple-dim);" onclick="filterTalentByStatCard('Assigned')"><div class="stat-num" id="talent-stat-assigned">–</div><div class="stat-label">Assigned</div></div>
+          <div class="stat-card clickable" id="talent-stat-card-inactive" style="--stat-color:var(--red); --stat-dim:var(--red-dim);" onclick="filterTalentByStatCard('Inactive')"><div class="stat-num" id="talent-stat-inactive">–</div><div class="stat-label">Inactive</div></div>
+        </div>
+
+        <div class="filters-row">
+          <input class="filter-input" id="talent-search" placeholder="Search name, email or country…" oninput="renderTalentPool()">
+          <select class="filter-select" id="talent-filter-status" onchange="renderTalentPool()">
+            <option value="">All statuses</option>
+            <option>In pool</option><option>Shortlisted</option><option>Contacted</option>
+            <option>Assigned</option><option>Inactive</option>
+          </select>
+          <select class="filter-select" id="talent-sort" onchange="renderTalentPool()">
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="score">Highest score</option>
+            <option value="az">A–Z</option>
+            <option value="country">Country</option>
+          </select>
+          <button class="btn-filters-toggle" id="talent-more-filters-btn" onclick="toggleMoreFilters()">⚙ Filters</button>
+          <button class="btn-refresh" onclick="loadTalentPool()">↻ Refresh</button>
+        </div>
+
+        <div class="more-filters-row" id="talent-more-filters">
+          <select class="filter-select" id="talent-filter-country" onchange="renderTalentPool()"><option value="">All countries</option></select>
+          <select class="filter-select" id="talent-filter-experience" onchange="renderTalentPool()"><option value="">All experience levels</option></select>
+          <select class="filter-select" id="talent-filter-education" onchange="renderTalentPool()"><option value="">All education levels</option></select>
+          <select class="filter-select" id="talent-filter-position" onchange="renderTalentPool()"><option value="">All preferred roles</option></select>
+          <select class="filter-select" id="talent-filter-worktype" onchange="renderTalentPool()"><option value="">All work types</option></select>
+          <select class="filter-select" id="talent-filter-availability" onchange="renderTalentPool()"><option value="">All availability</option></select>
+          <select class="filter-select" id="talent-filter-skill" onchange="renderTalentPool()"><option value="">All skills</option></select>
+        </div>
+
+        <div class="bulk-toolbar" id="talent-bulk-toolbar">
+          <span class="bulk-count"><span id="talent-bulk-count">0</span> selected</span>
+          <button onclick="bulkAssign('talent')">Assign</button>
+          <button onclick="bulkShortlist('talent')">Shortlist</button>
+          <button onclick="bulkExport('talent')">Export</button>
+          <button onclick="bulkEmail('talent')">Email</button>
+          <button class="danger" onclick="bulkDelete('talent')">Delete</button>
+          <button class="bulk-clear" onclick="clearSelection('talent')">Clear</button>
+        </div>
+
+        <div id="talent-loading"><span class="spinner"></span></div>
+        <div class="table-wrap" id="talent-table-wrap" style="display:none;">
+          <table>
+            <thead><tr>
+              <th class="th-check"><input type="checkbox" onchange="toggleSelectAll('talent', this.checked)"></th>
+              <th>Candidate</th><th>Contact</th><th>Preferred roles</th><th>Experience</th><th>Education</th><th>Status</th><th>Resume</th><th>Submitted</th>
+            </tr></thead>
+            <tbody id="talent-tbody"></tbody>
+          </table>
+          <div class="empty-state" id="talent-empty" style="display:none;">No talent pool entries match your filters.</div>
+        </div>
       </div>
 
-      <div id="talent-loading"><span class="spinner"></span></div>
-      <div class="table-wrap" id="talent-table-wrap" style="display:none;">
-        <table>
-          <thead><tr><th>Name</th><th>Country</th><th>Areas of expertise</th><th>Status</th><th>Submitted</th></tr></thead>
-          <tbody id="talent-tbody"></tbody>
-        </table>
-        <div class="empty-state" id="talent-empty" style="display:none;">No talent pool entries match your filters.</div>
+      <!-- ── full-screen candidate profile view ── -->
+      <div class="profile-view" id="talent-profile-view">
+        <button class="profile-back" onclick="closeTalentPanel()">← Back to Talent Pool</button>
+        <div class="profile-header">
+          <div class="profile-header-left">
+            <div class="profile-avatar" id="talent-profile-avatar">?</div>
+            <div>
+              <h1 id="talent-panel-name">Candidate</h1>
+              <div class="profile-subline" id="talent-profile-subline"></div>
+              <div class="profile-contact-row" id="talent-profile-contact"></div>
+            </div>
+          </div>
+          <span class="status-badge" id="talent-profile-status"></span>
+        </div>
+        <div class="profile-tabs" id="talent-profile-tabs"></div>
+        <div id="talent-panel-body"></div>
       </div>
     </div>
 
@@ -642,28 +798,6 @@
       </div>
     </div>
 
-  </div>
-</div>
-
-<!-- ── APPLICATION DETAIL PANEL ── -->
-<div class="panel-overlay" id="app-panel-overlay">
-  <div class="panel">
-    <div class="panel-header">
-      <h3 id="app-panel-name">Applicant</h3>
-      <button class="btn-close-panel" onclick="closeAppPanel()">✕</button>
-    </div>
-    <div class="panel-body" id="app-panel-body"></div>
-  </div>
-</div>
-
-<!-- ── TALENT POOL DETAIL PANEL ── -->
-<div class="panel-overlay" id="talent-panel-overlay">
-  <div class="panel">
-    <div class="panel-header">
-      <h3 id="talent-panel-name">Candidate</h3>
-      <button class="btn-close-panel" onclick="closeTalentPanel()">✕</button>
-    </div>
-    <div class="panel-body" id="talent-panel-body"></div>
   </div>
 </div>
 
@@ -777,6 +911,9 @@
   let currentApp = null;
   let currentTalent = null;
   let currentProjectId = null;
+
+  // Bulk-selection state, keyed by table name ('applications' | 'talent')
+  const selection = { applications: new Set(), talent: new Set() };
 
   const loadedTabs = { applications:false, talent:false, members:false, assignments:false };
 
@@ -1158,6 +1295,41 @@
     if (!iso) return '—';
     return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
   }
+  function fmtDateShort(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+  }
+  function initialsOf(name) {
+    const parts = String(name || '?').trim().split(/\s+/);
+    return ((parts[0]||'')[0] || '?').toUpperCase() + ((parts[1]||'')[0] || '').toUpperCase();
+  }
+  // Turns a value that may be an array, a comma/newline-delimited string, or empty
+  // into a clean array of trimmed strings. Used for preferred roles / skills / expertise
+  // fields, since those columns may be stored as either a Postgres array or free text.
+
+  function toList(val) {
+    if (!val) return [];
+    if (Array.isArray(val)) return val.map(v => String(v).trim()).filter(Boolean);
+    return String(val).split(/[,\n]/).map(v => v.trim()).filter(Boolean);
+  }
+
+  function getCandidateSkills(candidate) {
+  const skills = [];
+
+  if (candidate.skill_programming) skills.push("Programming");
+  if (candidate.skill_annotation) skills.push("Data Annotation");
+  if (candidate.skill_ai_ml) skills.push("AI / Machine Learning");
+  if (candidate.skill_design) skills.push("UI/UX Design");
+  if (candidate.skill_support) skills.push("Customer Support");
+  if (candidate.skill_marketing) skills.push("Marketing");
+  if (candidate.skill_admin) skills.push("Administration");
+  if (candidate.skill_writing) skills.push("Writing");
+  if (candidate.skill_finance) skills.push("Finance");
+  if (candidate.skill_other) skills.push("Other");
+
+  return skills;
+}
+
   function statusClass(s) {
     const map = {
       'Submitted':'s-submitted','Under Review':'s-under-review','Passed':'s-passed','Failed':'s-failed',
@@ -1184,7 +1356,120 @@
     return m ? m.email : 'Unassigned';
   }
 
+  function starRatingHtml(id, value, editable) {
+    const v = value || 0;
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+      stars += `<span class="star ${i<=v?'filled':''}" ${editable?`onclick="setStarRating('${id}',${i})"`:''}>★</span>`;
+    }
+    return `<div class="star-rating" id="star-rating-${id}" data-value="${v}">${stars}</div>`;
+  }
+  function setStarRating(id, value) {
+    const el = document.getElementById('star-rating-' + id);
+    if (!el) return;
+    el.dataset.value = value;
+    el.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('filled', i < value));
+  }
+
+  // ══════════════════════ SELECTION / BULK ACTIONS (shared by Applications + Talent) ══════════════════════
+  function toggleRowSelect(table, id, checked) {
+    if (checked) selection[table].add(id); else selection[table].delete(id);
+    updateBulkToolbar(table);
+    document.querySelectorAll(`tr[data-row-id="${id}"][data-row-table="${table}"]`).forEach(tr => tr.classList.toggle('row-selected', checked));
+  }
+  function toggleSelectAll(table, checked) {
+    const rows = table === 'applications' ? currentAppRowsRendered : currentTalentRowsRendered;
+    (rows || []).forEach(r => { if (checked) selection[table].add(r.id); else selection[table].delete(r.id); });
+    if (table === 'applications') renderApplications(); else renderTalentPool();
+  }
+  function clearSelection(table) {
+    selection[table].clear();
+    if (table === 'applications') renderApplications(); else renderTalentPool();
+  }
+  function updateBulkToolbar(table) {
+    const count = selection[table].size;
+    const bar = document.getElementById(table + '-bulk-toolbar');
+    const countEl = document.getElementById(table + '-bulk-count');
+    if (countEl) countEl.textContent = count;
+    if (bar) bar.classList.toggle('show', count > 0);
+  }
+  function selectedRows(table) {
+    const source = table === 'applications' ? allApplications : allTalentPool;
+    return source.filter(r => selection[table].has(r.id));
+  }
+  function bulkExport(table) {
+    const rows = selectedRows(table);
+    if (rows.length === 0) { alert('Select at least one row to export.'); return; }
+    const cols = table === 'applications'
+      ? ['full_name','email','position','country','status','reviewer_score','submitted_at']
+      : ['full_name','email','phone','country','status','years_experience','education_level','submitted_at'];
+    const csv = [cols.join(',')].concat(
+      rows.map(r => cols.map(c => `"${String(r[c] ?? '').replace(/"/g,'""')}"`).join(','))
+    ).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${table}-export-${Date.now()}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+  function bulkEmail(table) {
+    const rows = selectedRows(table);
+    if (rows.length === 0) { alert('Select at least one row to email.'); return; }
+    const emails = rows.map(r => r.email).filter(Boolean).join(',');
+    window.location.href = 'mailto:?bcc=' + encodeURIComponent(emails);
+  }
+  async function bulkDelete(table) {
+    const rows = selectedRows(table);
+    if (rows.length === 0) { alert('Select at least one row to delete.'); return; }
+    if (!confirm(`Delete ${rows.length} record(s)? This cannot be undone.`)) return;
+    const tableName = table === 'applications' ? 'applications' : 'talent_pool';
+    const ids = rows.map(r => r.id);
+    const { error } = await sb.from(tableName).delete().in('id', ids);
+    if (error) { alert('Error deleting: ' + error.message); return; }
+    if (table === 'applications') {
+      allApplications = allApplications.filter(r => !ids.includes(r.id));
+      updateAppStats(); renderApplications();
+    } else {
+      allTalentPool = allTalentPool.filter(r => !ids.includes(r.id));
+      updateTalentStats(); renderTalentPool();
+    }
+    selection[table].clear();
+    updateBulkToolbar(table);
+  }
+  async function bulkShortlist(table) {
+    const rows = selectedRows(table);
+    if (rows.length === 0) { alert('Select at least one candidate to shortlist.'); return; }
+    const ids = rows.map(r => r.id);
+    const { error } = await sb.from('talent_pool').update({ status: 'Shortlisted' }).in('id', ids);
+    if (error) { alert('Error shortlisting: ' + error.message); return; }
+    allTalentPool.forEach(r => { if (ids.includes(r.id)) r.status = 'Shortlisted'; });
+    updateTalentStats(); renderTalentPool();
+  }
+  async function bulkAssign(table) {
+    const rows = selectedRows(table);
+    if (rows.length === 0) { alert('Select at least one candidate to assign.'); return; }
+    if (allTeamMembers.length === 0) await loadTeamMembersForDropdowns();
+    const reviewers = allTeamMembers.filter(m => m.role === 'reviewer' || m.role === 'admin');
+    const label = reviewers.map((r,i) => `${i+1}. ${r.email}`).join('\n');
+    const pick = prompt(`Assign ${rows.length} candidate(s) to which owner?\n${label}\n\nEnter the number:`);
+    const idx = parseInt(pick, 10) - 1;
+    if (isNaN(idx) || !reviewers[idx]) return;
+    const ids = rows.map(r => r.id);
+    const { error } = await sb.from('talent_pool').update({ owner_id: reviewers[idx].id, status: 'Assigned' }).in('id', ids);
+    if (error) { alert('Error assigning: ' + error.message); return; }
+    allTalentPool.forEach(r => { if (ids.includes(r.id)) { r.owner_id = reviewers[idx].id; r.status = 'Assigned'; } });
+    updateTalentStats(); renderTalentPool();
+  }
+
+  function toggleMoreFilters() {
+    document.getElementById('talent-more-filters').classList.toggle('open');
+    document.getElementById('talent-more-filters-btn').classList.toggle('active');
+  }
+
   // ══════════════════════ APPLICATIONS TAB ══════════════════════
+  let currentAppRowsRendered = [];
+
   async function loadApplications() {
     document.getElementById('applications-loading').style.display = 'block';
     document.getElementById('applications-table-wrap').style.display = 'none';
@@ -1237,7 +1522,7 @@
   // Clicking "Total" (empty status) clears the filter back to "All statuses".
   function filterByStatCard(status) {
     document.getElementById('app-filter-status').value = status;
-    document.querySelectorAll('.stat-card.clickable').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('#app-list-view .stat-card.clickable').forEach(c => c.classList.remove('active'));
     const idMap = {
       '': 'stat-card-total', 'Submitted': 'stat-card-submitted', 'Under Review': 'stat-card-review',
       'Passed': 'stat-card-passed', 'Failed': 'stat-card-failed',
@@ -1253,9 +1538,10 @@
     const posFilter = document.getElementById('app-filter-position').value;
     const stFilter  = document.getElementById('app-filter-status').value;
     const revFilter = document.getElementById('app-filter-reviewer').value;
+    const sortMode  = document.getElementById('app-sort').value;
 
     // Keep stat-card highlighting in sync even when the status dropdown is changed directly.
-    document.querySelectorAll('.stat-card.clickable').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('#app-list-view .stat-card.clickable').forEach(c => c.classList.remove('active'));
     const idMap = {
       '': 'stat-card-total', 'Submitted': 'stat-card-submitted', 'Under Review': 'stat-card-review',
       'Passed': 'stat-card-passed', 'Failed': 'stat-card-failed',
@@ -1274,14 +1560,18 @@
       return matchSearch && matchPos && matchSt && matchRev;
     });
 
+    rows = sortRows(rows, sortMode);
+    currentAppRowsRendered = rows;
+
     const tbody = document.getElementById('applications-tbody');
     const empty = document.getElementById('applications-empty');
-    if (rows.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+    if (rows.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; updateBulkToolbar('applications'); return; }
     empty.style.display = 'none';
 
     tbody.innerHTML = rows.map(r => `
-      <tr class="clickable" onclick="openAppPanel('${r.id}')">
-        <td><div class="td-name">${esc(r.full_name)}</div><div class="td-email">${esc(r.email)}</div></td>
+      <tr class="clickable ${selection.applications.has(r.id)?'row-selected':''}" data-row-id="${r.id}" data-row-table="applications" onclick="openAppPanel('${r.id}')">
+        <td class="td-check" onclick="event.stopPropagation()"><input type="checkbox" ${selection.applications.has(r.id)?'checked':''} onchange="toggleRowSelect('applications','${r.id}',this.checked)"></td>
+        <td><div class="td-name"><span class="row-avatar">${initialsOf(r.full_name)}</span>${esc(r.full_name)}</div><div class="td-email">${esc(r.email)}</div></td>
         <td>${esc(r.position)}</td>
         <td>${esc(r.country || '—')}</td>
         <td><span class="status-badge ${statusClass(r.status)}">${esc(r.status)}</span></td>
@@ -1290,6 +1580,27 @@
         <td>${r.reviewer_score != null ? r.reviewer_score + '/10' : '—'}</td>
       </tr>
     `).join('');
+    updateBulkToolbar('applications');
+  }
+
+  function sortRows(rows, mode) {
+    const copy = rows.slice();
+    if (mode === 'oldest') copy.sort((a,b) => new Date(a.submitted_at||0) - new Date(b.submitted_at||0));
+    else if (mode === 'score') copy.sort((a,b) => (b.reviewer_score||0) - (a.reviewer_score||0));
+    else if (mode === 'az') copy.sort((a,b) => (a.full_name||'').localeCompare(b.full_name||''));
+    else if (mode === 'country') copy.sort((a,b) => (a.country||'').localeCompare(b.country||''));
+    else copy.sort((a,b) => new Date(b.submitted_at||0) - new Date(a.submitted_at||0)); // newest (default)
+    return copy;
+  }
+
+  // ── Full-screen application profile ──────────────────────────────
+  function switchProfileTab(prefix, tabName) {
+    document.querySelectorAll(`#${prefix}-panel-body .profile-tab-content`).forEach(el => el.classList.remove('active'));
+    document.querySelectorAll(`#${prefix}-profile-tabs .profile-tab-btn`).forEach(el => el.classList.remove('active'));
+    const content = document.getElementById(`${prefix}-tab-${tabName}`);
+    const btn = document.getElementById(`${prefix}-tabbtn-${tabName}`);
+    if (content) content.classList.add('active');
+    if (btn) btn.classList.add('active');
   }
 
   function openAppPanel(id) {
@@ -1297,6 +1608,14 @@
     if (!app) return;
     currentApp = app;
     document.getElementById('app-panel-name').textContent = app.full_name;
+    document.getElementById('app-profile-avatar').textContent = initialsOf(app.full_name);
+    document.getElementById('app-profile-subline').textContent = app.position || '';
+    document.getElementById('app-profile-status').outerHTML = `<span class="status-badge ${statusClass(app.status)}" id="app-profile-status"><span class="status-dot"></span>${esc(app.status)}</span>`;
+    document.getElementById('app-profile-contact').innerHTML = `
+      ${app.country ? `<span>📍 ${esc(app.city ? app.city + ', ' : '')}${esc(app.country)}</span>` : ''}
+      <span>📧 <a href="mailto:${esc(app.email)}">${esc(app.email)}</a></span>
+      ${app.phone ? `<span>📱 ${esc(app.phone)}</span>` : ''}
+    `;
 
     const answers = app.assessment_answers || {};
     const expList = [
@@ -1313,99 +1632,139 @@
     const reviewerOptions = allTeamMembers.filter(m => m.role === 'reviewer' || m.role === 'admin')
       .map(m => `<option value="${m.id}" ${app.assigned_reviewer_id===m.id?'selected':''}>${esc(m.email)}</option>`).join('');
 
+    // Profile tabs
+    const tabs = ['personal','professional','documents','timeline'];
+    if (isAdmin || canEdit) tabs.push('admin');
+    const tabLabels = { personal:'Personal', professional:'Professional', documents:'Documents', timeline:'Timeline', admin:'Admin' };
+    document.getElementById('app-profile-tabs').innerHTML = tabs.map((t,i) =>
+      `<button class="profile-tab-btn ${i===0?'active':''}" id="app-tabbtn-${t}" onclick="switchProfileTab('app','${t}')">${tabLabels[t]}</button>`
+    ).join('');
+
     document.getElementById('app-panel-body').innerHTML = `
-      <div class="panel-section">
-        <div class="panel-section-title">Personal details</div>
-        <div class="info-grid">
-          <div class="info-item"><div class="info-key">Full name</div><div class="info-val">${esc(app.full_name)}</div></div>
-          <div class="info-item"><div class="info-key">Email</div><div class="info-val"><a href="mailto:${esc(app.email)}" style="color:var(--gold)">${esc(app.email)}</a></div></div>
-          <div class="info-item"><div class="info-key">Phone</div><div class="info-val">${esc(app.phone || '—')}</div></div>
-          <div class="info-item"><div class="info-key">Location</div><div class="info-val">${esc(app.city||'')}${app.city && app.country ? ', ' : ''}${esc(app.country||'')}</div></div>
-          <div class="info-item"><div class="info-key">Time zone</div><div class="info-val">${esc(app.timezone || '—')}</div></div>
-          <div class="info-item"><div class="info-key">Submitted</div><div class="info-val">${fmtDate(app.submitted_at)}</div></div>
+      <div class="profile-tab-content active" id="app-tab-personal">
+        <div class="profile-card panel-section">
+          <div class="panel-section-title">Personal details</div>
+          <div class="info-grid">
+            <div class="info-item"><div class="info-key">Full name</div><div class="info-val">${esc(app.full_name)}</div></div>
+            <div class="info-item"><div class="info-key">Email</div><div class="info-val"><a href="mailto:${esc(app.email)}" style="color:var(--primary)">${esc(app.email)}</a></div></div>
+            <div class="info-item"><div class="info-key">Phone</div><div class="info-val">${esc(app.phone || '—')}</div></div>
+            <div class="info-item"><div class="info-key">Location</div><div class="info-val">${esc(app.city||'')}${app.city && app.country ? ', ' : ''}${esc(app.country||'')}</div></div>
+            <div class="info-item"><div class="info-key">Time zone</div><div class="info-val">${esc(app.timezone || '—')}</div></div>
+            <div class="info-item"><div class="info-key">Submitted</div><div class="info-val">${fmtDate(app.submitted_at)}</div></div>
+          </div>
         </div>
       </div>
 
-      <div class="panel-section">
-        <div class="panel-section-title">Professional details</div>
-        <div class="info-grid">
-          <div class="info-item"><div class="info-key">Position</div><div class="info-val">${esc(app.position)}</div></div>
-          <div class="info-item"><div class="info-key">Occupation</div><div class="info-val">${esc(app.occupation || '—')}</div></div>
-          <div class="info-item"><div class="info-key">Experience</div><div class="info-val">${esc(app.years_experience || '—')}</div></div>
-          <div class="info-item"><div class="info-key">Hours/week</div><div class="info-val">${esc(String(app.hours_per_week || '—'))}</div></div>
-          <div class="info-item"><div class="info-key">Languages</div><div class="info-val">${esc(app.languages || '—')}</div></div>
-          <div class="info-item"><div class="info-key">Computer skills</div><div class="info-val">${esc(app.computer_skills || '—')}</div></div>
-          <div class="info-item"><div class="info-key">Internet</div><div class="info-val">${esc(app.internet_availability || '—')}</div></div>
+      <div class="profile-tab-content" id="app-tab-professional">
+        <div class="profile-card panel-section">
+          <div class="panel-section-title">Professional details</div>
+          <div class="info-grid">
+            <div class="info-item"><div class="info-key">Position</div><div class="info-val">${esc(app.position)}</div></div>
+            <div class="info-item"><div class="info-key">Occupation</div><div class="info-val">${esc(app.occupation || '—')}</div></div>
+            <div class="info-item"><div class="info-key">Experience</div><div class="info-val">${esc(app.years_experience || '—')}</div></div>
+            <div class="info-item"><div class="info-key">Hours/week</div><div class="info-val">${esc(String(app.hours_per_week || '—'))}</div></div>
+            <div class="info-item"><div class="info-key">Languages</div><div class="info-val">${esc(app.languages || '—')}</div></div>
+            <div class="info-item"><div class="info-key">Computer skills</div><div class="info-val">${esc(app.computer_skills || '—')}</div></div>
+            <div class="info-item"><div class="info-key">Internet</div><div class="info-val">${esc(app.internet_availability || '—')}</div></div>
+          </div>
+          ${expList.length ? `<div class="info-divider"></div><div class="info-key" style="margin-bottom:.5rem;">Experience areas</div><div class="badge-row">${expList.map(t=>`<span class="badge primary">${t}</span>`).join('')}</div>` : ''}
+          <div class="info-divider"></div>
+          <div class="info-key" style="margin-bottom:.5rem;">Previous experience</div><div class="qa-a">${esc(app.previous_experience || '—')}</div>
         </div>
-        ${expList.length ? `<div style="margin-top:.875rem;"><div class="info-key" style="margin-bottom:.375rem;">Experience areas</div><div class="exp-tags">${expList.map(t=>`<span class="exp-tag">${t}</span>`).join('')}</div></div>` : ''}
-        <div style="margin-top:.875rem;"><div class="info-key" style="margin-bottom:.375rem;">Previous experience</div><div class="qa-a">${esc(app.previous_experience || '—')}</div></div>
-      </div>
 
-      <div class="panel-section">
-        <div class="panel-section-title">Resume / CV</div>
-        ${app.resume_path
-          ? `<button class="btn-resume" onclick="downloadFile('resumes','${esc(app.resume_path)}')">⬇ Download resume</button>`
-          : '<p style="color:var(--fg2);font-size:.875rem;">No resume uploaded.</p>'}
-      </div>
-
-      <div class="panel-section">
-        <div class="panel-section-title">Assessment answers</div>
-        ${Object.keys(answers).length
-          ? Object.entries(answers).map(([k,v]) => `<div class="qa-item"><div class="qa-q">Question ${k.replace('q','')}</div><div class="qa-a">${esc(v)}</div></div>`).join('')
-          : '<p style="color:var(--fg2);font-size:.875rem;">No answers recorded.</p>'}
-      </div>
-
-      ${isAdmin ? `
-      <div class="panel-section">
-        <div class="panel-section-title">Assignment</div>
-        <div class="action-field">
-          <label>Assigned reviewer</label>
-          <select id="app-action-reviewer">
-            <option value="">Unassigned</option>
-            ${reviewerOptions}
-          </select>
+        <div class="profile-card panel-section" style="margin-top:1.25rem;">
+          <div class="panel-section-title">Assessment answers</div>
+          ${Object.keys(answers).length
+            ? Object.entries(answers).map(([k,v]) => `<div class="qa-item"><div class="qa-q">Question ${k.replace('q','')}</div><div class="qa-a">${esc(v)}</div></div>`).join('')
+            : '<p style="color:var(--fg2);font-size:.875rem;">No answers recorded.</p>'}
         </div>
-      </div>` : ''}
+      </div>
 
-      ${canEdit ? `
-      <div class="panel-section">
-        <div class="panel-section-title">Reviewer actions</div>
-        <div class="action-row">
+      <div class="profile-tab-content" id="app-tab-documents">
+        <div class="profile-card panel-section">
+          <div class="panel-section-title">Resume / CV</div>
+          ${app.resume_path
+            ? `<button class="btn-resume" onclick="downloadFile('resumes','${esc(app.resume_path)}')">📄 Download resume</button>`
+            : '<p style="color:var(--fg2);font-size:.875rem;">No resume uploaded.</p>'}
+        </div>
+      </div>
+
+      <div class="profile-tab-content" id="app-tab-timeline">
+        <div class="profile-card panel-section">
+          <div class="panel-section-title">Timeline</div>
+          ${buildTimeline([
+            { date: app.submitted_at, label: 'Application submitted' },
+            app.status && app.status !== 'Submitted' ? { date: app.submitted_at, label: 'Status: ' + app.status } : null
+          ])}
+        </div>
+      </div>
+
+      ${(isAdmin || canEdit) ? `
+      <div class="profile-tab-content" id="app-tab-admin">
+        ${isAdmin ? `
+        <div class="profile-card panel-section">
+          <div class="panel-section-title">Assignment</div>
           <div class="action-field">
-            <label>Status</label>
-            <select id="app-action-status">
-              <option ${app.status==='Submitted'?'selected':''}>Submitted</option>
-              <option ${app.status==='Under Review'?'selected':''}>Under Review</option>
-              <option ${app.status==='Passed'?'selected':''}>Passed</option>
-              <option ${app.status==='Failed'?'selected':''}>Failed</option>
-              <option ${app.status==='Interview Required'?'selected':''}>Interview Required</option>
-              <option ${app.status==='Accepted'?'selected':''}>Accepted</option>
+            <label>Assigned reviewer</label>
+            <select id="app-action-reviewer">
+              <option value="">Unassigned</option>
+              ${reviewerOptions}
             </select>
           </div>
-          <div class="action-field">
-            <label>Score (1–10)</label>
-            <input type="number" id="app-action-score" min="1" max="10" value="${app.reviewer_score != null ? app.reviewer_score : ''}">
-          </div>
-          <div class="action-field">
-            <label>Reviewer notes</label>
-            <textarea id="app-action-notes" placeholder="Internal notes visible only to the team…">${esc(app.reviewer_notes || '')}</textarea>
-          </div>
-          <div>
-            <button class="btn-save" id="app-save-btn" onclick="saveApplication()">Save changes</button>
-            <p class="save-msg" id="app-save-msg"></p>
+        </div>` : ''}
+
+        <div class="profile-card panel-section" style="margin-top:${isAdmin?'1.25rem':'0'};">
+          <div class="panel-section-title">Reviewer actions</div>
+          <div class="action-row">
+            <div class="action-field">
+              <label>Status</label>
+              <select id="app-action-status">
+                <option ${app.status==='Submitted'?'selected':''}>Submitted</option>
+                <option ${app.status==='Under Review'?'selected':''}>Under Review</option>
+                <option ${app.status==='Passed'?'selected':''}>Passed</option>
+                <option ${app.status==='Failed'?'selected':''}>Failed</option>
+                <option ${app.status==='Interview Required'?'selected':''}>Interview Required</option>
+                <option ${app.status==='Accepted'?'selected':''}>Accepted</option>
+              </select>
+            </div>
+            <div class="action-field">
+              <label>Score (1–10)</label>
+              <input type="number" id="app-action-score" min="1" max="10" value="${app.reviewer_score != null ? app.reviewer_score : ''}">
+            </div>
+            <div class="action-field">
+              <label>Reviewer notes</label>
+              <textarea id="app-action-notes" placeholder="Internal notes visible only to the team…">${esc(app.reviewer_notes || '')}</textarea>
+            </div>
+            <div>
+              <button class="btn-save" id="app-save-btn" onclick="saveApplication()">Save changes</button>
+              <p class="save-msg" id="app-save-msg"></p>
+            </div>
           </div>
         </div>
-      </div>` : '<p style="color:var(--fg2);font-size:.8125rem;">You have view-only access to this application.</p>'}
+      </div>` : ''}
     `;
 
-    document.getElementById('app-panel-overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
+    document.getElementById('app-list-view').style.display = 'none';
+    document.getElementById('app-profile-view').classList.add('open');
   }
 
   function closeAppPanel() {
-    document.getElementById('app-panel-overlay').classList.remove('open');
-    document.body.style.overflow = '';
+    document.getElementById('app-profile-view').classList.remove('open');
+    document.getElementById('app-list-view').style.display = 'block';
     currentApp = null;
+  }
+
+  function buildTimeline(items) {
+    const valid = items.filter(Boolean);
+    if (valid.length === 0) return '<p style="color:var(--fg2);font-size:.875rem;">No timeline events yet.</p>';
+    return `<div class="timeline">${valid.map(it => `
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div>
+          <div class="timeline-date">${fmtDate(it.date)}</div>
+          <div class="timeline-label">${esc(it.label)}</div>
+        </div>
+      </div>`).join('')}</div>`;
   }
 
   async function saveApplication() {
@@ -1441,9 +1800,13 @@
   }
 
   // ══════════════════════ TALENT POOL TAB ══════════════════════
+  let currentTalentRowsRendered = [];
+
   async function loadTalentPool() {
     document.getElementById('talent-loading').style.display = 'block';
     document.getElementById('talent-table-wrap').style.display = 'none';
+
+    if (allTeamMembers.length === 0) await loadTeamMembersForDropdowns();
 
     const { data, error } = await sb.from('talent_pool').select('*').order('submitted_at', { ascending: false });
 
@@ -1453,33 +1816,104 @@
     if (error) { console.error(error); return; }
     allTalentPool = data || [];
     loadedTabs.talent = true;
+
+    populateTalentFilterOptions();
+    updateTalentStats();
+    renderTalentPool();
+  }
+
+  // Populates the "more filters" dropdowns (country, experience, education, preferred role,
+  // work type, availability, skill) from whatever values actually exist in the loaded data —
+  // so this works whether these are free-text or array columns, and degrades gracefully
+  // if a given column doesn't exist in your schema (it'll just render an empty list).
+  function populateTalentFilterOptions() {
+    const build = (selId, values) => {
+      const sel = document.getElementById(selId);
+      const current = sel.value;
+      const unique = [...new Set(values)].filter(Boolean).sort();
+      const label = sel.options[0].textContent;
+      sel.innerHTML = `<option value="">${label}</option>` + unique.map(v => `<option ${v===current?'selected':''}>${esc(v)}</option>`).join('');
+    };
+    build('talent-filter-country', allTalentPool.map(r => r.country));
+    build('talent-filter-experience', allTalentPool.map(r => r.years_experience || r.experience_level));
+    build('talent-filter-education', allTalentPool.map(r => r.education_level));
+    build('talent-filter-worktype', allTalentPool.map(r => r.work_type));
+    build('talent-filter-availability', allTalentPool.map(r => r.availability));
+    build('talent-filter-position', allTalentPool.flatMap(r => toList(r.preferred_roles)));
+    build('talent-filter-skill',allTalentPool.flatMap(r => getCandidateSkills(r)));
+  }
+
+  function updateTalentStats() {
+    const t = allTalentPool;
+    document.getElementById('talent-stat-all').textContent = t.length;
+    document.getElementById('talent-stat-shortlisted').textContent = t.filter(r => r.status === 'Shortlisted').length;
+    document.getElementById('talent-stat-assigned').textContent = t.filter(r => r.status === 'Assigned').length;
+    document.getElementById('talent-stat-inactive').textContent = t.filter(r => r.status === 'Inactive').length;
+  }
+
+  function filterTalentByStatCard(status) {
+    document.getElementById('talent-filter-status').value = status;
+    document.querySelectorAll('#talent-list-view .stats-row .stat-card.clickable').forEach(c => c.classList.remove('active'));
+    const idMap = { '':'talent-stat-card-all', 'Shortlisted':'talent-stat-card-shortlisted', 'Assigned':'talent-stat-card-assigned', 'Inactive':'talent-stat-card-inactive' };
+    const el = document.getElementById(idMap[status]);
+    if (el) el.classList.add('active');
     renderTalentPool();
   }
 
   function renderTalentPool() {
     const search = document.getElementById('talent-search').value.toLowerCase();
     const stFilter = document.getElementById('talent-filter-status').value;
+    const sortMode = document.getElementById('talent-sort').value;
+    const countryFilter = document.getElementById('talent-filter-country').value;
+    const expFilter = document.getElementById('talent-filter-experience').value;
+    const eduFilter = document.getElementById('talent-filter-education').value;
+    const roleFilter = document.getElementById('talent-filter-position').value;
+    const workTypeFilter = document.getElementById('talent-filter-worktype').value;
+    const availFilter = document.getElementById('talent-filter-availability').value;
+    const skillFilter = document.getElementById('talent-filter-skill').value;
+
+    document.querySelectorAll('#talent-list-view .stats-row .stat-card.clickable').forEach(c => c.classList.remove('active'));
+    const idMap = { '':'talent-stat-card-all', 'Shortlisted':'talent-stat-card-shortlisted', 'Assigned':'talent-stat-card-assigned', 'Inactive':'talent-stat-card-inactive' };
+    const activeCard = document.getElementById(idMap[stFilter]);
+    if (activeCard) activeCard.classList.add('active');
 
     let rows = allTalentPool.filter(r => {
-      const matchSearch = !search || (r.full_name||'').toLowerCase().includes(search) || (r.country||'').toLowerCase().includes(search);
+      const matchSearch = !search || (r.full_name||'').toLowerCase().includes(search) || (r.country||'').toLowerCase().includes(search) || (r.email||'').toLowerCase().includes(search);
       const matchSt = !stFilter || r.status === stFilter;
-      return matchSearch && matchSt;
+      const matchCountry = !countryFilter || r.country === countryFilter;
+      const matchExp = !expFilter || (r.years_experience||r.experience_level) === expFilter;
+      const matchEdu = !eduFilter || r.education_level === eduFilter;
+      const matchRole = !roleFilter || toList(r.preferred_roles).includes(roleFilter);
+      const matchWorkType = !workTypeFilter || r.work_type === workTypeFilter;
+      const matchAvail = !availFilter || r.availability === availFilter;
+      const matchSkill =!skillFilter ||getCandidateSkills(r).includes(skillFilter);
+      return matchSearch && matchSt && matchCountry && matchExp && matchEdu && matchRole && matchWorkType && matchAvail && matchSkill;
     });
+
+    rows = sortRows(rows, sortMode);
+    currentTalentRowsRendered = rows;
 
     const tbody = document.getElementById('talent-tbody');
     const empty = document.getElementById('talent-empty');
-    if (rows.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+    if (rows.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; updateBulkToolbar('talent'); return; }
     empty.style.display = 'none';
 
-    tbody.innerHTML = rows.map(r => `
-      <tr class="clickable" onclick="openTalentPanel('${r.id}')">
-        <td class="td-name">${esc(r.full_name)}</td>
-        <td>${esc(r.country || '—')}</td>
-        <td>${esc((r.areas_of_expertise||'').slice(0,60))}${(r.areas_of_expertise||'').length>60?'…':''}</td>
-        <td><span class="status-badge ${statusClass(r.status)}">${esc(r.status || 'In pool')}</span></td>
-        <td class="td-sub">${fmtDate(r.submitted_at)}</td>
+    tbody.innerHTML = rows.map(r => {
+      const roles = toList(r.preferred_roles);
+      return `
+      <tr class="clickable ${selection.talent.has(r.id)?'row-selected':''}" data-row-id="${r.id}" data-row-table="talent" onclick="openTalentPanel('${r.id}')">
+        <td class="td-check" onclick="event.stopPropagation()"><input type="checkbox" ${selection.talent.has(r.id)?'checked':''} onchange="toggleRowSelect('talent','${r.id}',this.checked)"></td>
+        <td><div class="td-name"><span class="row-avatar">${initialsOf(r.full_name)}</span>${esc(r.full_name)}</div></td>
+        <td><div class="td-email">${esc(r.email||'—')}</div><div class="td-sub">${esc(r.phone||'')}</div></td>
+        <td>${roles.length ? roles.map(x=>`<span class="badge">${esc(x)}</span>`).join(' ') : '—'}</td>
+        <td>${esc(r.years_experience || r.experience_level || '—')}</td>
+        <td>${esc(r.education_level || '—')}</td>
+        <td><span class="status-badge ${statusClass(r.status)}"><span class="status-dot"></span>${esc(r.status || 'In pool')}</span></td>
+        <td>${r.resume_path ? `<button class="icon-btn" onclick="event.stopPropagation(); downloadFile('resumes','${esc(r.resume_path)}')" title="Download resume">📄</button>` : '—'}</td>
+        <td class="td-sub">${fmtDateShort(r.submitted_at)}</td>
       </tr>
-    `).join('');
+    `; }).join('');
+    updateBulkToolbar('talent');
   }
 
   function openTalentPanel(id) {
@@ -1487,65 +1921,153 @@
     if (!t) return;
     currentTalent = t;
     document.getElementById('talent-panel-name').textContent = t.full_name;
+    document.getElementById('talent-profile-avatar').textContent = initialsOf(t.full_name);
+    const roles = toList(t.preferred_roles);
+    document.getElementById('talent-profile-subline').textContent = roles.join(' • ') || (t.occupation || '');
+    document.getElementById('talent-profile-status').outerHTML = `<span class="status-badge ${statusClass(t.status)}" id="talent-profile-status"><span class="status-dot"></span>${esc(t.status || 'In pool')}</span>`;
+    document.getElementById('talent-profile-contact').innerHTML = `
+      ${t.country ? `<span>📍 ${esc(t.country)}</span>` : ''}
+      ${t.email ? `<span>📧 <a href="mailto:${esc(t.email)}">${esc(t.email)}</a></span>` : ''}
+      ${t.phone ? `<span>📱 ${esc(t.phone)}</span>` : ''}
+    `;
 
     const isAdmin = currentMember.role === 'admin';
+    const skills = getCandidateSkills(t);
+    const expertise = toList(t.areas_of_expertise);
+
+    const tabs = ['personal','employment','education','skills','documents','timeline'];
+    if (isAdmin) tabs.push('admin');
+    const tabLabels = { personal:'Personal', employment:'Employment', education:'Education', skills:'Skills', documents:'Documents', timeline:'Timeline', admin:'Admin' };
+    document.getElementById('talent-profile-tabs').innerHTML = tabs.map((tb,i) =>
+      `<button class="profile-tab-btn ${i===0?'active':''}" id="talent-tabbtn-${tb}" onclick="switchProfileTab('talent','${tb}')">${tabLabels[tb]}</button>`
+    ).join('');
+
+    const reviewerOptions = allTeamMembers.filter(m => m.role === 'reviewer' || m.role === 'admin')
+      .map(m => `<option value="${m.id}" ${t.owner_id===m.id?'selected':''}>${esc(m.email)}</option>`).join('');
 
     document.getElementById('talent-panel-body').innerHTML = `
-      <div class="panel-section">
-        <div class="panel-section-title">Candidate details</div>
-        <div class="info-grid">
-          <div class="info-item"><div class="info-key">Full name</div><div class="info-val">${esc(t.full_name)}</div></div>
-          <div class="info-item"><div class="info-key">Country</div><div class="info-val">${esc(t.country || '—')}</div></div>
-          <div class="info-item"><div class="info-key">Referred by</div><div class="info-val">${esc(t.referred_by || '—')}</div></div>
-          <div class="info-item"><div class="info-key">Submitted</div><div class="info-val">${fmtDate(t.submitted_at)}</div></div>
+      <div class="profile-tab-content active" id="talent-tab-personal">
+        <div class="profile-card panel-section">
+          <div class="panel-section-title">Personal details</div>
+          <div class="info-grid">
+            <div class="info-item"><div class="info-key">Full name</div><div class="info-val">${esc(t.full_name)}</div></div>
+            <div class="info-item"><div class="info-key">Email</div><div class="info-val">${t.email ? `<a href="mailto:${esc(t.email)}" style="color:var(--primary)">${esc(t.email)}</a>` : '—'}</div></div>
+            <div class="info-item"><div class="info-key">Phone</div><div class="info-val">${esc(t.phone || '—')}</div></div>
+            <div class="info-item"><div class="info-key">Gender</div><div class="info-val">${esc(t.gender || '—')}</div></div>
+            <div class="info-item"><div class="info-key">Country</div><div class="info-val">${esc(t.country || '—')}</div></div>
+            <div class="info-item"><div class="info-key">Referred by</div><div class="info-val">${esc(t.referred_by || '—')}</div></div>
+            <div class="info-item"><div class="info-key">Submitted</div><div class="info-val">${fmtDate(t.submitted_at)}</div></div>
+          </div>
         </div>
       </div>
 
-      <div class="panel-section">
-        <div class="panel-section-title">Background</div>
-        <div style="margin-bottom:.875rem;"><div class="info-key" style="margin-bottom:.375rem;">Education background</div><div class="qa-a">${esc(t.education_background || '—')}</div></div>
-        <div style="margin-bottom:.875rem;"><div class="info-key" style="margin-bottom:.375rem;">Areas of expertise</div><div class="qa-a">${esc(t.areas_of_expertise || '—')}</div></div>
-        <div style="margin-bottom:.875rem;"><div class="info-key" style="margin-bottom:.375rem;">Computer spec</div><div class="qa-a">${esc(t.computer_spec || '—')}</div></div>
-        <div><div class="info-key" style="margin-bottom:.375rem;">Additional experience</div><div class="qa-a">${esc(t.additional_experience || '—')}</div></div>
+      <div class="profile-tab-content" id="talent-tab-employment">
+        <div class="profile-card panel-section">
+          <div class="panel-section-title">Preferred roles</div>
+          <div class="badge-row">${roles.length ? roles.map(x=>`<span class="badge primary">${esc(x)}</span>`).join('') : '<span style="color:var(--fg2);font-size:.875rem;">None specified</span>'}</div>
+          <div class="info-divider"></div>
+          <div class="info-grid">
+            <div class="info-item"><div class="info-key">Work type</div><div class="info-val">${esc(t.work_type || '—')}</div></div>
+            <div class="info-item"><div class="info-key">Availability</div><div class="info-val">${esc(t.availability || '—')}</div></div>
+            <div class="info-item"><div class="info-key">Years experience</div><div class="info-val">${esc(t.years_experience || t.experience_level || '—')}</div></div>
+            <div class="info-item"><div class="info-key">Hours/week</div><div class="info-val">${esc(String(t.hours_per_week || '—'))}</div></div>
+          </div>
+          <div class="info-divider"></div>
+          <div class="info-key" style="margin-bottom:.5rem;">Additional experience</div>
+          <div class="qa-a">${esc(t.additional_experience || '—')}</div>
+        </div>
       </div>
 
-      <div class="panel-section">
-        <div class="panel-section-title">Documents</div>
-        <div style="display:flex; gap:.625rem; flex-wrap:wrap;">
-          ${t.efset_certificate_url ? `<a class="btn-resume" href="${esc(t.efset_certificate_url)}" target="_blank" rel="noopener">⬇ EFSET certificate</a>` : ''}
-          ${t.resume_path ? `<button class="btn-resume" onclick="downloadFile('resumes','${esc(t.resume_path)}')">⬇ Download resume</button>` : ''}
-          ${(!t.efset_certificate_url && !t.resume_path) ? '<p style="color:var(--fg2);font-size:.875rem;">No documents on file.</p>' : ''}
+      <div class="profile-tab-content" id="talent-tab-education">
+        <div class="profile-card panel-section">
+          <div class="panel-section-title">Education</div>
+          <div class="info-grid">
+            <div class="info-item"><div class="info-key">Education level</div><div class="info-val">${esc(t.education_level || '—')}</div></div>
+            <div class="info-item"><div class="info-key">Education background</div><div class="info-val">${esc(t.education_background || '—')}</div></div>
+          </div>
+          <div class="info-divider"></div>
+          <div class="info-key" style="margin-bottom:.5rem;">Areas of expertise</div>
+          <div class="badge-row">${expertise.length ? expertise.map(x=>`<span class="badge">${esc(x)}</span>`).join('') : '<span style="color:var(--fg2);font-size:.875rem;">—</span>'}</div>
+          <div class="info-divider"></div>
+          <div class="info-key" style="margin-bottom:.5rem;">Computer specs</div>
+          <div class="qa-a">${esc(t.computer_spec || '—')}</div>
+        </div>
+      </div>
+
+      <div class="profile-tab-content" id="talent-tab-skills">
+        <div class="profile-card panel-section">
+          <div class="panel-section-title">Skills</div>
+          <div class="badge-row">${skills.length ? skills.map(x=>`<span class="badge">${esc(x)}</span>`).join('') : '<span style="color:var(--fg2);font-size:.875rem;">No skills recorded.</span>'}</div>
+        </div>
+      </div>
+
+      <div class="profile-tab-content" id="talent-tab-documents">
+        <div class="profile-card panel-section">
+          <div class="panel-section-title">Documents</div>
+          <div style="display:flex; gap:.625rem; flex-wrap:wrap;">
+            ${t.resume_path ? `<button class="btn-resume" onclick="downloadFile('resumes','${esc(t.resume_path)}')">📄 Download resume</button>` : ''}
+            ${t.efset_certificate_url ? `<a class="btn-resume" href="${esc(t.efset_certificate_url)}" target="_blank" rel="noopener">🔗 EFSET certificate</a>` : ''}
+            ${t.portfolio_url ? `<a class="btn-resume" href="${esc(t.portfolio_url)}" target="_blank" rel="noopener">🔗 View portfolio</a>` : ''}
+            ${(!t.efset_certificate_url && !t.resume_path && !t.portfolio_url) ? '<p style="color:var(--fg2);font-size:.875rem;">No documents on file.</p>' : ''}
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-tab-content" id="talent-tab-timeline">
+        <div class="profile-card panel-section">
+          <div class="panel-section-title">Timeline</div>
+          ${buildTimeline([
+            { date: t.submitted_at, label: 'Candidate joined Talent Pool' },
+            t.status && t.status !== 'In pool' ? { date: t.status_updated_at || t.submitted_at, label: 'Status: ' + t.status } : null
+          ])}
         </div>
       </div>
 
       ${isAdmin ? `
-      <div class="panel-section">
-        <div class="panel-section-title">Status</div>
-        <div class="action-row">
-          <div class="action-field">
-            <select id="talent-action-status">
-              <option ${t.status==='In pool'?'selected':''}>In pool</option>
-              <option ${t.status==='Shortlisted'?'selected':''}>Shortlisted</option>
-              <option ${t.status==='Contacted'?'selected':''}>Contacted</option>
-              <option ${t.status==='Assigned'?'selected':''}>Assigned</option>
-              <option ${t.status==='Inactive'?'selected':''}>Inactive</option>
-            </select>
-          </div>
-          <div>
-            <button class="btn-save" id="talent-save-btn" onclick="saveTalent()">Save changes</button>
-            <p class="save-msg" id="talent-save-msg"></p>
+      <div class="profile-tab-content" id="talent-tab-admin">
+        <div class="profile-card panel-section">
+          <div class="action-row">
+            <div class="action-field">
+              <label>Status</label>
+              <select id="talent-action-status">
+                <option ${t.status==='In pool'?'selected':''}>In pool</option>
+                <option ${t.status==='Shortlisted'?'selected':''}>Shortlisted</option>
+                <option ${t.status==='Contacted'?'selected':''}>Contacted</option>
+                <option ${t.status==='Assigned'?'selected':''}>Assigned</option>
+                <option ${t.status==='Inactive'?'selected':''}>Inactive</option>
+              </select>
+            </div>
+            <div class="action-field">
+              <label>Reviewer score</label>
+              ${starRatingHtml('talent-score', t.reviewer_score, true)}
+            </div>
+            <div class="action-field">
+              <label>Reviewer notes</label>
+              <textarea id="talent-action-notes" placeholder="Internal notes visible only to the team…">${esc(t.reviewer_notes || '')}</textarea>
+            </div>
+            <div class="action-field">
+              <label>Owner</label>
+              <select id="talent-action-owner">
+                <option value="">Unassigned</option>
+                ${reviewerOptions}
+              </select>
+            </div>
+            <div>
+              <button class="btn-save" id="talent-save-btn" onclick="saveTalent()">Save changes</button>
+              <p class="save-msg" id="talent-save-msg"></p>
+            </div>
           </div>
         </div>
       </div>` : ''}
     `;
 
-    document.getElementById('talent-panel-overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
+    document.getElementById('talent-list-view').style.display = 'none';
+    document.getElementById('talent-profile-view').classList.add('open');
   }
 
   function closeTalentPanel() {
-    document.getElementById('talent-panel-overlay').classList.remove('open');
-    document.body.style.overflow = '';
+    document.getElementById('talent-profile-view').classList.remove('open');
+    document.getElementById('talent-list-view').style.display = 'block';
     currentTalent = null;
   }
 
@@ -1557,15 +2079,24 @@
     saveMsg.className = 'save-msg';
 
     const status = document.getElementById('talent-action-status').value;
-    const { error } = await sb.from('talent_pool').update({ status }).eq('id', currentTalent.id);
+    const scoreEl = document.getElementById('star-rating-talent-score');
+    const reviewer_score = scoreEl ? parseInt(scoreEl.dataset.value || '0') || null : null;
+    const reviewer_notes = document.getElementById('talent-action-notes').value || null;
+    const ownerSel = document.getElementById('talent-action-owner');
+    const owner_id = ownerSel ? (ownerSel.value || null) : undefined;
+
+    const update = { status, reviewer_score, reviewer_notes };
+    if (owner_id !== undefined) update.owner_id = owner_id;
+
+    const { error } = await sb.from('talent_pool').update(update).eq('id', currentTalent.id);
 
     if (error) {
       saveMsg.textContent = 'Error saving: ' + error.message;
       saveMsg.className = 'save-msg err show';
     } else {
       const idx = allTalentPool.findIndex(r => r.id === currentTalent.id);
-      if (idx !== -1) { allTalentPool[idx].status = status; currentTalent = allTalentPool[idx]; }
-      renderTalentPool();
+      if (idx !== -1) { allTalentPool[idx] = { ...allTalentPool[idx], ...update }; currentTalent = allTalentPool[idx]; }
+      updateTalentStats(); renderTalentPool();
       saveMsg.textContent = 'Changes saved.';
       saveMsg.className = 'save-msg ok show';
     }
@@ -1617,7 +2148,7 @@
           </select>
         </td>
         <td>${member.active ? '<span class="status-badge s-accepted">Active</span>' : '<span class="status-badge s-failed">Disabled</span>'}</td>
-        <td>${projectNames.length ? projectNames.map(n=>`<span class="exp-tag">${esc(n)}</span>`).join(' ') : '<span style="color:var(--fg2)">—</span>'}</td>
+        <td>${projectNames.length ? projectNames.map(n=>`<span class="badge">${esc(n)}</span>`).join(' ') : '<span style="color:var(--fg2)">—</span>'}</td>
         <td><button class="btn-secondary" onclick="toggleMember('${member.id}', ${member.active})">${member.active ? 'Disable' : 'Activate'}</button></td>
       </tr>`;
     }).join('');

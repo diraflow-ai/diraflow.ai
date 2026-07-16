@@ -834,51 +834,29 @@
       const now = new Date().toISOString();
 
       const payload = {
-        full_name:              formData.get('full_name'),
-        email:                  formData.get('email'),
-        phone:                  formData.get('phone'),
-        gender:                 formData.get('gender'),
-
-        // Positions interested in
-        pos_software_dev:       !!formData.get('pos_software_dev'),
-        pos_data_annotator:     !!formData.get('pos_data_annotator'),
-        pos_ai_trainer:         !!formData.get('pos_ai_trainer'),
-        pos_uiux:               !!formData.get('pos_uiux'),
-        pos_marketing:          !!formData.get('pos_marketing'),
-        pos_support:            !!formData.get('pos_support'),
-        pos_pm:                 !!formData.get('pos_pm'),
-        pos_finance:            !!formData.get('pos_finance'),
-        pos_hr:                 !!formData.get('pos_hr'),
-        pos_other:              !!formData.get('pos_other'),
-        pos_other_specify:      formData.get('pos_other_specify') || null,
-
-        years_experience:       formData.get('years_experience'),
-        education_level:        formData.get('education_level'),
-        education_background:   formData.get('education_background'),
-
-        // Skills
-        skill_programming:      !!formData.get('skill_programming'),
-        skill_annotation:       !!formData.get('skill_annotation'),
-        skill_ai_ml:            !!formData.get('skill_ai_ml'),
-        skill_design:           !!formData.get('skill_design'),
-        skill_support:          !!formData.get('skill_support'),
-        skill_marketing:        !!formData.get('skill_marketing'),
-        skill_admin:            !!formData.get('skill_admin'),
-        skill_writing:          !!formData.get('skill_writing'),
-        skill_finance:          !!formData.get('skill_finance'),
-        skill_other:            !!formData.get('skill_other'),
-
-        work_type:              formData.get('work_type'),
-        availability:           formData.get('availability'),
-        areas_of_expertise:     formData.get('areas_of_expertise'),
-        computer_spec:          formData.get('computer_spec'),
-        referred_by:            formData.get('referred_by'),
-        country:                formData.get('country'),
-        efset_certificate_url:  formData.get('efset_certificate_url'),
-        resume_path:            resumePath,
-        additional_experience:  formData.get('additional_experience') || null,
-        status:                 'In pool',
-        submitted_at:           now
+        position:             formData.get('position'),
+        full_name:            formData.get('full_name'),
+        email:                formData.get('email'),
+        phone:                formData.get('phone'),
+        country:              formData.get('country'),
+        city:                 formData.get('city'),
+        timezone:             formData.get('timezone'),
+        occupation:           formData.get('occupation'),
+        previous_experience:  formData.get('previous_experience'),
+        years_experience:     formData.get('years_experience'),
+        exp_annotation:       !!formData.get('exp_annotation'),
+        exp_labeling:         !!formData.get('exp_labeling'),
+        exp_ai_training:      !!formData.get('exp_ai_training'),
+        exp_qa:               !!formData.get('exp_qa'),
+        exp_image_eval:       !!formData.get('exp_image_eval'),
+        languages:            formData.get('languages'),
+        computer_skills:      formData.get('computer_skills'),
+        internet_availability: formData.get('internet_availability'),
+        hours_per_week:       formData.get('hours_per_week'),
+        resume_path:          resumePath,
+        assessment_answers:   answers,
+        status:               'Submitted',
+        submitted_at:         now
       };
 
       // 1. Insert into applications table
