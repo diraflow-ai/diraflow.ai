@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo.jpg">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.102.0"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -79,12 +79,12 @@
   .login-card h2 { font-size: 1.375rem; font-weight: 700; margin-bottom: 1.75rem; }
   .field { display: flex; flex-direction: column; gap: .375rem; margin-bottom: 1rem; }
   .field label { font-size: .8125rem; font-weight: 600; color: var(--fg2); }
-  .field input {
+  .field input, .field select {
     background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
     padding: .625rem .875rem; font-family: inherit; font-size: .9375rem; color: var(--fg);
     transition: border-color .2s;
   }
-  .field input:focus { outline: none; border-color: var(--gold); }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--gold); }
   .btn-primary {
     width: 100%; background: var(--gold); color: #fff; border: none; border-radius: var(--radius);
     padding: .75rem; font-family: inherit; font-size: .9375rem; font-weight: 600; cursor: pointer;
@@ -94,6 +94,12 @@
   .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
   .login-err, .verify-error { color: #e74c3c; font-size: .8125rem; margin-top: .75rem; display: none; }
   .login-err.show, .verify-error.show { display: block; }
+  .login-ok { color: #2e8b57; font-size: .8125rem; margin-top: .75rem; display: none; }
+  .login-ok.show { display: block; }
+
+  .auth-links { display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; font-size: .8125rem; }
+  .auth-links a { color: var(--gold); text-decoration: none; font-weight: 600; cursor: pointer; }
+  .auth-links a:hover { text-decoration: underline; }
 
   /* ── VERIFY SCREEN ── */
   #verify-screen {
@@ -116,6 +122,16 @@
     font-family:inherit; font-size:1rem; color:white; width:100%;
   }
   .verify-card input:focus { outline:none; border-color:var(--gold); }
+
+  /* ── SIGNUP / FORGOT / RESET SCREENS (share login-screen look) ── */
+  #signup-screen, #forgot-screen, #reset-screen {
+    display:none; position:relative; align-items:center; justify-content:center;
+    min-height:100vh; padding:2rem; overflow:hidden;
+    background:
+      linear-gradient(rgba(255,255,255,.25), rgba(255,255,255,.35)),
+      url("/assets/AutonomousTrucks-970.jpg");
+    background-size:cover; background-position:center;
+  }
 
   /* ── ADMIN SHELL ── */
   #admin-shell { display: none; min-height: 100vh; }
@@ -144,6 +160,20 @@
     cursor: pointer; transition: border-color .2s, color .2s;
   }
   .btn-logout:hover { border-color: var(--fg2); color: var(--fg); }
+
+  .avatar-btn {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--gold-dim); color: var(--gold);
+    border: 1px solid var(--border); font-family: inherit;
+    font-size: .75rem; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .2s;
+  }
+  .avatar-btn:hover { border-color: var(--gold); }
+
+  .profile-section { margin-bottom: 1.5rem; }
+  .profile-section:last-child { margin-bottom: 0; }
+  .profile-divider { border-top: 1px solid var(--border); margin: 1.5rem 0; }
 
   /* Tabs */
   .tabs-bar {
@@ -387,7 +417,86 @@
     </div>
     <button class="btn-primary" id="login-btn" onclick="doLogin()">Sign in →</button>
     <p class="login-err" id="login-err"></p>
+    <div class="auth-links">
+      <a onclick="showAuthScreen('forgot')">Forgot password?</a>
+      <a onclick="showAuthScreen('signup')">Create account</a>
+    </div>
     <p style="margin-top:1.25rem; font-size:.8125rem; color:var(--subtle);">Access is restricted to Diraflow team members only.</p>
+  </div>
+</div>
+
+<!-- ── SIGNUP SCREEN ─────────────────────────────────────────── -->
+<div id="signup-screen">
+  <div class="login-card">
+    <div class="login-logo"><img src="/assets/logo.jpg" alt="Diraflow"><span>Diraflow</span></div>
+    <div class="login-label">Request Access</div>
+    <h2>Create account</h2>
+    <div class="field">
+      <label>Email address</label>
+      <input type="email" id="signup-email" placeholder="you@diraflowai.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Requested role</label>
+      <select id="signup-role">
+        <option value="viewer">Viewer</option>
+        <option value="reviewer">Reviewer</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="signup-password" placeholder="••••••••" autocomplete="new-password">
+    </div>
+    <div class="field">
+      <label>Repeat password</label>
+      <input type="password" id="signup-password2" placeholder="••••••••" autocomplete="new-password">
+    </div>
+    <button class="btn-primary" id="signup-btn" onclick="doSignup()">Create account →</button>
+    <p class="login-err" id="signup-err"></p>
+    <p class="login-ok" id="signup-ok"></p>
+    <div class="auth-links">
+      <a onclick="showAuthScreen('login')">← Back to sign in</a>
+    </div>
+    <p style="margin-top:1.25rem; font-size:.8125rem; color:var(--subtle);">Your requested role is reviewed by an admin — you'll be able to sign in once your account is approved.</p>
+  </div>
+</div>
+
+<!-- ── FORGOT PASSWORD SCREEN ─────────────────────────────────── -->
+<div id="forgot-screen">
+  <div class="login-card">
+    <div class="login-logo"><img src="/assets/logo.jpg" alt="Diraflow"><span>Diraflow</span></div>
+    <div class="login-label">Account Recovery</div>
+    <h2>Reset your password</h2>
+    <div class="field">
+      <label>Email address</label>
+      <input type="email" id="forgot-email" placeholder="you@diraflowai.com" autocomplete="email">
+    </div>
+    <button class="btn-primary" id="forgot-btn" onclick="doForgotPassword()">Send reset link →</button>
+    <p class="login-err" id="forgot-err"></p>
+    <p class="login-ok" id="forgot-ok"></p>
+    <div class="auth-links">
+      <a onclick="showAuthScreen('login')">← Back to sign in</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── RESET PASSWORD SCREEN (reached via emailed link) ────────── -->
+<div id="reset-screen">
+  <div class="login-card">
+    <div class="login-logo"><img src="/assets/logo.jpg" alt="Diraflow"><span>Diraflow</span></div>
+    <div class="login-label">Account Recovery</div>
+    <h2>Set a new password</h2>
+    <div class="field">
+      <label>New password</label>
+      <input type="password" id="reset-password" placeholder="••••••••" autocomplete="new-password">
+    </div>
+    <div class="field">
+      <label>Repeat new password</label>
+      <input type="password" id="reset-password2" placeholder="••••••••" autocomplete="new-password">
+    </div>
+    <button class="btn-primary" id="reset-btn" onclick="doResetPassword()">Update password →</button>
+    <p class="login-err" id="reset-err"></p>
+    <p class="login-ok" id="reset-ok"></p>
   </div>
 </div>
 
@@ -417,6 +526,7 @@
     <div class="topbar-right">
       <span class="role-badge" id="role-badge"></span>
       <span class="team-email" id="user-email"></span>
+      <button class="avatar-btn" id="profile-avatar-btn" onclick="openProfileModal()" title="My profile"></button>
       <button class="btn-logout" onclick="doLogout()">Sign out</button>
     </div>
   </div>
@@ -501,7 +611,7 @@
       <div id="members-loading"><span class="spinner"></span></div>
       <div class="table-wrap" id="members-table-wrap" style="display:none;">
         <table>
-          <thead><tr><th>Email</th><th>Role</th><th>Status</th><th>Projects</th><th>Action</th></tr></thead>
+          <thead><tr><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Projects</th><th>Action</th></tr></thead>
           <tbody id="members-tbody"></tbody>
         </table>
       </div>
@@ -617,6 +727,39 @@
   </div>
 </div>
 
+<!-- ── MY PROFILE MODAL ── -->
+<div class="modal-overlay" id="profile-modal">
+  <div class="modal">
+    <h2>My Profile</h2>
+
+    <div class="profile-section">
+      <div class="field"><label>Email</label><input type="text" id="profile-email" disabled></div>
+      <div class="field"><label>Role</label><input type="text" id="profile-role" disabled></div>
+      <div class="field">
+        <label>Phone number</label>
+        <input type="tel" id="profile-phone" placeholder="+254 7XX XXX XXX">
+      </div>
+      <button class="btn-primary" id="profile-save-info-btn" onclick="saveProfileInfo()">Save changes</button>
+      <p class="save-msg" id="profile-info-msg"></p>
+    </div>
+
+    <div class="profile-divider"></div>
+
+    <div class="profile-section">
+      <div class="panel-section-title" style="margin-bottom:1rem;">Change password</div>
+      <div class="field"><label>Current password</label><input type="password" id="profile-current-password" placeholder="••••••••" autocomplete="current-password"></div>
+      <div class="field"><label>New password</label><input type="password" id="profile-new-password" placeholder="••••••••" autocomplete="new-password"></div>
+      <div class="field"><label>Repeat new password</label><input type="password" id="profile-new-password2" placeholder="••••••••" autocomplete="new-password"></div>
+      <button class="btn-primary" id="profile-save-password-btn" onclick="changeOwnPassword()">Update password</button>
+      <p class="save-msg" id="profile-password-msg"></p>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" type="button" onclick="closeProfileModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // ── Supabase config ──────────────────────────────────────────
   const SUPABASE_URL      = "https://kwxlfuygotdcabhkqbdd.supabase.co";
@@ -639,8 +782,40 @@
 
   // ── Auth bootstrap ───────────────────────────────────────────
   async function init() {
+    // Supabase sends people back here with a #access_token=...&type=recovery
+    // fragment when they click a "reset password" email link. Catch that
+    // before doing anything else so we can show the reset-password screen.
+    sb.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        hideAllAuthScreens();
+        document.getElementById('reset-screen').style.display = 'flex';
+      }
+    });
+
     const { data: { session } } = await sb.auth.getSession();
-    if (session) checkTeamAccess(session.user);
+    if (session) {
+      const last = parseInt(localStorage.getItem(ACTIVITY_KEY) || '0', 10);
+      if (last && Date.now() - last > INACTIVITY_LIMIT_MS) {
+        await sb.auth.signOut();
+        localStorage.removeItem(ACTIVITY_KEY);
+        return;
+      }
+      checkTeamAccess(session.user);
+    }
+  }
+
+  // ── Switching between login / signup / forgot screens ─────────
+  function hideAllAuthScreens() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('signup-screen').style.display = 'none';
+    document.getElementById('forgot-screen').style.display = 'none';
+    document.getElementById('reset-screen').style.display = 'none';
+    document.getElementById('verify-screen').style.display = 'none';
+  }
+
+  function showAuthScreen(name) {
+    hideAllAuthScreens();
+    document.getElementById(name + '-screen').style.display = 'flex';
   }
 
   async function doLogin() {
@@ -669,8 +844,127 @@
       return;
     }
 
-    document.getElementById("login-screen").style.display = "none";
+    hideAllAuthScreens();
     document.getElementById("verify-screen").style.display = "flex";
+    btn.disabled = false; btn.textContent = 'Sign in →';
+  }
+
+  // ── Create account ─────────────────────────────────────────────
+  // Anyone can request an account with any role, but the row this creates
+  // in team_members is inserted with active=false, so checkTeamAccess()
+  // will keep rejecting sign-in until an admin flips it on from the
+  // Members tab (and can correct the requested role at the same time).
+  async function doSignup() {
+    const email     = document.getElementById('signup-email').value.trim();
+    const role      = document.getElementById('signup-role').value;
+    const password  = document.getElementById('signup-password').value;
+    const password2 = document.getElementById('signup-password2').value;
+    const btn = document.getElementById('signup-btn');
+    const errEl = document.getElementById('signup-err');
+    const okEl  = document.getElementById('signup-ok');
+    errEl.className = 'login-err'; okEl.className = 'login-ok';
+
+    if (!email || !password) {
+      errEl.textContent = 'Email and password are required.'; errEl.className = 'login-err show'; return;
+    }
+    if (password.length < 8) {
+      errEl.textContent = 'Password must be at least 8 characters.'; errEl.className = 'login-err show'; return;
+    }
+    if (password !== password2) {
+      errEl.textContent = 'Passwords do not match.'; errEl.className = 'login-err show'; return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Creating account…';
+
+    const { data, error } = await sb.auth.signUp({ email, password });
+    if (error) {
+      errEl.textContent = error.message; errEl.className = 'login-err show';
+      btn.disabled = false; btn.textContent = 'Create account →';
+      return;
+    }
+
+    // Record the requested role and keep the account inactive until an admin approves it.
+    // Uses upsert so this works whether or not a team_members row already exists
+    // for this user id (e.g. created separately by an invite/trigger flow).
+    if (data.user) {
+      const { error: memberError } = await sb.from('team_members').upsert({
+        id: data.user.id,
+        email: data.user.email,
+        role: role,
+        active: false
+      }, { onConflict: 'id' });
+      if (memberError) {
+        console.error('Could not record team_members row for new signup:', memberError);
+      }
+    }
+
+    // If a session came back, the project has email confirmation disabled —
+    // sign the person straight back out since they still need admin approval.
+    if (data.session) await sb.auth.signOut();
+
+    document.getElementById('signup-email').value = '';
+    document.getElementById('signup-password').value = '';
+    document.getElementById('signup-password2').value = '';
+    btn.disabled = false; btn.textContent = 'Create account →';
+    okEl.textContent = data.session
+      ? 'Account created. An admin needs to approve it before you can sign in.'
+      : 'Account created. Check your email to confirm it, then an admin will approve your access.';
+    okEl.className = 'login-ok show';
+  }
+
+  // ── Forgot password ─────────────────────────────────────────────
+  async function doForgotPassword() {
+    const email = document.getElementById('forgot-email').value.trim();
+    const btn = document.getElementById('forgot-btn');
+    const errEl = document.getElementById('forgot-err');
+    const okEl  = document.getElementById('forgot-ok');
+    errEl.className = 'login-err'; okEl.className = 'login-ok';
+
+    if (!email) { errEl.textContent = 'Enter your email address.'; errEl.className = 'login-err show'; return; }
+
+    btn.disabled = true; btn.textContent = 'Sending…';
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname
+    });
+    btn.disabled = false; btn.textContent = 'Send reset link →';
+
+    if (error) {
+      errEl.textContent = error.message; errEl.className = 'login-err show';
+      return;
+    }
+    document.getElementById('forgot-email').value = '';
+    okEl.textContent = 'If that email has an account, a reset link is on its way.';
+    okEl.className = 'login-ok show';
+  }
+
+  // ── Reset password (after following the emailed link) ───────────
+  async function doResetPassword() {
+    const password  = document.getElementById('reset-password').value;
+    const password2 = document.getElementById('reset-password2').value;
+    const btn = document.getElementById('reset-btn');
+    const errEl = document.getElementById('reset-err');
+    const okEl  = document.getElementById('reset-ok');
+    errEl.className = 'login-err'; okEl.className = 'login-ok';
+
+    if (password.length < 8) {
+      errEl.textContent = 'Password must be at least 8 characters.'; errEl.className = 'login-err show'; return;
+    }
+    if (password !== password2) {
+      errEl.textContent = 'Passwords do not match.'; errEl.className = 'login-err show'; return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Updating…';
+    const { error } = await sb.auth.updateUser({ password });
+    btn.disabled = false; btn.textContent = 'Update password →';
+
+    if (error) {
+      errEl.textContent = error.message; errEl.className = 'login-err show';
+      return;
+    }
+    okEl.textContent = 'Password updated. Signing you in…';
+    okEl.className = 'login-ok show';
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) setTimeout(() => checkTeamAccess(session.user), 800);
   }
 
   async function verifyCode() {
@@ -700,7 +994,7 @@
   async function doLogout() {
     await sb.auth.signOut();
     document.getElementById('admin-shell').style.display = 'none';
-    document.getElementById('verify-screen').style.display = 'none';
+    hideAllAuthScreens();
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('login-email').value = '';
     document.getElementById('login-password').value = '';
@@ -710,22 +1004,30 @@
 
   document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
   document.getElementById('verification-code').addEventListener('keydown', e => { if (e.key === 'Enter') verifyCode(); });
+  document.getElementById('signup-password2').addEventListener('keydown', e => { if (e.key === 'Enter') doSignup(); });
+  document.getElementById('forgot-email').addEventListener('keydown', e => { if (e.key === 'Enter') doForgotPassword(); });
+  document.getElementById('reset-password2').addEventListener('keydown', e => { if (e.key === 'Enter') doResetPassword(); });
 
   async function checkTeamAccess(user) {
-    const { data, error } = await sb.from('team_members').select('*').eq('id', user.id).eq('active', true).single();
+    const { data, error } = await sb.from('team_members').select('*').eq('id', user.id).single();
     if (error || !data) {
       await sb.auth.signOut();
       alert("Your account is not authorized to access this portal.");
       return;
     }
+    if (!data.active) {
+      await sb.auth.signOut();
+      alert("Your account is still pending admin approval. You'll be able to sign in once it's activated.");
+      return;
+    }
     currentUser = user;
     currentMember = data;
+    markActivity();
     showDashboard();
   }
 
   function showDashboard() {
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("verify-screen").style.display = "none";
+    hideAllAuthScreens();
     document.getElementById("admin-shell").style.display = "block";
     document.getElementById("user-email").textContent = currentMember.email;
 
@@ -738,7 +1040,97 @@
     document.getElementById('tab-btn-assignments').style.display = isAdmin ? 'inline-block' : 'none';
     document.getElementById('app-filter-reviewer').style.display = isAdmin ? 'inline-block' : 'none';
 
+    const initials = (currentMember.email || '?').trim().charAt(0).toUpperCase();
+    document.getElementById('profile-avatar-btn').textContent = initials;
+
     switchTab('applications');
+  }
+
+  // ══════════════════════ MY PROFILE (any role, including admin) ══════════════════════
+  function openProfileModal() {
+    document.getElementById('profile-email').value = currentMember.email || '';
+    document.getElementById('profile-role').value = currentMember.role || '';
+    document.getElementById('profile-phone').value = currentMember.phone || '';
+    document.getElementById('profile-current-password').value = '';
+    document.getElementById('profile-new-password').value = '';
+    document.getElementById('profile-new-password2').value = '';
+    document.getElementById('profile-info-msg').className = 'save-msg';
+    document.getElementById('profile-password-msg').className = 'save-msg';
+    document.getElementById('profile-modal').classList.add('show');
+  }
+
+  function closeProfileModal() {
+    document.getElementById('profile-modal').classList.remove('show');
+  }
+
+  // Saves the editable parts of the person's own team_members row (currently just
+  // phone number). Requires an RLS policy on team_members that lets a user update
+  // their own row — role/active/email stay admin-controlled and are not touched here.
+  async function saveProfileInfo() {
+    const btn = document.getElementById('profile-save-info-btn');
+    const msg = document.getElementById('profile-info-msg');
+    msg.className = 'save-msg';
+    const phone = document.getElementById('profile-phone').value.trim() || null;
+
+    btn.disabled = true; btn.textContent = 'Saving…';
+    const { error } = await sb.from('team_members').update({ phone }).eq('id', currentUser.id);
+    btn.disabled = false; btn.textContent = 'Save changes';
+
+    if (error) {
+      msg.textContent = 'Error saving: ' + error.message;
+      msg.className = 'save-msg err show';
+      return;
+    }
+    currentMember.phone = phone;
+    const idx = allTeamMembers.findIndex(m => m.id === currentUser.id);
+    if (idx !== -1) allTeamMembers[idx].phone = phone;
+    msg.textContent = 'Changes saved.';
+    msg.className = 'save-msg ok show';
+    setTimeout(() => { msg.className = 'save-msg'; }, 3000);
+  }
+
+  // Lets any signed-in member (reviewer, viewer, or admin) change their own password
+  // without going through the "forgot password" email flow.
+  async function changeOwnPassword() {
+    const btn = document.getElementById('profile-save-password-btn');
+    const msg = document.getElementById('profile-password-msg');
+    msg.className = 'save-msg';
+
+    const currentPassword = document.getElementById('profile-current-password').value;
+    const password  = document.getElementById('profile-new-password').value;
+    const password2 = document.getElementById('profile-new-password2').value;
+
+    if (!currentPassword) {
+      msg.textContent = 'Enter your current password.';
+      msg.className = 'save-msg err show';
+      return;
+    }
+    if (password.length < 8) {
+      msg.textContent = 'Password must be at least 8 characters.';
+      msg.className = 'save-msg err show';
+      return;
+    }
+    if (password !== password2) {
+      msg.textContent = 'Passwords do not match.';
+      msg.className = 'save-msg err show';
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Updating…';
+    const { error } = await sb.auth.updateUser({ password, current_password: currentPassword });
+    btn.disabled = false; btn.textContent = 'Update password';
+
+    if (error) {
+      msg.textContent = 'Error updating password: ' + error.message;
+      msg.className = 'save-msg err show';
+      return;
+    }
+    document.getElementById('profile-current-password').value = '';
+    document.getElementById('profile-new-password').value = '';
+    document.getElementById('profile-new-password2').value = '';
+    msg.textContent = 'Password updated.';
+    msg.className = 'save-msg ok show';
+    setTimeout(() => { msg.className = 'save-msg'; }, 3000);
   }
 
   // ── Tabs ──────────────────────────────────────────────────────
@@ -1216,6 +1608,7 @@
       return `
       <tr>
         <td class="td-name">${esc(member.email)}</td>
+        <td class="td-sub">${esc(member.phone || '—')}</td>
         <td>
           <select onchange="changeRole('${member.id}', this.value)">
             <option ${member.role==='admin'?'selected':''}>admin</option>
@@ -1409,7 +1802,7 @@
   function renderAssignApps() {
     const tbody = document.getElementById('assign-apps-tbody');
     const reviewers = allTeamMembers.filter(m => m.role === 'reviewer' || m.role === 'admin');
-    const rows = allApplications.filter(a => a.status !== 'Accepted' && a.status !== 'Failed');
+    const rows = allApplications;
 
     tbody.innerHTML = rows.map(a => `
       <tr class="clickable" onclick="openAppPanel('${a.id}')">
@@ -1433,6 +1826,38 @@
     if (idx !== -1) allApplications[idx].assigned_reviewer_id = reviewerId || null;
     if (document.getElementById('panel-applications').classList.contains('active')) renderApplications();
   }
+
+  // ── Inactivity auto-logout (6 hours) ─────────────────────────
+  const INACTIVITY_LIMIT_MS = 6 * 60 * 60 * 1000; // 6 hours
+  const ACTIVITY_KEY = 'diraflow_last_activity';
+
+  function markActivity() {
+    // Only bother tracking once someone is actually logged in.
+    if (currentUser) localStorage.setItem(ACTIVITY_KEY, String(Date.now()));
+  }
+
+  function checkInactivity() {
+    if (!currentUser) return;
+    const last = parseInt(localStorage.getItem(ACTIVITY_KEY) || '0', 10);
+    if (last && Date.now() - last > INACTIVITY_LIMIT_MS) {
+      forceLogoutForInactivity();
+    }
+  }
+
+  async function forceLogoutForInactivity() {
+    await doLogout();
+    localStorage.removeItem(ACTIVITY_KEY);
+    alert('You have been signed out after 6 hours of inactivity for security purposes. Please sign in again.');
+  }
+
+  ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'].forEach(evt => {
+    document.addEventListener(evt, markActivity, { passive: true });
+  });
+
+  // Check once a minute, and also immediately whenever the tab regains focus/visibility
+  // (covers the case where a laptop was asleep or the tab was backgrounded for hours).
+  setInterval(checkInactivity, 60 * 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) checkInactivity(); });
 
   // ── Boot ──────────────────────────────────────────────────────
   init();
