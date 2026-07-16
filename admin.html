@@ -136,6 +136,39 @@
   }
   .avatar-btn:hover { border-color: var(--primary); }
 
+  .bell-btn {
+    position: relative; width: 30px; height: 30px; border-radius: 50%;
+    background: none; border: 1px solid var(--border); color: var(--fg2);
+    font-size: .95rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: border-color .2s, color .2s;
+  }
+  .bell-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .notif-badge {
+    position: absolute; top: -4px; right: -4px; min-width: 16px; height: 16px;
+    background: var(--red); color: #fff; font-size: .625rem; font-weight: 700;
+    border-radius: 8px; display: none; align-items: center; justify-content: center; padding: 0 3px;
+  }
+  .notif-panel {
+    display: none; position: absolute; top: 40px; right: 0; width: 320px; max-height: 420px;
+    overflow-y: auto; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    box-shadow: 0 10px 30px rgba(17,24,39,.15); z-index: 100;
+  }
+  .notif-panel.show { display: block; }
+  .notif-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .75rem 1rem; border-bottom: 1px solid var(--border);
+    font-size: .8125rem; font-weight: 700;
+  }
+  .notif-panel-header a { color: var(--primary); font-weight: 600; cursor: pointer; font-size: .75rem; }
+  .notif-item { padding: .75rem 1rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background-color .15s; }
+  .notif-item:last-child { border-bottom: none; }
+  .notif-item:hover { background: #F8FAFC; }
+  .notif-item.unread { background: var(--primary-dim); }
+  .notif-title { font-size: .8125rem; font-weight: 700; }
+  .notif-msg { font-size: .78rem; color: var(--fg2); margin-top: .2rem; }
+  .notif-time { font-size: .7rem; color: var(--subtle); margin-top: .3rem; }
+  .notif-empty { padding: 2rem 1rem; text-align: center; color: var(--fg2); font-size: .8125rem; }
+
   .profile-section { margin-bottom: 1.5rem; }
   .profile-section:last-child { margin-bottom: 0; }
   .profile-divider { border-top: 1px solid var(--border); margin: 1.5rem 0; }
@@ -585,6 +618,12 @@
     <div class="topbar-right">
       <span class="role-badge" id="role-badge"></span>
       <span class="team-email" id="user-email"></span>
+      <div style="position:relative;">
+        <button class="bell-btn" id="notif-bell-btn" onclick="toggleNotifPanel()" title="Notifications">
+          🔔<span class="notif-badge" id="notif-badge">0</span>
+        </button>
+        <div class="notif-panel" id="notif-panel"></div>
+      </div>
       <button class="avatar-btn" id="profile-avatar-btn" onclick="openProfileModal()" title="My profile"></button>
       <button class="btn-logout" onclick="doLogout()">Sign out</button>
     </div>
@@ -1129,6 +1168,8 @@
   }
 
   async function doLogout() {
+    unsubscribeNotifications();
+    allNotifications = [];
     await sb.auth.signOut();
     document.getElementById('admin-shell').style.display = 'none';
     hideAllAuthScreens();
@@ -1179,6 +1220,9 @@
 
     const initials = (currentMember.email || '?').trim().charAt(0).toUpperCase();
     document.getElementById('profile-avatar-btn').textContent = initials;
+
+    loadNotifications();
+    subscribeNotifications();
 
     switchTab('applications');
   }
@@ -1268,6 +1312,145 @@
     msg.textContent = 'Password updated.';
     msg.className = 'save-msg ok show';
     setTimeout(() => { msg.className = 'save-msg'; }, 3000);
+  }
+
+  // ══════════════════════ NOTIFICATIONS (bell + email) ══════════════════════
+  let allNotifications = [];
+  let notifRealtimeChannel = null;
+
+  async function loadNotifications() {
+    if (!currentUser) return;
+    const { data, error } = await sb.from('notifications')
+      .select('*').eq('recipient_id', currentUser.id)
+      .order('created_at', { ascending: false }).limit(30);
+    if (error) { console.error(error); return; }
+    allNotifications = data || [];
+    renderNotifBadge();
+    renderNotifPanel();
+  }
+
+  function subscribeNotifications() {
+    if (!currentUser || notifRealtimeChannel) return;
+    notifRealtimeChannel = sb.channel('notifications-' + currentUser.id)
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'notifications',
+        filter: `recipient_id=eq.${currentUser.id}`
+      }, () => loadNotifications())
+      .subscribe();
+  }
+
+  function unsubscribeNotifications() {
+    if (notifRealtimeChannel) { sb.removeChannel(notifRealtimeChannel); notifRealtimeChannel = null; }
+  }
+
+  function renderNotifBadge() {
+    const badge = document.getElementById('notif-badge');
+    if (!badge) return;
+    const unread = allNotifications.filter(n => !n.is_read).length;
+    if (unread > 0) { badge.textContent = unread > 9 ? '9+' : unread; badge.style.display = 'flex'; }
+    else { badge.style.display = 'none'; }
+  }
+
+  function renderNotifPanel() {
+    const panel = document.getElementById('notif-panel');
+    if (!panel) return;
+    if (allNotifications.length === 0) {
+      panel.innerHTML = '<div class="notif-empty">No notifications yet.</div>';
+      return;
+    }
+    panel.innerHTML = `
+      <div class="notif-panel-header">
+        <span>Notifications</span>
+        <a onclick="markAllNotifRead()">Mark all read</a>
+      </div>
+      ${allNotifications.map(n => `
+        <div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="openNotification('${n.id}')">
+          <div class="notif-title">${esc(n.title)}</div>
+          <div class="notif-msg">${esc(n.message || '')}</div>
+          <div class="notif-time">${fmtDate(n.created_at)}</div>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  function toggleNotifPanel() {
+    document.getElementById('notif-panel').classList.toggle('show');
+  }
+
+  document.addEventListener('click', (e) => {
+    const panel = document.getElementById('notif-panel');
+    const btn = document.getElementById('notif-bell-btn');
+    if (panel && panel.classList.contains('show') && !panel.contains(e.target) && e.target !== btn) {
+      panel.classList.remove('show');
+    }
+  });
+
+  async function markNotifRead(id) {
+    await sb.from('notifications').update({ is_read: true }).eq('id', id);
+    const n = allNotifications.find(x => x.id === id);
+    if (n) n.is_read = true;
+    renderNotifBadge(); renderNotifPanel();
+  }
+
+  async function markAllNotifRead() {
+    const unreadIds = allNotifications.filter(n => !n.is_read).map(n => n.id);
+    if (unreadIds.length === 0) return;
+    await sb.from('notifications').update({ is_read: true }).in('id', unreadIds);
+    allNotifications.forEach(n => n.is_read = true);
+    renderNotifBadge(); renderNotifPanel();
+  }
+
+  function openNotification(id) {
+    markNotifRead(id);
+    const n = allNotifications.find(x => x.id === id);
+    document.getElementById('notif-panel').classList.remove('show');
+    if (!n || !n.related_id) return;
+    if (n.related_table === 'applications') {
+      switchTab('applications');
+      setTimeout(() => openAppPanel(n.related_id), 150);
+    } else if (n.related_table === 'talent_pool') {
+      switchTab('talent');
+      setTimeout(() => openTalentPanel(n.related_id), 150);
+    }
+  }
+
+  async function createNotification(recipientId, type, title, message, relatedTable, relatedId) {
+    if (!recipientId) return;
+    const { error } = await sb.from('notifications').insert({
+      recipient_id: recipientId, type, title, message,
+      related_table: relatedTable, related_id: relatedId ? String(relatedId) : null
+    });
+    if (error) console.error('Could not create notification:', error);
+  }
+
+  async function notifyReviewerAssigned(reviewerId, applicantName, relatedTable, relatedId) {
+    if (!reviewerId) return;
+    await createNotification(
+      reviewerId, 'assignment', 'New review assigned',
+      `You've been assigned to review ${applicantName}.`, relatedTable, relatedId
+    );
+    const { error } = await sb.functions.invoke('notify-reviewer-assigned', {
+      body: { reviewerId, applicantName, relatedTable, relatedId }
+    });
+    if (error) console.error('notify-reviewer-assigned email failed:', error);
+  }
+
+  async function notifyAdminsReviewCompleted(applicantName, relatedTable, relatedId) {
+    if (allTeamMembers.length === 0) await loadTeamMembersForDropdowns();
+    const admins = allTeamMembers.filter(m => m.role === 'admin' && m.id !== currentUser.id);
+    for (const admin of admins) {
+      await createNotification(
+        admin.id, 'review_completed', 'Review completed',
+        `${currentMember.email} finished reviewing ${applicantName}.`, relatedTable, relatedId
+      );
+    }
+    const { error } = await sb.functions.invoke('notify-admin-review-completed', {
+      body: {
+        reviewerEmail: currentMember.email, applicantName, relatedTable, relatedId,
+        adminEmails: admins.map(a => a.email)
+      }
+    });
+    if (error) console.error('notify-admin-review-completed email failed:', error);
   }
 
   // ── Tabs ──────────────────────────────────────────────────────
@@ -1373,13 +1556,22 @@
 
   // ══════════════════════ SELECTION / BULK ACTIONS (shared by Applications + Talent) ══════════════════════
   function toggleRowSelect(table, id, checked) {
-    if (checked) selection[table].add(id); else selection[table].delete(id);
+    id = Number(id);
+
+    if (checked)
+        selection[table].add(id);
+    else
+        selection[table].delete(id);
+
     updateBulkToolbar(table);
-    document.querySelectorAll(`tr[data-row-id="${id}"][data-row-table="${table}"]`).forEach(tr => tr.classList.toggle('row-selected', checked));
-  }
+
+    document.querySelectorAll(
+        `tr[data-row-id="${id}"][data-row-table="${table}"]`
+    ).forEach(tr => tr.classList.toggle('row-selected', checked));
+}
   function toggleSelectAll(table, checked) {
     const rows = table === 'applications' ? currentAppRowsRendered : currentTalentRowsRendered;
-    (rows || []).forEach(r => { if (checked) selection[table].add(r.id); else selection[table].delete(r.id); });
+    (rows || []).forEach(r => { if (checked) selection[table].add(Number(r.id)); else selection[table].delete(r.id); });
     if (table === 'applications') renderApplications(); else renderTalentPool();
   }
   function clearSelection(table) {
@@ -1394,9 +1586,15 @@
     if (bar) bar.classList.toggle('show', count > 0);
   }
   function selectedRows(table) {
-    const source = table === 'applications' ? allApplications : allTalentPool;
+    const source = table === 'applications'
+        ? allApplications
+        : allTalentPool;
+
+    console.log("Selection:", [...selection[table]]);
+    console.log("Rows:", source);
+
     return source.filter(r => selection[table].has(r.id));
-  }
+}
   function bulkExport(table) {
     const rows = selectedRows(table);
     if (rows.length === 0) { alert('Select at least one row to export.'); return; }
@@ -1456,10 +1654,54 @@
     const idx = parseInt(pick, 10) - 1;
     if (isNaN(idx) || !reviewers[idx]) return;
     const ids = rows.map(r => r.id);
-    const { error } = await sb.from('talent_pool').update({ owner_id: reviewers[idx].id, status: 'Assigned' }).in('id', ids);
-    if (error) { alert('Error assigning: ' + error.message); return; }
-    allTalentPool.forEach(r => { if (ids.includes(r.id)) { r.owner_id = reviewers[idx].id; r.status = 'Assigned'; } });
-    updateTalentStats(); renderTalentPool();
+    const { error } = await sb
+  .from('talent_pool')
+  .update({
+      owner_id: reviewers[idx].id,
+      status: 'Assigned'
+  })
+  .in('id', ids);
+
+if (error) {
+    alert('Error assigning: ' + error.message);
+    return;
+}
+
+
+// Send email notification
+const { error: emailError } = await sb.functions.invoke(
+    'send-review-assignment-email',
+    {
+        body: {
+            reviewerEmail: reviewers[idx].email,
+            reviewerName: reviewers[idx].full_name,
+            candidateIds: ids
+        }
+    }
+);
+
+if (emailError) {
+    console.error(emailError);
+}
+
+for (const id of ids) {
+    const candidate = allTalentPool.find(r => r.id === id);
+    await createNotification(
+        reviewers[idx].id, 'assignment', 'New candidate assigned',
+        `You've been assigned to review ${candidate ? candidate.full_name : 'a candidate'}.`,
+        'talent_pool', id
+    );
+}
+
+allTalentPool.forEach(r => {
+    if (ids.includes(r.id)) {
+        r.owner_id = reviewers[idx].id;
+        r.status = 'Assigned';
+    }
+});
+
+updateTalentStats();
+renderTalentPool();
   }
 
   function toggleMoreFilters() {
@@ -1774,6 +2016,11 @@
     saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
     saveMsg.className = 'save-msg';
 
+    const previousReviewerId = currentApp.assigned_reviewer_id;
+    const previousStatus = currentApp.status;
+    const applicantName = currentApp.full_name;
+    const appId = currentApp.id;
+
     const update = {
       status: document.getElementById('app-action-status').value,
       reviewer_score: document.getElementById('app-action-score').value ? parseInt(document.getElementById('app-action-score').value) : null,
@@ -1792,6 +2039,16 @@
       if (idx !== -1) { allApplications[idx] = { ...allApplications[idx], ...update }; currentApp = allApplications[idx]; }
       updateAppStats(); renderApplications();
       if (document.getElementById('panel-assignments').classList.contains('active')) renderAssignApps();
+
+      if (update.assigned_reviewer_id && update.assigned_reviewer_id !== previousReviewerId) {
+        notifyReviewerAssigned(update.assigned_reviewer_id, applicantName, 'applications', appId);
+      }
+
+      const decisiveStatuses = ['Passed', 'Failed', 'Interview Required', 'Accepted'];
+      if (currentMember.role !== 'admin' && decisiveStatuses.includes(update.status) && update.status !== previousStatus) {
+        notifyAdminsReviewCompleted(applicantName, 'applications', appId);
+      }
+
       saveMsg.textContent = 'Changes saved.';
       saveMsg.className = 'save-msg ok show';
     }
@@ -2184,6 +2441,8 @@
     loadTeamMembers();
   }
 
+  
+
   // ══════════════════════ ASSIGNMENTS TAB (Projects) ══════════════════════
   async function loadProjectsRaw() {
     const [projRes, pmRes] = await Promise.all([
@@ -2351,11 +2610,18 @@
   }
 
   async function quickAssignReviewer(appId, reviewerId) {
+    const idxBefore = allApplications.findIndex(a => a.id === appId);
+    const previousReviewerId = idxBefore !== -1 ? allApplications[idxBefore].assigned_reviewer_id : null;
+
     const { error } = await sb.from('applications').update({ assigned_reviewer_id: reviewerId || null }).eq('id', appId);
     if (error) { alert('Error assigning reviewer: ' + error.message); return; }
     const idx = allApplications.findIndex(a => a.id === appId);
     if (idx !== -1) allApplications[idx].assigned_reviewer_id = reviewerId || null;
     if (document.getElementById('panel-applications').classList.contains('active')) renderApplications();
+
+    if (reviewerId && reviewerId !== previousReviewerId) {
+      notifyReviewerAssigned(reviewerId, allApplications[idx].full_name, 'applications', appId);
+    }
   }
 
   // ── Inactivity auto-logout (6 hours) ─────────────────────────
