@@ -904,6 +904,7 @@
         <div class="stat-card clickable" id="members-stat-card-pending" style="--stat-color:var(--orange); --stat-dim:var(--orange-dim);" onclick="filterMembersByStatCard('pending')"><div class="stat-num" id="members-stat-pending">–</div><div class="stat-label">Pending approval</div></div>
         <div class="stat-card clickable" id="members-stat-card-active" style="--stat-color:var(--green); --stat-dim:var(--green-dim);" onclick="filterMembersByStatCard('active')"><div class="stat-num" id="members-stat-active">–</div><div class="stat-label">Active</div></div>
         <div class="stat-card clickable" id="members-stat-card-all" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);" onclick="filterMembersByStatCard('')"><div class="stat-num" id="members-stat-all">–</div><div class="stat-label">Total</div></div>
+        <div class="stat-card" style="--stat-color:var(--green); --stat-dim:var(--green-dim);"><div class="stat-num" id="members-stat-online">–</div><div class="stat-label">Online now</div></div>
       </div>
 
       <div id="members-loading"><span class="spinner"></span></div>
@@ -1308,6 +1309,7 @@ async function claimSession(userId) {
   async function doLogout() {
     unsubscribeNotifications();
     unsubscribeMemberStatus();
+    unsubscribeOnlinePresence();
     allNotifications = [];
     await sb.auth.signOut();
     document.getElementById('admin-shell').style.display = 'none';
@@ -1387,6 +1389,7 @@ async function claimSession(userId) {
     loadNotifications();
     subscribeNotifications();
     subscribeMemberStatus();
+    subscribeOnlinePresence();
 
     switchTab('applications');
   }
@@ -1618,6 +1621,11 @@ async function claimSession(userId) {
   }
 
   // ══════════════════════ FORCE LOGOUT ON DISABLE ══════════════════════
+
+let presenceChannel = null;
+let onlineMemberIds = new Set();
+
+
 let memberStatusChannel = null;
 
 function subscribeMemberStatus() {
@@ -1645,6 +1653,41 @@ function subscribeMemberStatus() {
     })
     .subscribe();
 }
+
+function subscribeOnlinePresence() {
+  if (!currentUser || presenceChannel) return;
+  presenceChannel = sb.channel('online-members', {
+    config: { presence: { key: currentUser.id } }
+  });
+
+  presenceChannel
+    .on('presence', { event: 'sync' }, () => {
+      const state = presenceChannel.presenceState();
+      onlineMemberIds = new Set(Object.keys(state));
+      renderOnlineStatus();
+    })
+    .subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await presenceChannel.track({
+          email: currentMember.email,
+          role: currentMember.role,
+          online_at: new Date().toISOString()
+        });
+      }
+    });
+}
+
+function unsubscribeOnlinePresence() {
+  if (presenceChannel) { sb.removeChannel(presenceChannel); presenceChannel = null; }
+  onlineMemberIds = new Set();
+}
+
+function renderOnlineStatus() {
+  const el = document.getElementById('members-stat-online');
+  if (el) el.textContent = onlineMemberIds.size;
+  if (loadedTabs.members) renderTeamMembers();
+}
+
 
 async function forceLogoutForNewSession() {
   await doLogout();
@@ -2928,9 +2971,10 @@ renderTalentPool();
         actionHtml = `<button class="btn-secondary" onclick="toggleMember('${member.id}', ${member.active})">${member.active ? 'Disable' : 'Activate'}</button>`;
       }
 
+      const isOnline = onlineMemberIds.has(member.id);
       return `
       <tr>
-        <td class="td-name">${esc(member.email)}</td>
+        <td class="td-name">${isOnline ? '<span title="Online now" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:.5rem;"></span>' : ''}${esc(member.email)}</td>
         <td class="td-sub">${esc(member.phone || '—')}</td>
         <td>
           <select onchange="changeRole('${member.id}', this.value)">
