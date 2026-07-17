@@ -701,7 +701,7 @@
           <button onclick="bulkEmail('applications')">Email</button>
           <button onclick="bulkArchive('applications', true)">Archive</button>
           <button onclick="bulkArchive('applications', false)">Unarchive</button>
-          <button class="danger" onclick="bulkDelete('applications')">Delete</button>
+          <button class="danger" id="app-bulk-delete-btn" style="display:none;" onclick="bulkDelete('applications')">Delete</button>
           <button class="bulk-clear" onclick="clearSelection('applications')">Clear</button>
         </div>
 
@@ -786,7 +786,7 @@
           <button onclick="bulkEmail('talent')">Email</button>
           <button onclick="bulkArchive('talent', true)">Archive</button>
           <button onclick="bulkArchive('talent', false)">Unarchive</button>
-          <button class="danger" onclick="bulkDelete('talent')">Delete</button>
+          <button class="danger" id="talent-bulk-delete-btn" style="display:none;" onclick="bulkDelete('talent')">Delete</button>
           <button class="bulk-clear" onclick="clearSelection('talent')">Clear</button>
         </div>
 
@@ -1332,6 +1332,8 @@
     document.getElementById('tab-btn-members').style.display     = isAdmin ? 'inline-block' : 'none';
     document.getElementById('tab-btn-assignments').style.display = isAdmin ? 'inline-block' : 'none';
     document.getElementById('app-filter-reviewer').style.display = isAdmin ? 'inline-block' : 'none';
+    document.getElementById('app-bulk-delete-btn').style.display    = isAdmin ? 'inline-block' : 'none';
+    document.getElementById('talent-bulk-delete-btn').style.display = isAdmin ? 'inline-block' : 'none';
 
     const initials = (currentMember.email || '?').trim().charAt(0).toUpperCase();
     document.getElementById('profile-avatar-btn').textContent = initials;
@@ -1786,7 +1788,8 @@
 
 
   async function bulkDelete(table) {
-    const rows = selectedRows(table);
+  if (currentMember.role !== 'admin') { alert('Only admins can delete records.'); return; }
+  const rows = selectedRows(table);
     if (rows.length === 0) { alert('Select at least one row to delete.'); return; }
     if (!confirm(`Delete ${rows.length} record(s)? This cannot be undone.`)) return;
     const tableName = table === 'applications' ? 'applications' : 'talent_pool';
@@ -2218,8 +2221,9 @@ renderTalentPool();
   }
 
   async function deleteCurrentApp() {
-    if (!currentApp) return;
-    if (!confirm(`Permanently delete ${currentApp.full_name}'s application? This cannot be undone.`)) return;
+  if (!currentApp) return;
+  if (currentMember.role !== 'admin') { alert('Only admins can delete records.'); return; }
+  if (!confirm(`Permanently delete ${currentApp.full_name}'s application? This cannot be undone.`)) return;
 
     const { error } = await sb.from('applications').delete().eq('id', currentApp.id);
     if (error) { alert('Error deleting: ' + error.message); return; }
