@@ -1145,7 +1145,11 @@ function clearStoredSessionId() { localStorage.removeItem(SESSION_ID_KEY); }
 async function claimSession(userId) {
   const sessionId = crypto.randomUUID();
   const { error } = await sb.from('team_members').update({ active_session_id: sessionId }).eq('id', userId);
-  if (error) console.error('Could not claim session:', error);
+  if (error) {
+    console.error('Could not claim session:', error);
+    alert('Could not register this device as your active session (' + error.message + '). Please contact an admin — you may get signed out on refresh.');
+    return null;
+  }
   localStorage.setItem(SESSION_ID_KEY, sessionId);
 
   const { error: signOutErr } = await sb.auth.signOut({ scope: 'others' });
@@ -1342,7 +1346,6 @@ async function claimSession(userId) {
   currentMember = data;
 
   if (isNewLogin) {
-    // Fresh sign-in — claim this device as the active session, kicking any other device out.
     const sessionId = await claimSession(user.id);
     currentMember.active_session_id = sessionId;
   } else {
