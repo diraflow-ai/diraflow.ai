@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo.jpg">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.102.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -285,6 +286,21 @@
   .p-active           { background: var(--green-dim);    color: var(--green); }
   .p-paused           { background: var(--orange-dim);   color: var(--orange); }
   .p-completed        { background: var(--bg2);          color: var(--fg2); }
+  .bl-cleared          { background: var(--green-dim);    color: var(--green); }
+
+  .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 1.25rem; }
+  .chart-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1.25rem; position: relative;
+  }
+  .chart-card h3 { font-size: .95rem; font-weight: 700; margin-bottom: 1rem; }
+  .chart-card-canvas-wrap { position: relative; height: 280px; }
+  .chart-card canvas { max-height: 280px; }
+  .chart-empty {
+    display: none; position: absolute; inset: 0; top: 2.5rem;
+    align-items: center; justify-content: center;
+    color: var(--fg2); font-size: .8125rem;
+  }
 
   .empty-state { text-align: center; padding: 3rem; color: var(--fg2); }
 
@@ -632,6 +648,7 @@
   <div class="tabs-bar">
     <button class="tab-btn active" id="tab-btn-applications" onclick="switchTab('applications')">Applications</button>
     <button class="tab-btn" id="tab-btn-talent" onclick="switchTab('talent')">Talent Pool</button>
+    <button class="tab-btn" id="tab-btn-insights" onclick="switchTab('insights')">Insights</button>
     <button class="tab-btn" id="tab-btn-members" onclick="switchTab('members')" style="display:none;">Members</button>
     <button class="tab-btn" id="tab-btn-assignments" onclick="switchTab('assignments')" style="display:none;">Assignments</button>
   </div>
@@ -664,6 +681,11 @@
           <select class="filter-select" id="app-filter-reviewer" onchange="renderApplications()" style="display:none;">
             <option value="">All reviewers</option>
           </select>
+          <select class="filter-select" id="app-filter-archived" onchange="renderApplications()">
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+            <option value="all">All</option>
+          </select>
           <select class="filter-select" id="app-sort" onchange="renderApplications()">
             <option value="newest">Newest</option>
             <option value="oldest">Oldest</option>
@@ -677,6 +699,8 @@
           <span class="bulk-count"><span id="app-bulk-count">0</span> selected</span>
           <button onclick="bulkExport('applications')">Export</button>
           <button onclick="bulkEmail('applications')">Email</button>
+          <button onclick="bulkArchive('applications', true)">Archive</button>
+          <button onclick="bulkArchive('applications', false)">Unarchive</button>
           <button class="danger" onclick="bulkDelete('applications')">Delete</button>
           <button class="bulk-clear" onclick="clearSelection('applications')">Clear</button>
         </div>
@@ -760,6 +784,8 @@
           <button onclick="bulkShortlist('talent')">Shortlist</button>
           <button onclick="bulkExport('talent')">Export</button>
           <button onclick="bulkEmail('talent')">Email</button>
+          <button onclick="bulkArchive('talent', true)">Archive</button>
+          <button onclick="bulkArchive('talent', false)">Unarchive</button>
           <button class="danger" onclick="bulkDelete('talent')">Delete</button>
           <button class="bulk-clear" onclick="clearSelection('talent')">Clear</button>
         </div>
@@ -796,6 +822,77 @@
       </div>
     </div>
 
+    <!-- ═══════════ INSIGHTS TAB ═══════════ -->
+    <div class="tab-panel" id="panel-insights">
+      <div class="section-header">
+        <h2>Insights</h2>
+      </div>
+
+      <div class="filters-row">
+        <select class="filter-select" id="insights-filter-country" onchange="renderInsightsCharts()"><option value="">All countries</option></select>
+        <select class="filter-select" id="insights-filter-gender" onchange="renderInsightsCharts()"><option value="">All genders</option></select>
+        <select class="filter-select" id="insights-filter-status" onchange="renderInsightsCharts()">
+          <option value="">All statuses</option>
+          <option>In pool</option><option>Shortlisted</option><option>Contacted</option>
+          <option>Assigned</option><option>Inactive</option>
+        </select>
+        <select class="filter-select" id="insights-filter-agebucket" onchange="renderInsightsCharts()">
+          <option value="">All ages</option>
+          <option value="18-24">18–24</option>
+          <option value="25-40">25–40</option>
+          <option value="40+">40+</option>
+        </select>
+        <button class="btn-refresh" onclick="loadInsights()">↻ Refresh data</button>
+      </div>
+
+      <div id="insights-loading"><span class="spinner"></span></div>
+      <div class="insights-grid" id="insights-grid-wrap" style="display:none;">
+        <div class="chart-card">
+          <h3>Talent pool by country</h3>
+          <div class="chart-card-canvas-wrap">
+            <canvas id="chart-country"></canvas>
+            <div class="chart-empty">No candidates match these filters.</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Gender distribution</h3>
+          <div class="chart-card-canvas-wrap">
+            <canvas id="chart-gender"></canvas>
+            <div class="chart-empty">No candidates match these filters.</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Age distribution</h3>
+          <div class="chart-card-canvas-wrap">
+            <canvas id="chart-age"></canvas>
+            <div class="chart-empty">No date-of-birth data recorded yet.</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Talent pool status</h3>
+          <div class="chart-card-canvas-wrap">
+            <canvas id="chart-talent-status"></canvas>
+            <div class="chart-empty">No candidates match these filters.</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Application outcomes</h3>
+          <div class="chart-card-canvas-wrap">
+            <canvas id="chart-app-status"></canvas>
+            <div class="chart-empty">No applications match this country filter.</div>
+          </div>
+        </div>
+        <div class="chart-card" style="grid-column: 1 / -1;">
+          <h3>Team members working on projects</h3>
+          <div class="chart-card-canvas-wrap">
+            <canvas id="chart-projects"></canvas>
+            <div class="chart-empty">No projects yet.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ MEMBERS TAB (admin only) ═══════════ -->
     <!-- ═══════════ MEMBERS TAB (admin only) ═══════════ -->
     <div class="tab-panel" id="panel-members">
       <div class="section-header">
@@ -803,10 +900,16 @@
         <button class="btn-primary" style="width:auto;" onclick="openInvite()">+ Invite Member</button>
       </div>
 
+      <div class="stats-row">
+        <div class="stat-card clickable" id="members-stat-card-pending" style="--stat-color:var(--orange); --stat-dim:var(--orange-dim);" onclick="filterMembersByStatCard('pending')"><div class="stat-num" id="members-stat-pending">–</div><div class="stat-label">Pending approval</div></div>
+        <div class="stat-card clickable" id="members-stat-card-active" style="--stat-color:var(--green); --stat-dim:var(--green-dim);" onclick="filterMembersByStatCard('active')"><div class="stat-num" id="members-stat-active">–</div><div class="stat-label">Active</div></div>
+        <div class="stat-card clickable" id="members-stat-card-all" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);" onclick="filterMembersByStatCard('')"><div class="stat-num" id="members-stat-all">–</div><div class="stat-label">Total</div></div>
+      </div>
+
       <div id="members-loading"><span class="spinner"></span></div>
       <div class="table-wrap" id="members-table-wrap" style="display:none;">
         <table>
-          <thead><tr><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Projects</th><th>Action</th></tr></thead>
+          <thead><tr><th>Email</th><th>Phone</th><th>Requested/Role</th><th>Status</th><th>Projects</th><th>Action</th></tr></thead>
           <tbody id="members-tbody"></tbody>
         </table>
       </div>
@@ -954,7 +1057,9 @@
   // Bulk-selection state, keyed by table name ('applications' | 'talent')
   const selection = { applications: new Set(), talent: new Set() };
 
-  const loadedTabs = { applications:false, talent:false, members:false, assignments:false };
+  const loadedTabs = { applications:false, talent:false, members:false, assignments:false, insights:false };
+  let insightsCharts = {};
+  const CHART_PALETTE = ['#2563EB','#10B981','#F59E0B','#7C3AED','#EF4444','#8B5CF6','#6B7280'];
 
   // ── Auth bootstrap ───────────────────────────────────────────
   async function init() {
@@ -1067,8 +1172,14 @@
         id: data.user.id,
         email: data.user.email,
         role: role,
-        active: false
+        active: false,
+        request_status: 'pending'
       }, { onConflict: 'id' });
+      if (!memberError) {
+        sb.functions.invoke('notify-admins-new-member-request', {
+          body: { email: data.user.email, requestedRole: role }
+        }).catch(err => console.warn('Admin notification failed (non-blocking):', err));
+      }
       if (memberError) {
         console.error('Could not record team_members row for new signup:', memberError);
       }
@@ -1195,7 +1306,11 @@
     }
     if (!data.active) {
       await sb.auth.signOut();
-      alert("Your account is still pending admin approval. You'll be able to sign in once it's activated.");
+      if (data.request_status === 'rejected') {
+        alert("Your account application was not approved." + (data.rejection_reason ? " Reason: " + data.rejection_reason : ""));
+      } else {
+        alert("Your account is still pending admin approval. You'll be able to sign in once it's activated.");
+      }
       return;
     }
     currentUser = user;
@@ -1463,6 +1578,7 @@
     if (name === 'applications' && !loadedTabs.applications) loadApplications();
     if (name === 'talent' && !loadedTabs.talent) loadTalentPool();
     if (name === 'members' && !loadedTabs.members) loadTeamMembers();
+    if (name === 'insights') { if (!loadedTabs.insights) loadInsights(); else renderInsightsCharts(); }
     if (name === 'assignments') {
       if (!loadedTabs.assignments) loadProjects();
       if (!loadedTabs.applications) loadApplications(); else renderAssignApps();
@@ -1482,6 +1598,26 @@
     if (!iso) return '—';
     return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
   }
+
+  function calcAge(dobStr) {
+    if (!dobStr) return null;
+    const dob = new Date(dobStr);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+    return age;
+  }
+
+  function ageBucket(dobStr) {
+    const age = calcAge(dobStr);
+    if (age == null) return null;
+    if (age >= 18 && age <= 24) return '18-24';
+    if (age > 24 && age <= 40) return '25-40';
+    return '40+';
+  }
+
+
   function initialsOf(name) {
     const parts = String(name || '?').trim().split(/\s+/);
     return ((parts[0]||'')[0] || '?').toUpperCase() + ((parts[1]||'')[0] || '').toUpperCase();
@@ -1532,6 +1668,11 @@
     const { data, error } = await sb.from('team_members').select('id,email,role,active').eq('active', true);
     if (!error && data) allTeamMembers = data;
   }
+
+  function activeApplications() {
+    return allApplications.filter(a => !a.is_archived);
+  }
+
 
   function reviewerLabel(id) {
     if (!id) return 'Unassigned';
@@ -1617,6 +1758,33 @@
     const emails = rows.map(r => r.email).filter(Boolean).join(',');
     window.location.href = 'mailto:?bcc=' + encodeURIComponent(emails);
   }
+
+  async function bulkArchive(table, archive) {
+    const rows = selectedRows(table);
+    if (rows.length === 0) { alert(`Select at least one row to ${archive ? 'archive' : 'unarchive'}.`); return; }
+    const tableName = table === 'applications' ? 'applications' : 'talent_pool';
+    const ids = rows.map(r => r.id);
+    const update = archive
+      ? { is_archived: true, archived_at: new Date().toISOString(), archived_by: currentUser.id }
+      : { is_archived: false, archived_at: null, archived_by: null };
+
+    const { error } = await sb.from(tableName).update(update).in('id', ids);
+    if (error) { alert('Error updating: ' + error.message); return; }
+
+    const source = table === 'applications' ? allApplications : allTalentPool;
+    source.forEach(r => { if (ids.includes(r.id)) Object.assign(r, update); });
+
+    if (table === 'applications') {
+      updateAppStats(); renderApplications();
+      if (document.getElementById('panel-assignments').classList.contains('active')) renderAssignApps();
+    } else {
+      updateTalentStats(); renderTalentPool();
+    }
+    selection[table].clear();
+    updateBulkToolbar(table);
+  }
+
+
   async function bulkDelete(table) {
     const rows = selectedRows(table);
     if (rows.length === 0) { alert('Select at least one row to delete.'); return; }
@@ -1750,7 +1918,7 @@ renderTalentPool();
   }
 
   function updateAppStats() {
-    const a = allApplications;
+    const a = activeApplications();
     document.getElementById('stat-total').textContent     = a.length;
     document.getElementById('stat-submitted').textContent = a.filter(r => r.status === 'Submitted').length;
     document.getElementById('stat-review').textContent    = a.filter(r => r.status === 'Under Review').length;
@@ -1781,6 +1949,7 @@ renderTalentPool();
     const stFilter  = document.getElementById('app-filter-status').value;
     const revFilter = document.getElementById('app-filter-reviewer').value;
     const sortMode  = document.getElementById('app-sort').value;
+    const archivedFilter = document.getElementById('app-filter-archived').value;
 
     // Keep stat-card highlighting in sync even when the status dropdown is changed directly.
     document.querySelectorAll('#app-list-view .stat-card.clickable').forEach(c => c.classList.remove('active'));
@@ -1799,7 +1968,10 @@ renderTalentPool();
       let matchRev = true;
       if (revFilter === 'unassigned') matchRev = !r.assigned_reviewer_id;
       else if (revFilter) matchRev = r.assigned_reviewer_id === revFilter;
-      return matchSearch && matchPos && matchSt && matchRev;
+      const matchArchived = archivedFilter === 'all' ? true
+        : archivedFilter === 'archived' ? !!r.is_archived
+        : !r.is_archived;
+      return matchSearch && matchPos && matchSt && matchRev && matchArchived;
     });
 
     rows = sortRows(rows, sortMode);
@@ -1813,7 +1985,7 @@ renderTalentPool();
     tbody.innerHTML = rows.map(r => `
       <tr class="clickable ${selection.applications.has(r.id)?'row-selected':''}" data-row-id="${r.id}" data-row-table="applications" onclick="openAppPanel('${r.id}')">
         <td class="td-check" onclick="event.stopPropagation()"><input type="checkbox" ${selection.applications.has(r.id)?'checked':''} onchange="toggleRowSelect('applications','${r.id}',this.checked)"></td>
-        <td><div class="td-name"><span class="row-avatar">${initialsOf(r.full_name)}</span>${esc(r.full_name)}</div><div class="td-email">${esc(r.email)}</div></td>
+        <td><div class="td-name"><span class="row-avatar">${initialsOf(r.full_name)}</span>${esc(r.full_name)}${r.is_archived ? '<span class="badge" style="margin-left:.4rem; font-size:.68rem;">Archived</span>' : ''}</div><div class="td-email">${esc(r.email)}</div></td>
         <td>${esc(r.position)}</td>
         <td>${esc(r.country || '—')}</td>
         <td><span class="status-badge ${statusClass(r.status)}">${esc(r.status)}</span></td>
@@ -1953,6 +2125,16 @@ renderTalentPool();
               ${reviewerOptions}
             </select>
           </div>
+        </div>
+        <div class="profile-card panel-section" style="margin-top:1.25rem;">
+          <div class="panel-section-title">Archive</div>
+          <p style="font-size:.8125rem; color:var(--fg2); margin-bottom:.75rem;">
+            ${app.is_archived ? 'This application is archived and hidden from the default list view.' : 'Archiving hides this application from the default list view without deleting it.'}
+          </p>
+          <div style="display:flex; gap:.75rem;">
+            <button class="btn-secondary" onclick="toggleArchiveCurrentApp()">${app.is_archived ? 'Unarchive' : 'Archive'}</button>
+            <button class="btn-secondary" style="border-color:var(--red); color:var(--red);" onclick="deleteCurrentApp()">Delete permanently</button>
+          </div>
         </div>` : ''}
 
         <div class="profile-card panel-section" style="margin-top:${isAdmin?'1.25rem':'0'};">
@@ -2008,6 +2190,46 @@ renderTalentPool();
         </div>
       </div>`).join('')}</div>`;
   }
+
+  async function toggleArchiveCurrentApp() {
+    if (!currentApp) return;
+    const archive = !currentApp.is_archived;
+    const update = archive
+      ? { is_archived: true, archived_at: new Date().toISOString(), archived_by: currentUser.id }
+      : { is_archived: false, archived_at: null, archived_by: null };
+
+    const { error } = await sb.from('applications').update(update).eq('id', currentApp.id);
+    if (error) { alert('Error updating: ' + error.message); return; }
+
+    Object.assign(currentApp, update);
+    const idx = allApplications.findIndex(r => r.id === currentApp.id);
+    if (idx !== -1) Object.assign(allApplications[idx], update);
+    updateAppStats();
+
+    if (archive) {
+      // Archived — return to the list so it visibly disappears right away.
+      document.getElementById('app-filter-archived').value = 'active';
+      closeAppPanel();
+      renderApplications();
+      if (document.getElementById('panel-assignments').classList.contains('active')) renderAssignApps();
+    } else {
+      openAppPanel(currentApp.id);
+    }
+  }
+
+  async function deleteCurrentApp() {
+    if (!currentApp) return;
+    if (!confirm(`Permanently delete ${currentApp.full_name}'s application? This cannot be undone.`)) return;
+
+    const { error } = await sb.from('applications').delete().eq('id', currentApp.id);
+    if (error) { alert('Error deleting: ' + error.message); return; }
+
+    allApplications = allApplications.filter(r => r.id !== currentApp.id);
+    updateAppStats();
+    closeAppPanel();
+    renderApplications();
+  }
+
 
   async function saveApplication() {
     if (!currentApp) return;
@@ -2384,6 +2606,165 @@ renderTalentPool();
     window.open(data.signedUrl, '_blank');
   }
 
+  // ══════════════════════ INSIGHTS TAB (charts) ══════════════════════
+  async function loadInsights() {
+    document.getElementById('insights-loading').style.display = 'block';
+    document.getElementById('insights-grid-wrap').style.display = 'none';
+
+    if (!loadedTabs.talent) await loadTalentPool();
+    if (!loadedTabs.applications) await loadApplications();
+    if (allProjects.length === 0 && allProjectMembers.length === 0) await loadProjectsRaw();
+    if (allTeamMembers.length === 0) await loadTeamMembersForDropdowns();
+
+    document.getElementById('insights-loading').style.display = 'none';
+    document.getElementById('insights-grid-wrap').style.display = 'grid';
+
+    loadedTabs.insights = true;
+    populateInsightsFilters();
+    renderInsightsCharts();
+  }
+
+  function buildFilterOptions(selId, values) {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    const current = sel.value;
+    const unique = [...new Set(values)].filter(Boolean).sort();
+    const label = sel.options[0].textContent;
+    sel.innerHTML = `<option value="">${label}</option>` + unique.map(v => `<option ${v===current?'selected':''}>${esc(v)}</option>`).join('');
+  }
+
+  function populateInsightsFilters() {
+    buildFilterOptions('insights-filter-country', allTalentPool.map(r => r.country));
+    buildFilterOptions('insights-filter-gender', allTalentPool.map(r => r.gender));
+  }
+
+  function buildChartOptions(type, extra) {
+    const isPieLike = type === 'pie' || type === 'doughnut';
+    return Object.assign({
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: isPieLike, position: 'bottom', labels: { boxWidth: 12, font: { family: 'Sora', size: 11 } } },
+        tooltip: { titleFont: { family: 'Sora' }, bodyFont: { family: 'Sora' } }
+      },
+      scales: isPieLike ? {} : {
+        x: { beginAtZero: true, grid: { display: false }, ticks: { font: { family: 'Sora', size: 11 } } },
+        y: { grid: { color: '#E5E7EB' }, ticks: { font: { family: 'Sora', size: 11 } } }
+      }
+    }, extra || {});
+  }
+
+  function upsertChart(canvasId, type, data, extraOptions) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const options = buildChartOptions(type, extraOptions);
+    if (insightsCharts[canvasId]) {
+      insightsCharts[canvasId].config.type = type;
+      insightsCharts[canvasId].data = data;
+      insightsCharts[canvasId].options = options;
+      insightsCharts[canvasId].update();
+    } else {
+      insightsCharts[canvasId] = new Chart(canvas.getContext('2d'), { type, data, options });
+    }
+  }
+
+  function toggleChartEmptyStates(map) {
+    Object.entries(map).forEach(([id, isEmpty]) => {
+      const canvas = document.getElementById(id);
+      if (!canvas) return;
+      const card = canvas.closest('.chart-card');
+      const emptyEl = card ? card.querySelector('.chart-empty') : null;
+      canvas.style.display = isEmpty ? 'none' : 'block';
+      if (emptyEl) emptyEl.style.display = isEmpty ? 'flex' : 'none';
+    });
+  }
+
+  function renderInsightsCharts() {
+    if (typeof Chart === 'undefined') return;
+    const countryFilter = document.getElementById('insights-filter-country').value;
+    const genderFilter = document.getElementById('insights-filter-gender').value;
+    const statusFilter = document.getElementById('insights-filter-status').value;
+
+    const ageBucketFilterInsights = document.getElementById('insights-filter-agebucket').value;
+    const talentRows = allTalentPool.filter(r => {
+      const matchCountry = !countryFilter || r.country === countryFilter;
+      const matchGender = !genderFilter || r.gender === genderFilter;
+      const matchStatus = !statusFilter || r.status === statusFilter;
+      const matchAgeBucket = !ageBucketFilterInsights || ageBucket(r.date_of_birth) === ageBucketFilterInsights;
+      return matchCountry && matchGender && matchStatus && matchAgeBucket;
+    });
+    const appRows = activeApplications().filter(r => !countryFilter || r.country === countryFilter);
+
+    // 1. Talent pool by country
+    const countryCounts = {};
+    talentRows.forEach(r => { const c = r.country || 'Unknown'; countryCounts[c] = (countryCounts[c]||0) + 1; });
+    const countryEntries = Object.entries(countryCounts).sort((a,b) => b[1]-a[1]).slice(0, 10);
+    upsertChart('chart-country', 'bar', {
+      labels: countryEntries.map(e => e[0]),
+      datasets: [{ label: 'Candidates', data: countryEntries.map(e => e[1]), backgroundColor: '#2563EB', borderRadius: 6 }]
+    }, { indexAxis: 'y' });
+
+    // 2. Gender distribution
+    const genderCounts = {};
+    talentRows.forEach(r => { const g = r.gender || 'Unspecified'; genderCounts[g] = (genderCounts[g]||0) + 1; });
+    const genderLabels = Object.keys(genderCounts);
+    upsertChart('chart-gender', 'pie', {
+      labels: genderLabels,
+      datasets: [{ data: genderLabels.map(g => genderCounts[g]), backgroundColor: CHART_PALETTE }]
+    });
+
+    // 2b. Age distribution
+    const ageBuckets = { '18-24':0, '25-40':0, '40+':0 };
+    let withAgeCount = 0;
+    talentRows.forEach(r => { const b = ageBucket(r.date_of_birth); if (b) { ageBuckets[b]++; withAgeCount++; } });
+    upsertChart('chart-age', 'bar', {
+      labels: Object.keys(ageBuckets),
+      datasets: [{ label: 'Candidates', data: Object.values(ageBuckets), backgroundColor: '#F59E0B', borderRadius: 6 }]
+    });
+
+
+    // 3. Talent pool status
+    const statusOrder = ['In pool','Shortlisted','Contacted','Assigned','Inactive'];
+    const statusColors = { 'In pool':'#2563EB','Shortlisted':'#10B981','Contacted':'#7C3AED','Assigned':'#8B5CF6','Inactive':'#EF4444' };
+    const statusCounts = {};
+    talentRows.forEach(r => { const s = r.status || 'In pool'; statusCounts[s] = (statusCounts[s]||0) + 1; });
+    const statusLabels = statusOrder.filter(s => statusCounts[s]);
+    upsertChart('chart-talent-status', 'doughnut', {
+      labels: statusLabels,
+      datasets: [{ data: statusLabels.map(s => statusCounts[s]), backgroundColor: statusLabels.map(s => statusColors[s]) }]
+    });
+
+    // 4. Application outcomes
+    const appStatusOrder = ['Submitted','Under Review','Passed','Failed','Interview Required','Accepted'];
+    const appStatusColors = { 'Submitted':'#2563EB','Under Review':'#F59E0B','Passed':'#10B981','Failed':'#EF4444','Interview Required':'#7C3AED','Accepted':'#10B981' };
+    const appStatusCounts = {};
+    appRows.forEach(r => { const s = r.status || 'Submitted'; appStatusCounts[s] = (appStatusCounts[s]||0) + 1; });
+    const appLabels = appStatusOrder.filter(s => appStatusCounts[s] !== undefined);
+    upsertChart('chart-app-status', 'bar', {
+      labels: appLabels,
+      datasets: [{ label: 'Applications', data: appLabels.map(s => appStatusCounts[s]), backgroundColor: appLabels.map(s => appStatusColors[s]), borderRadius: 6 }]
+    });
+
+    // 5. Team members working on projects
+    const projectCounts = allProjects.map(p => ({
+      name: p.name,
+      count: allProjectMembers.filter(pm => pm.project_id === p.id).length
+    })).sort((a,b) => b.count - a.count);
+    upsertChart('chart-projects', 'bar', {
+      labels: projectCounts.map(p => p.name),
+      datasets: [{ label: 'Team members assigned', data: projectCounts.map(p => p.count), backgroundColor: '#8B5CF6', borderRadius: 6 }]
+    }, { indexAxis: 'y' });
+
+    toggleChartEmptyStates({
+      'chart-country': countryEntries.length === 0,
+      'chart-gender': genderLabels.length === 0,
+      'chart-age': withAgeCount === 0,
+      'chart-talent-status': statusLabels.length === 0,
+      'chart-app-status': appLabels.length === 0,
+      'chart-projects': projectCounts.length === 0
+    });
+  }
+
   // ══════════════════════ MEMBERS TAB ══════════════════════
   async function loadTeamMembers() {
     document.getElementById('members-loading').style.display = 'block';
@@ -2398,17 +2779,56 @@ renderTalentPool();
 
     document.getElementById('members-loading').style.display = 'none';
     document.getElementById('members-table-wrap').style.display = 'block';
+    updateMembersStats();
     renderTeamMembers();
     populateReviewerFilter();
   }
 
+  let membersStatFilter = '';
+
+  function updateMembersStats() {
+    document.getElementById('members-stat-pending').textContent = allTeamMembers.filter(m => m.request_status === 'pending').length;
+    document.getElementById('members-stat-active').textContent = allTeamMembers.filter(m => m.active).length;
+    document.getElementById('members-stat-all').textContent = allTeamMembers.length;
+  }
+
+  function filterMembersByStatCard(filter) {
+    membersStatFilter = filter;
+    document.querySelectorAll('#panel-members .stat-card.clickable').forEach(c => c.classList.remove('active'));
+    const idMap = { pending: 'members-stat-card-pending', active: 'members-stat-card-active', '': 'members-stat-card-all' };
+    const el = document.getElementById(idMap[filter]);
+    if (el) el.classList.add('active');
+    renderTeamMembers();
+  }
+
   function renderTeamMembers() {
     const table = document.getElementById('members-tbody');
-    table.innerHTML = allTeamMembers.map(member => {
+    const rows = allTeamMembers.filter(m => {
+      if (membersStatFilter === 'pending') return m.request_status === 'pending';
+      if (membersStatFilter === 'active') return m.active;
+      return true;
+    });
+
+    table.innerHTML = rows.map(member => {
       const projectNames = allProjectMembers
         .filter(pm => pm.team_member_id === member.id)
         .map(pm => (allProjects.find(p => p.id === pm.project_id) || {}).name)
         .filter(Boolean);
+
+      let statusBadge;
+      if (member.request_status === 'pending') statusBadge = '<span class="status-badge s-under-review">Pending</span>';
+      else if (member.request_status === 'rejected') statusBadge = '<span class="status-badge s-failed">Rejected</span>';
+      else statusBadge = member.active ? '<span class="status-badge s-accepted">Active</span>' : '<span class="status-badge s-failed">Disabled</span>';
+
+      let actionHtml;
+      if (member.request_status === 'pending') {
+        actionHtml = `
+          <button class="btn-secondary" style="border-color:var(--green); color:var(--green);" onclick="approveMember('${member.id}')">Approve</button>
+          <button class="btn-secondary" style="border-color:var(--red); color:var(--red); margin-left:.4rem;" onclick="rejectMember('${member.id}')">Reject</button>`;
+      } else {
+        actionHtml = `<button class="btn-secondary" onclick="toggleMember('${member.id}', ${member.active})">${member.active ? 'Disable' : 'Activate'}</button>`;
+      }
+
       return `
       <tr>
         <td class="td-name">${esc(member.email)}</td>
@@ -2420,9 +2840,9 @@ renderTalentPool();
             <option ${member.role==='viewer'?'selected':''}>viewer</option>
           </select>
         </td>
-        <td>${member.active ? '<span class="status-badge s-accepted">Active</span>' : '<span class="status-badge s-failed">Disabled</span>'}</td>
+        <td>${statusBadge}</td>
         <td>${projectNames.length ? projectNames.map(n=>`<span class="badge">${esc(n)}</span>`).join(' ') : '<span style="color:var(--fg2)">—</span>'}</td>
-        <td><button class="btn-secondary" onclick="toggleMember('${member.id}', ${member.active})">${member.active ? 'Disable' : 'Activate'}</button></td>
+        <td>${actionHtml}</td>
       </tr>`;
     }).join('');
   }
@@ -2434,6 +2854,47 @@ renderTalentPool();
     if (idx !== -1) allTeamMembers[idx].role = role;
     populateReviewerFilter();
   }
+
+  async function approveMember(id) {
+    const member = allTeamMembers.find(m => m.id === id);
+    if (!member) return;
+    if (!confirm(`Approve ${member.email} as ${member.role}? They'll be notified by email.`)) return;
+
+    const update = { active: true, request_status: 'approved', reviewed_by: currentUser.id, reviewed_at: new Date().toISOString() };
+    const { error } = await sb.from('team_members').update(update).eq('id', id);
+    if (error) { alert('Error approving: ' + error.message); return; }
+
+    Object.assign(member, update);
+    updateMembersStats(); renderTeamMembers();
+
+    const { error: emailError } = await sb.functions.invoke('notify-member-application-decision', {
+      body: { email: member.email, decision: 'approved', role: member.role }
+    });
+    if (emailError) console.warn('Approval email failed (non-blocking):', emailError);
+  }
+
+  async function rejectMember(id) {
+    const member = allTeamMembers.find(m => m.id === id);
+    if (!member) return;
+    const reason = prompt(`Reason for rejecting ${member.email}'s account request (optional, shown to them by email):`);
+    if (reason === null) return; // cancelled
+
+    const update = {
+      active: false, request_status: 'rejected', reviewed_by: currentUser.id,
+      reviewed_at: new Date().toISOString(), rejection_reason: reason || null
+    };
+    const { error } = await sb.from('team_members').update(update).eq('id', id);
+    if (error) { alert('Error rejecting: ' + error.message); return; }
+
+    Object.assign(member, update);
+    updateMembersStats(); renderTeamMembers();
+
+    const { error: emailError } = await sb.functions.invoke('notify-member-application-decision', {
+      body: { email: member.email, decision: 'rejected', role: member.role, reason: reason || null }
+    });
+    if (emailError) console.warn('Rejection email failed (non-blocking):', emailError);
+  }
+
 
   async function toggleMember(id, active) {
     const { error } = await sb.from('team_members').update({ active: !active }).eq('id', id);
@@ -2608,7 +3069,7 @@ renderTalentPool();
   function renderAssignApps() {
     const tbody = document.getElementById('assign-apps-tbody');
     const reviewers = allTeamMembers.filter(m => m.role === 'reviewer' || m.role === 'admin');
-    const rows = allApplications;
+    const rows = activeApplications();
 
     tbody.innerHTML = rows.map(a => `
       <tr class="clickable" onclick="openAppPanel('${a.id}')">

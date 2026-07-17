@@ -428,6 +428,16 @@
         </div>
       </div>
 
+      <!-- Row: Date of birth -->
+      <div class="form-row">
+        <div class="form-field">
+          <label>Date of birth *</label>
+          <input type="date" name="date_of_birth" id="talentpool-dob-input" required>
+          <p style="font-size:.8125rem; color:var(--subtle); margin-top:.375rem;">You must be at least 18 years old to join the talent pool.</p>
+          <p id="dob-inline-error" style="font-size:.8125rem; color:#c0392b; margin-top:.375rem; display:none;"></p>
+        </div>
+      </div>
+
       <!-- Positions interested in -->
       <div class="form-field">
         <label>What position(s) are you interested in? * (select all that apply)</label>
@@ -677,6 +687,47 @@
 
  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+  function calcAgeFromDob(dobStr) {
+    if (!dobStr) return null;
+    const dob = new Date(dobStr);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+    return age;
+  }
+
+  (function setDobBounds() {
+    const dobInput = document.getElementById('talentpool-dob-input');
+    if (!dobInput) return;
+    const today = new Date();
+    const maxDob = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+    const minDob = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+    const toISO = d => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+    dobInput.setAttribute('max', toISO(maxDob));
+    dobInput.setAttribute('min', toISO(minDob));
+
+    const errorEl = document.getElementById('dob-inline-error');
+    dobInput.addEventListener('change', () => {
+      const age = calcAgeFromDob(dobInput.value);
+      if (age === null) { errorEl.style.display = 'none'; return; }
+      if (age < 18) {
+        errorEl.textContent = 'You must be at least 18 years old to join the talent pool.';
+        errorEl.style.display = 'block';
+      } else if (age > 100) {
+        errorEl.textContent = 'Please double-check the date of birth entered.';
+        errorEl.style.display = 'block';
+      } else {
+        errorEl.style.display = 'none';
+      }
+    });
+  })();
+
   // ── Assessment question banks ────────────────────────────────────────────────
   const ANNOTATION_QUESTIONS = [
     { name: "q1", label: "1. Explain what image annotation means and why accuracy matters.", type: "textarea" },
@@ -923,6 +974,15 @@
       const formData   = new FormData(form);
       const resumeFile = document.getElementById('talentpool-resume-input').files[0];
 
+      const dobValue = formData.get('date_of_birth');
+      const age = calcAgeFromDob(dobValue);
+      if (age === null || age < 18) {
+        throw new Error('You must be at least 18 years old to join the talent pool.');
+      }
+      if (age > 100) {
+        throw new Error('Please double-check the date of birth entered.');
+      }
+
       if (resumeFile && resumeFile.size > 10 * 1024 * 1024) {
         throw new Error('Resume file exceeds 10MB. Please upload a smaller file.');
       }
@@ -943,6 +1003,7 @@
         email:                  formData.get('email'),
         phone:                  formData.get('phone'),
         gender:                 formData.get('gender'),
+        date_of_birth:          dobValue,
 
         // Positions interested in
         pos_software_dev:       !!formData.get('pos_software_dev'),
