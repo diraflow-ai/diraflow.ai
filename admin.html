@@ -1085,6 +1085,13 @@
     }
   }
 
+  const SESSION_ID_KEY = 'diraflow_session_id';
+let mySessionId = null;
+
+function getStoredSessionId() { return localStorage.getItem(SESSION_ID_KEY); }
+function setStoredSessionId(id) { localStorage.setItem(SESSION_ID_KEY, id); }
+function clearStoredSessionId() { localStorage.removeItem(SESSION_ID_KEY); }
+
   // ── Switching between login / signup / forgot screens ─────────
   function hideAllAuthScreens() {
     document.getElementById('login-screen').style.display = 'none';
@@ -1130,6 +1137,22 @@
     btn.disabled = false; btn.textContent = 'Sign in →';
   }
 
+
+  // Called only on a genuinely fresh sign-in (not a page-refresh session restore).
+// Generates a new session id, saves it locally, writes it to the DB (marking this
+// device as the "owner"), and revokes every other active session's refresh token
+// for this account — Supabase's built-in scope:'others' handles that for us.
+async function claimSession(userId) {
+  const sessionId = crypto.randomUUID();
+  const { error } = await sb.from('team_members').update({ active_session_id: sessionId }).eq('id', userId);
+  if (error) console.error('Could not claim session:', error);
+  localStorage.setItem(SESSION_ID_KEY, sessionId);
+
+  const { error: signOutErr } = await sb.auth.signOut({ scope: 'others' });
+  if (signOutErr) console.warn('Could not revoke other sessions:', signOutErr);
+
+  return sessionId;
+}
   // ── Create account ─────────────────────────────────────────────
   // Anyone can request an account with any role, but the row this creates
   // in team_members is inserted with active=false, so checkTeamAccess()
@@ -1251,7 +1274,7 @@
     okEl.textContent = 'Password updated. Signing you in…';
     okEl.className = 'login-ok show';
     const { data: { session } } = await sb.auth.getSession();
-    if (session) setTimeout(() => checkTeamAccess(session.user), 800);
+    if (session) setTimeout(() => checkTeamAccess(session.user, true), 800);
   }
 
   async function verifyCode() {
@@ -1275,11 +1298,12 @@
       return;
     }
 
-    checkTeamAccess(window.pendingUser);
+    checkTeamAccess(window.pendingUser, true);
   }
 
   async function doLogout() {
     unsubscribeNotifications();
+    unsubscribeMemberStatus();
     allNotifications = [];
     await sb.auth.signOut();
     document.getElementById('admin-shell').style.display = 'none';
@@ -1297,27 +1321,46 @@
   document.getElementById('forgot-email').addEventListener('keydown', e => { if (e.key === 'Enter') doForgotPassword(); });
   document.getElementById('reset-password2').addEventListener('keydown', e => { if (e.key === 'Enter') doResetPassword(); });
 
-  async function checkTeamAccess(user) {
-    const { data, error } = await sb.from('team_members').select('*').eq('id', user.id).single();
-    if (error || !data) {
-      await sb.auth.signOut();
-      alert("Your account is not authorized to access this portal.");
-      return;
-    }
-    if (!data.active) {
-      await sb.auth.signOut();
-      if (data.request_status === 'rejected') {
-        alert("Your account application was not approved." + (data.rejection_reason ? " Reason: " + data.rejection_reason : ""));
-      } else {
-        alert("Your account is still pending admin approval. You'll be able to sign in once it's activated.");
-      }
-      return;
-    }
-    currentUser = user;
-    currentMember = data;
-    markActivity();
-    showDashboard();
+  async function checkTeamAccess(user, isNewLogin = false) {
+  const { data, error } = await sb.from('team_members').select('*').eq('id', user.id).single();
+  if (error || !data) {
+    await sb.auth.signOut();
+    alert("Your account is not authorized to access this portal.");
+    return;
   }
+  if (!data.active) {
+    await sb.auth.signOut();
+    if (data.request_status === 'rejected') {
+      alert("Your account application was not approved." + (data.rejection_reason ? " Reason: " + data.rejection_reason : ""));
+    } else {
+      alert("Your account is still pending admin approval. You'll be able to sign in once it's activated.");
+    }
+    return;
+  }
+
+  currentUser = user;
+  currentMember = data;
+
+  if (isNewLogin) {
+    // Fresh sign-in — claim this device as the active session, kicking any other device out.
+    const sessionId = await claimSession(user.id);
+    currentMember.active_session_id = sessionId;
+  } else {
+    // Restoring a session on page load/refresh — only continue if this browser still
+    // holds the session the server considers active. If another device has since
+    // logged in, our local id won't match anymore.
+    const localSessionId = localStorage.getItem(SESSION_ID_KEY);
+    if (!localSessionId || localSessionId !== data.active_session_id) {
+      await sb.auth.signOut();
+      localStorage.removeItem(SESSION_ID_KEY);
+      alert('Your session has ended because this account was signed in from another device.');
+      return;
+    }
+  }
+
+  markActivity();
+  showDashboard();
+}
 
   function showDashboard() {
     hideAllAuthScreens();
@@ -1340,6 +1383,7 @@
 
     loadNotifications();
     subscribeNotifications();
+    subscribeMemberStatus();
 
     switchTab('applications');
   }
@@ -1569,6 +1613,44 @@
     });
     if (error) console.error('notify-admin-review-completed email failed:', error);
   }
+
+  // ══════════════════════ FORCE LOGOUT ON DISABLE ══════════════════════
+let memberStatusChannel = null;
+
+function subscribeMemberStatus() {
+  if (!currentUser || memberStatusChannel) return;
+  memberStatusChannel = sb.channel('member-status-' + currentUser.id)
+    .on('postgres_changes', {
+      event: 'UPDATE', schema: 'public', table: 'team_members',
+      filter: `id=eq.${currentUser.id}`
+    }, (payload) => {
+      const updated = payload.new;
+      if (!updated) return;
+      if (updated.active === false) {
+        forceLogoutForDisabled();
+      } else {
+        // Keep role/phone/etc in sync live even when not disabled (e.g. role change).
+        currentMember = { ...currentMember, ...updated };
+        const roleBadge = document.getElementById('role-badge');
+        if (roleBadge) { roleBadge.textContent = currentMember.role; roleBadge.className = 'role-badge ' + currentMember.role; }
+      }
+    })
+    .subscribe();
+}
+
+function unsubscribeMemberStatus() {
+  if (memberStatusChannel) { sb.removeChannel(memberStatusChannel); memberStatusChannel = null; }
+}
+
+async function forceLogoutForDisabled() {
+  await doLogout();
+  alert('Your account has been disabled by an admin. You have been signed out.');
+}
+
+
+
+
+
 
   // ── Tabs ──────────────────────────────────────────────────────
   function switchTab(name) {
@@ -2901,12 +2983,25 @@ renderTalentPool();
 
 
   async function toggleMember(id, active) {
-    const { error } = await sb.from('team_members').update({ active: !active }).eq('id', id);
-    if (error) { alert('Error updating status: ' + error.message); return; }
-    const idx = allTeamMembers.findIndex(m => m.id === id);
-    if (idx !== -1) allTeamMembers[idx].active = !active;
-    renderTeamMembers();
+  const willBeActive = !active;
+  const update = { active: willBeActive };
+
+  // If we're turning someone back on (including a previously-rejected request),
+  // also clear the rejected/pending state so the badge reflects reality.
+  if (willBeActive) {
+    update.request_status = 'approved';
+    update.reviewed_by = currentUser.id;
+    update.reviewed_at = new Date().toISOString();
   }
+
+  const { error } = await sb.from('team_members').update(update).eq('id', id);
+  if (error) { alert('Error updating status: ' + error.message); return; }
+
+  const idx = allTeamMembers.findIndex(m => m.id === id);
+  if (idx !== -1) Object.assign(allTeamMembers[idx], update);
+  updateMembersStats();
+  renderTeamMembers();
+}
 
   function openInvite() { document.getElementById("invite-modal").classList.add('show'); }
   function closeInvite() { document.getElementById("invite-modal").classList.remove('show'); }
