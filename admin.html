@@ -1631,14 +1631,24 @@ function subscribeMemberStatus() {
       if (!updated) return;
       if (updated.active === false) {
         forceLogoutForDisabled();
-      } else {
-        // Keep role/phone/etc in sync live even when not disabled (e.g. role change).
-        currentMember = { ...currentMember, ...updated };
-        const roleBadge = document.getElementById('role-badge');
-        if (roleBadge) { roleBadge.textContent = currentMember.role; roleBadge.className = 'role-badge ' + currentMember.role; }
+        return;
       }
+      const localSessionId = localStorage.getItem(SESSION_ID_KEY);
+      if (updated.active_session_id && localSessionId && updated.active_session_id !== localSessionId) {
+        forceLogoutForNewSession();
+        return;
+      }
+      // Keep role/phone/etc in sync live even when not disabled (e.g. role change).
+      currentMember = { ...currentMember, ...updated };
+      const roleBadge = document.getElementById('role-badge');
+      if (roleBadge) { roleBadge.textContent = currentMember.role; roleBadge.className = 'role-badge ' + currentMember.role; }
     })
     .subscribe();
+}
+
+async function forceLogoutForNewSession() {
+  await doLogout();
+  alert('Your session has ended because this account was signed in from another device.');
 }
 
 function unsubscribeMemberStatus() {
