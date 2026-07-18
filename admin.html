@@ -133,7 +133,7 @@
     border: 1px solid var(--border); font-family: inherit;
     font-size: .75rem; font-weight: 700; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    transition: border-color .2s;
+    transition: border-color .2s; overflow: hidden;
   }
   .avatar-btn:hover { border-color: var(--primary); }
 
@@ -257,6 +257,7 @@
   .row-avatar {
     width: 28px; height: 28px; border-radius: 50%; background: var(--primary-dim); color: var(--primary);
     font-size: .75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    overflow: hidden;
   }
   .icon-btn {
     background: none; border: none; cursor: pointer; font-size: 1rem; color: var(--fg2);
@@ -367,6 +368,7 @@
   .profile-avatar {
     width: 56px; height: 56px; border-radius: 50%; background: var(--primary-dim); color: var(--primary);
     font-size: 1.375rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    overflow: hidden;
   }
   .profile-header h1 { font-size: 1.375rem; font-weight: 800; }
   .profile-subline { color: var(--fg2); font-size: .875rem; margin-top: .25rem; }
@@ -499,6 +501,12 @@
     border-top-color: var(--primary); border-radius: 50%;
     animation: spin .7s linear infinite; margin: 3rem auto; display: block;
   }
+  .btn-spinner {
+    width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.4);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin .6s linear infinite;
+    display: inline-block; vertical-align: -2px; margin-right: .5rem;
+  }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   @media (max-width: 768px) {
@@ -618,7 +626,7 @@
       <label>Verification code</label>
       <input type="text" id="verification-code" maxlength="6" placeholder="Enter 6 digit code">
     </div>
-    <button class="btn-primary" onclick="verifyCode()">Verify →</button>
+    <button class="btn-primary" id="verify-btn" onclick="verifyCode()">Verify →</button>
     <p class="verify-error" id="verify-error"></p>
   </div>
 </div>
@@ -651,6 +659,7 @@
     <button class="tab-btn" id="tab-btn-insights" onclick="switchTab('insights')">Insights</button>
     <button class="tab-btn" id="tab-btn-members" onclick="switchTab('members')" style="display:none;">Members</button>
     <button class="tab-btn" id="tab-btn-assignments" onclick="switchTab('assignments')" style="display:none;">Assignments</button>
+    <button class="tab-btn" id="tab-btn-activity" onclick="switchTab('activity')" style="display:none;">Activity</button>
   </div>
 
   <div class="main">
@@ -941,6 +950,87 @@
       </div>
     </div>
 
+    <!-- ═══════════ ACTIVITY TAB (admin only) ═══════════ -->
+    <div class="tab-panel" id="panel-activity">
+
+      <div id="activity-list-view">
+        <div class="section-header">
+          <h2>Team Activity</h2>
+          <button class="btn-refresh" onclick="loadActivity()">↻ Refresh</button>
+        </div>
+
+        <div class="filters-row">
+          <select class="filter-select" id="activity-filter-member" onchange="renderActivityStats(); renderActivityLog();"><option value="">All members</option></select>
+        </div>
+
+        <div id="activity-loading"><span class="spinner"></span></div>
+        <div id="activity-content" style="display:none;">
+          <div class="section-header"><h2 style="font-size:.95rem;">Time & performance summary</h2></div>
+          <div class="table-wrap" style="margin-bottom:1.5rem;">
+            <table>
+              <thead><tr>
+                <th>Member</th><th>Status</th><th>Sessions</th><th>Total logged in</th>
+                <th>Active</th><th>Idle</th><th>% Active</th><th>Last login</th><th>Last logout</th>
+              </tr></thead>
+              <tbody id="activity-stats-tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="section-header"><h2 style="font-size:.95rem;">Recent activity</h2></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Member</th><th>Action</th><th>When</th></tr></thead>
+              <tbody id="activity-log-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── per-member drill-down ── -->
+      <div class="profile-view" id="activity-member-view">
+        <button class="profile-back" onclick="closeActivityMemberPanel()">← Back to Activity</button>
+        <div class="profile-header">
+          <div class="profile-header-left">
+            <div class="profile-avatar" id="activity-member-avatar">?</div>
+            <div>
+              <h1 id="activity-member-name">Member</h1>
+              <div class="profile-subline" id="activity-member-subline"></div>
+            </div>
+          </div>
+          <select class="filter-select" id="activity-member-period" onchange="renderActivityMemberPanel()">
+            <option value="week">This week</option>
+            <option value="month" selected>This month</option>
+            <option value="year">This year</option>
+          </select>
+        </div>
+
+        <div class="stats-row" id="activity-member-stats"></div>
+
+        <div class="insights-grid">
+          <div class="chart-card">
+            <h3>Logged-in hours over time</h3>
+            <div class="chart-card-canvas-wrap"><canvas id="chart-member-timeline"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Active vs idle time</h3>
+            <div class="chart-card-canvas-wrap"><canvas id="chart-member-activesplit"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Actions by type</h3>
+            <div class="chart-card-canvas-wrap"><canvas id="chart-member-actiontypes"></canvas></div>
+          </div>
+        </div>
+
+        <div class="section-header" style="margin-top:1.5rem;"><h2 style="font-size:.95rem;">Activity history</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Action</th><th>When</th></tr></thead>
+            <tbody id="activity-member-log-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1013,6 +1103,13 @@
       <div class="field"><label>Email</label><input type="text" id="profile-email" disabled></div>
       <div class="field"><label>Role</label><input type="text" id="profile-role" disabled></div>
       <div class="field">
+        <label>Profile photo</label>
+        <div style="display:flex; align-items:center; gap:1rem;">
+          <div class="profile-avatar" id="profile-avatar-preview" style="width:56px;height:56px;"></div>
+          <input type="file" id="profile-avatar-input" accept="image/png,image/jpeg,image/webp" style="font-size:.8125rem;">
+        </div>
+      </div>
+      <div class="field">
         <label>Phone number</label>
         <input type="tel" id="profile-phone" placeholder="+254 7XX XXX XXX">
       </div>
@@ -1058,7 +1155,7 @@
   // Bulk-selection state, keyed by table name ('applications' | 'talent')
   const selection = { applications: new Set(), talent: new Set() };
 
-  const loadedTabs = { applications:false, talent:false, members:false, assignments:false, insights:false };
+  const loadedTabs = { applications:false, talent:false, members:false, assignments:false, insights:false, activity:false };
   let insightsCharts = {};
   const CHART_PALETTE = ['#2563EB','#10B981','#F59E0B','#7C3AED','#EF4444','#8B5CF6','#6B7280'];
 
@@ -1183,7 +1280,30 @@ async function claimSession(userId) {
       errEl.textContent = 'Passwords do not match.'; errEl.className = 'login-err show'; return;
     }
 
-    btn.disabled = true; btn.textContent = 'Creating account…';
+    btn.disabled = true; btn.textContent = 'Checking…';
+
+    const { data: existingStatus, error: checkError } = await sb.rpc('check_signup_email', { check_email: email });
+    if (checkError) {
+      console.error('Email check failed:', checkError);
+      errEl.textContent = 'Could not verify email. Please try again.'; errEl.className = 'login-err show';
+      btn.disabled = false; btn.textContent = 'Create account →';
+      return;
+    }
+
+    const statusMessages = {
+      active: 'An account with this email already exists. Please sign in instead.',
+      pending: 'An account request for this email is already pending admin approval. Please wait to be approved.',
+      rejected: 'A previous account request for this email was not approved. Please contact an admin.',
+      inactive: 'An account with this email already exists but is currently disabled. Please contact an admin.'
+    };
+    if (existingStatus && existingStatus !== 'none') {
+      errEl.textContent = statusMessages[existingStatus] || 'An account with this email already exists.';
+      errEl.className = 'login-err show';
+      btn.disabled = false; btn.textContent = 'Create account →';
+      return;
+    }
+
+    btn.textContent = 'Creating account…';
 
     const { data, error } = await sb.auth.signUp({ email, password });
     if (error) {
@@ -1285,6 +1405,7 @@ async function claimSession(userId) {
   async function verifyCode() {
     const code = document.getElementById("verification-code").value.trim();
     const errorBox = document.getElementById("verify-error");
+    const btn = document.getElementById("verify-btn");
     errorBox.className = "verify-error";
 
     if (!code) {
@@ -1293,6 +1414,9 @@ async function claimSession(userId) {
       return;
     }
 
+    btn.disabled = true;
+    btn.innerHTML = '<span class="btn-spinner"></span>Verifying…';
+
     const { error } = await sb.functions.invoke("verify-login-code", {
       body: { user_id: window.pendingUser.id, code: code }
     });
@@ -1300,16 +1424,19 @@ async function claimSession(userId) {
     if (error) {
       errorBox.textContent = "Invalid or expired verification code.";
       errorBox.className = "verify-error show";
+      btn.disabled = false;
+      btn.innerHTML = 'Verify →';
       return;
     }
 
     checkTeamAccess(window.pendingUser, true);
   }
 
-  async function doLogout() {
+  async function doLogout(reason) {
     unsubscribeNotifications();
     unsubscribeMemberStatus();
     unsubscribeOnlinePresence();
+    await endActivitySession(reason || 'manual');
     allNotifications = [];
     await sb.auth.signOut();
     document.getElementById('admin-shell').style.display = 'none';
@@ -1379,17 +1506,17 @@ async function claimSession(userId) {
     const isAdmin = currentMember.role === 'admin';
     document.getElementById('tab-btn-members').style.display     = isAdmin ? 'inline-block' : 'none';
     document.getElementById('tab-btn-assignments').style.display = isAdmin ? 'inline-block' : 'none';
+    document.getElementById('tab-btn-activity').style.display    = isAdmin ? 'inline-block' : 'none';
     document.getElementById('app-filter-reviewer').style.display = isAdmin ? 'inline-block' : 'none';
     document.getElementById('app-bulk-delete-btn').style.display    = isAdmin ? 'inline-block' : 'none';
     document.getElementById('talent-bulk-delete-btn').style.display = isAdmin ? 'inline-block' : 'none';
 
-    const initials = (currentMember.email || '?').trim().charAt(0).toUpperCase();
-    document.getElementById('profile-avatar-btn').textContent = initials;
+    document.getElementById('profile-avatar-btn').innerHTML = memberAvatarContent(currentMember);
 
     loadNotifications();
     subscribeNotifications();
     subscribeMemberStatus();
-    subscribeOnlinePresence();
+    startOrResumeActivitySession();
 
     switchTab('applications');
   }
@@ -1404,6 +1531,8 @@ async function claimSession(userId) {
     document.getElementById('profile-new-password2').value = '';
     document.getElementById('profile-info-msg').className = 'save-msg';
     document.getElementById('profile-password-msg').className = 'save-msg';
+    document.getElementById('profile-avatar-preview').innerHTML = memberAvatarContent(currentMember);
+    document.getElementById('profile-avatar-input').value = '';
     document.getElementById('profile-modal').classList.add('show');
   }
 
@@ -1666,13 +1795,15 @@ function subscribeOnlinePresence() {
       onlineMemberIds = new Set(Object.keys(state));
       renderOnlineStatus();
     })
-    .subscribe(async (status) => {
+    .subscribe(async (status, err) => {
+      console.log('[presence] channel status:', status, err || '');
       if (status === 'SUBSCRIBED') {
-        await presenceChannel.track({
+        const trackResult = await presenceChannel.track({
           email: currentMember.email,
           role: currentMember.role,
           online_at: new Date().toISOString()
         });
+        console.log('[presence] track result:', trackResult);
       }
     });
 }
@@ -1686,6 +1817,7 @@ function renderOnlineStatus() {
   const el = document.getElementById('members-stat-online');
   if (el) el.textContent = onlineMemberIds.size;
   if (loadedTabs.members) renderTeamMembers();
+  if (loadedTabs.activity) renderActivityStats();
 }
 
 
@@ -1699,11 +1831,9 @@ function unsubscribeMemberStatus() {
 }
 
 async function forceLogoutForDisabled() {
-  await doLogout();
+  await doLogout('disabled');
   alert('Your account has been disabled by an admin. You have been signed out.');
 }
-
-
 
 
 
@@ -1724,12 +1854,19 @@ async function forceLogoutForDisabled() {
       if (!loadedTabs.applications) loadApplications(); else renderAssignApps();
       if (allTeamMembers.length === 0) loadTeamMembersForDropdowns();
     }
+    if (name === 'activity') { if (!loadedTabs.activity) loadActivity(); else { renderActivityStats(); renderActivityLog(); } }
   }
 
   // ── Helpers ───────────────────────────────────────────────────
   function esc(str) {
     return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
+
+  function fmtDateTime(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString('en-GB', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  }
+
   function fmtDate(iso) {
     if (!iso) return '—';
     return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
@@ -1756,6 +1893,60 @@ async function forceLogoutForDisabled() {
     if (age > 24 && age <= 40) return '25-40';
     return '40+';
   }
+
+  function memberAvatarContent(member) {
+    if (member && member.avatar_url) {
+      return `<img src="${esc(member.avatar_url)}" alt="" style="width:100%;height:100%;object-fit:cover;">`;
+    }
+    return esc(initialsOf(member ? member.email : '?'));
+  }
+
+  function refreshAvatarDisplays() {
+    const btn = document.getElementById('profile-avatar-btn');
+    if (btn) btn.innerHTML = memberAvatarContent(currentMember);
+    const preview = document.getElementById('profile-avatar-preview');
+    if (preview) preview.innerHTML = memberAvatarContent(currentMember);
+    if (loadedTabs.members) renderTeamMembers();
+    if (loadedTabs.activity) renderActivityStats();
+  }
+
+  async function handleAvatarUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const msg = document.getElementById('profile-info-msg');
+    msg.className = 'save-msg';
+
+    const ext = file.name.split('.').pop();
+    const path = `${currentUser.id}/avatar.${ext}`;
+
+    const { error: uploadError } = await sb.storage.from('avatars').upload(path, file, { upsert: true });
+    if (uploadError) {
+      msg.textContent = 'Error uploading photo: ' + uploadError.message;
+      msg.className = 'save-msg err show';
+      return;
+    }
+
+    const { data: { publicUrl } } = sb.storage.from('avatars').getPublicUrl(path);
+    const cacheBustedUrl = publicUrl + '?t=' + Date.now();
+
+    const { error: updateError } = await sb.from('team_members').update({ avatar_url: cacheBustedUrl }).eq('id', currentUser.id);
+    if (updateError) {
+      msg.textContent = 'Error saving photo: ' + updateError.message;
+      msg.className = 'save-msg err show';
+      return;
+    }
+
+    currentMember.avatar_url = cacheBustedUrl;
+    const idx = allTeamMembers.findIndex(m => m.id === currentUser.id);
+    if (idx !== -1) allTeamMembers[idx].avatar_url = cacheBustedUrl;
+
+    refreshAvatarDisplays();
+    msg.textContent = 'Profile photo updated.';
+    msg.className = 'save-msg ok show';
+    setTimeout(() => { msg.className = 'save-msg'; }, 3000);
+  }
+
+  document.getElementById('profile-avatar-input').addEventListener('change', handleAvatarUpload);
 
 
   function initialsOf(name) {
@@ -2413,6 +2604,8 @@ renderTalentPool();
         notifyAdminsReviewCompleted(applicantName, 'applications', appId);
       }
 
+      logActivity('review', `Reviewed application for ${applicantName}${update.status !== previousStatus ? ` — status changed to ${update.status}` : ''}`, 'applications', appId);
+
       saveMsg.textContent = 'Changes saved.';
       saveMsg.className = 'save-msg ok show';
     }
@@ -2734,6 +2927,8 @@ renderTalentPool();
         notifyAdminsReviewCompleted(candidateName, 'talent_pool', talentId);
       }
 
+      logActivity('review', `Reviewed candidate ${candidateName}${status !== previousStatus ? ` — moved to ${status}` : ''}`, 'talent_pool', talentId);
+
       saveMsg.textContent = 'Changes saved.';
       saveMsg.className = 'save-msg ok show';
     }
@@ -2962,19 +3157,22 @@ renderTalentPool();
       else if (member.request_status === 'rejected') statusBadge = '<span class="status-badge s-failed">Rejected</span>';
       else statusBadge = member.active ? '<span class="status-badge s-accepted">Active</span>' : '<span class="status-badge s-failed">Disabled</span>';
 
+      const deleteBtn = `<button class="btn-secondary" style="border-color:var(--red); color:var(--red); margin-left:.4rem;" onclick="deleteMember('${member.id}')">Delete</button>`;
+
       let actionHtml;
       if (member.request_status === 'pending') {
         actionHtml = `
           <button class="btn-secondary" style="border-color:var(--green); color:var(--green);" onclick="approveMember('${member.id}')">Approve</button>
-          <button class="btn-secondary" style="border-color:var(--red); color:var(--red); margin-left:.4rem;" onclick="rejectMember('${member.id}')">Reject</button>`;
+          <button class="btn-secondary" style="border-color:var(--red); color:var(--red); margin-left:.4rem;" onclick="rejectMember('${member.id}')">Reject</button>
+          ${deleteBtn}`;
       } else {
-        actionHtml = `<button class="btn-secondary" onclick="toggleMember('${member.id}', ${member.active})">${member.active ? 'Disable' : 'Activate'}</button>`;
+        actionHtml = `<button class="btn-secondary" onclick="toggleMember('${member.id}', ${member.active})">${member.active ? 'Disable' : 'Activate'}</button>${deleteBtn}`;
       }
 
       const isOnline = onlineMemberIds.has(member.id);
       return `
       <tr>
-        <td class="td-name">${isOnline ? '<span title="Online now" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:.5rem;"></span>' : ''}${esc(member.email)}</td>
+        <td class="td-name"><span class="row-avatar">${memberAvatarContent(member)}</span>${isOnline ? '<span title="Online now" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-left:.4rem;margin-right:.3rem;"></span>' : ''}${esc(member.email)}</td>
         <td class="td-sub">${esc(member.phone || '—')}</td>
         <td>
           <select onchange="changeRole('${member.id}', this.value)">
@@ -3037,6 +3235,32 @@ renderTalentPool();
     });
     if (emailError) console.warn('Rejection email failed (non-blocking):', emailError);
   }
+
+
+  async function deleteMember(id) {
+  const member = allTeamMembers.find(m => m.id === id);
+  if (!member) return;
+  if (member.id === currentUser.id) { alert("You can't delete your own account."); return; }
+
+  const reason = prompt(`Enter a reason for permanently deleting ${member.email}. This is required and will be recorded in the activity log:`);
+  if (reason === null) return;
+  if (!reason.trim()) { alert('A reason is required to delete a member.'); return; }
+
+  if (!confirm(`Permanently delete ${member.email}? This removes their portal access AND their sign-in credentials entirely. This cannot be undone.`)) return;
+
+  const { error } = await sb.functions.invoke('delete-team-member', {
+    body: { memberId: id, reason: reason.trim() }
+  });
+  if (error) { alert('Error deleting member: ' + error.message); return; }
+
+  allTeamMembers = allTeamMembers.filter(m => m.id !== id);
+  allProjectMembers = allProjectMembers.filter(pm => pm.team_member_id !== id);
+  updateMembersStats();
+  renderTeamMembers();
+  renderProjects();
+  populateReviewerFilter();
+  if (loadedTabs.activity) loadActivity();
+}
 
 
   async function toggleMember(id, active) {
@@ -3221,6 +3445,234 @@ renderTalentPool();
     renderProjects();
   }
 
+  // ══════════════════════ ACTIVITY TAB ══════════════════════
+  let allActivitySessions = [];
+  let allActivityLog = [];
+
+  async function loadActivity() {
+    document.getElementById('activity-loading').style.display = 'block';
+    document.getElementById('activity-content').style.display = 'none';
+
+    if (allTeamMembers.length === 0) await loadTeamMembersForDropdowns();
+
+    const [sessionsRes, logRes] = await Promise.all([
+      sb.from('activity_sessions').select('*').order('login_at', { ascending: false }),
+      sb.from('activity_log').select('*').order('created_at', { ascending: false }).limit(100)
+    ]);
+
+    document.getElementById('activity-loading').style.display = 'none';
+    document.getElementById('activity-content').style.display = 'block';
+
+    if (sessionsRes.error) { console.error(sessionsRes.error); return; }
+    if (logRes.error) { console.error(logRes.error); return; }
+
+    allActivitySessions = sessionsRes.data || [];
+    allActivityLog = logRes.data || [];
+    loadedTabs.activity = true;
+
+    const sel = document.getElementById('activity-filter-member');
+    const current = sel.value;
+    sel.innerHTML = '<option value="">All members</option>' +
+      allTeamMembers.map(m => `<option value="${m.id}" ${m.id===current?'selected':''}>${esc(m.email)}</option>`).join('');
+
+    renderActivityStats();
+    renderActivityLog();
+  }
+
+  function fmtDuration(totalSeconds) {
+    const s = totalSeconds || 0;
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    return `${h}h ${m}m`;
+  }
+
+  function renderActivityStats() {
+    const memberFilter = document.getElementById('activity-filter-member').value;
+    const tbody = document.getElementById('activity-stats-tbody');
+    const members = memberFilter ? allTeamMembers.filter(m => m.id === memberFilter) : allTeamMembers;
+
+    tbody.innerHTML = members.map(m => {
+      const sessions = allActivitySessions.filter(s => s.team_member_id === m.id);
+      const activeSec = sessions.reduce((sum, s) => sum + (s.active_seconds || 0), 0);
+      const idleSec = sessions.reduce((sum, s) => sum + (s.idle_seconds || 0), 0);
+      const totalSec = activeSec + idleSec;
+      const pctActive = totalSec > 0 ? Math.round((activeSec / totalSec) * 100) : 0;
+      const lastLogin = sessions.length ? sessions.reduce((a,b) => new Date(a.login_at) > new Date(b.login_at) ? a : b) : null;
+      const loggedOutSessions = sessions.filter(s => s.logout_at);
+      const lastLogout = loggedOutSessions.length ? loggedOutSessions.reduce((a,b) => new Date(a.logout_at) > new Date(b.logout_at) ? a : b) : null;
+      const isOnline = typeof onlineMemberIds !== 'undefined' && onlineMemberIds.has(m.id);
+
+      return `
+        <tr class="clickable" onclick="openActivityMemberPanel('${m.id}')">
+          <td class="td-name"><span class="row-avatar">${memberAvatarContent(m)}</span>${esc(m.email)}</td>
+          <td>${isOnline ? '<span class="status-badge s-accepted">Online</span>' : '<span class="status-badge s-inactive">Offline</span>'}</td>
+          <td>${sessions.length}</td>
+          <td>${fmtDuration(totalSec)}</td>
+          <td>${fmtDuration(activeSec)}</td>
+          <td>${fmtDuration(idleSec)}</td>
+          <td>${pctActive}%</td>
+          <td class="td-sub">${lastLogin ? fmtDateTime(lastLogin.login_at) : '—'}</td>
+          <td class="td-sub">${lastLogout ? fmtDateTime(lastLogout.logout_at) : (sessions.some(s=>!s.logout_at) ? 'Active session' : '—')}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  function renderActivityLog() {
+    const memberFilter = document.getElementById('activity-filter-member').value;
+    const tbody = document.getElementById('activity-log-tbody');
+    const rows = memberFilter ? allActivityLog.filter(a => a.team_member_id === memberFilter) : allActivityLog;
+
+    tbody.innerHTML = rows.length ? rows.map(a => {
+      const member = allTeamMembers.find(m => m.id === a.team_member_id);
+      return `
+        <tr>
+          <td>${esc(member ? member.email : 'Unknown')}</td>
+          <td>${esc(a.detail || a.action_type)}</td>
+          <td class="td-sub">${fmtDateTime(a.created_at)}</td>
+        </tr>`;
+    }).join('') : '<tr><td colspan="3" style="text-align:center;color:var(--fg2);padding:2rem;">No activity recorded yet.</td></tr>';
+  }
+
+  // ══════════════════════ ACTIVITY — MEMBER DRILL-DOWN ══════════════════════
+  let currentActivityMemberId = null;
+  let currentActivityMemberSessions = [];
+  let currentActivityMemberLog = [];
+
+  async function openActivityMemberPanel(memberId) {
+    const member = allTeamMembers.find(m => m.id === memberId);
+    if (!member) return;
+    currentActivityMemberId = memberId;
+
+    document.getElementById('activity-member-name').textContent = member.email;
+    document.getElementById('activity-member-avatar').innerHTML = memberAvatarContent(member);
+    document.getElementById('activity-member-subline').textContent = member.role;
+
+    const [sessionsRes, logRes] = await Promise.all([
+      sb.from('activity_sessions').select('*').eq('team_member_id', memberId).order('login_at', { ascending: false }),
+      sb.from('activity_log').select('*').eq('team_member_id', memberId).order('created_at', { ascending: false }).limit(500)
+    ]);
+    if (sessionsRes.error) { alert('Error loading sessions: ' + sessionsRes.error.message); return; }
+    if (logRes.error) { alert('Error loading activity: ' + logRes.error.message); return; }
+
+    currentActivityMemberSessions = sessionsRes.data || [];
+    currentActivityMemberLog = logRes.data || [];
+
+    document.getElementById('activity-list-view').style.display = 'none';
+    document.getElementById('activity-member-view').classList.add('open');
+
+    renderActivityMemberPanel();
+  }
+
+  function closeActivityMemberPanel() {
+    document.getElementById('activity-member-view').classList.remove('open');
+    document.getElementById('activity-list-view').style.display = 'block';
+    currentActivityMemberId = null;
+  }
+
+  function periodRange(period) {
+    const now = new Date();
+    const start = new Date(now);
+    if (period === 'week') start.setDate(now.getDate() - 7);
+    else if (period === 'year') start.setFullYear(now.getFullYear() - 1);
+    else start.setDate(now.getDate() - 30); // month
+    return { start, end: now };
+  }
+
+  function renderActivityMemberPanel() {
+    if (!currentActivityMemberId) return;
+    const period = document.getElementById('activity-member-period').value;
+    const { start } = periodRange(period);
+
+    const sessionsInPeriod = currentActivityMemberSessions.filter(s => new Date(s.login_at) >= start);
+    const logInPeriod = currentActivityMemberLog.filter(a => new Date(a.created_at) >= start);
+
+    const activeSec = sessionsInPeriod.reduce((sum, s) => sum + (s.active_seconds || 0), 0);
+    const idleSec = sessionsInPeriod.reduce((sum, s) => sum + (s.idle_seconds || 0), 0);
+    const totalSec = activeSec + idleSec;
+    const pctActive = totalSec > 0 ? Math.round((activeSec / totalSec) * 100) : 0;
+
+    document.getElementById('activity-member-stats').innerHTML = `
+      <div class="stat-card" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);"><div class="stat-num">${sessionsInPeriod.length}</div><div class="stat-label">Sessions</div></div>
+      <div class="stat-card" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);"><div class="stat-num">${fmtDuration(totalSec)}</div><div class="stat-label">Total logged in</div></div>
+      <div class="stat-card" style="--stat-color:var(--green); --stat-dim:var(--green-dim);"><div class="stat-num">${fmtDuration(activeSec)}</div><div class="stat-label">Active time</div></div>
+      <div class="stat-card" style="--stat-color:var(--orange); --stat-dim:var(--orange-dim);"><div class="stat-num">${fmtDuration(idleSec)}</div><div class="stat-label">Idle time</div></div>
+      <div class="stat-card" style="--stat-color:var(--purple); --stat-dim:var(--purple-dim);"><div class="stat-num">${pctActive}%</div><div class="stat-label">Active rate</div></div>
+      <div class="stat-card" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);"><div class="stat-num">${logInPeriod.length}</div><div class="stat-label">Actions logged</div></div>
+    `;
+
+    renderActivityMemberCharts(period, sessionsInPeriod, logInPeriod);
+
+    const tbody = document.getElementById('activity-member-log-tbody');
+    tbody.innerHTML = logInPeriod.length ? logInPeriod.map(a => `
+      <tr><td>${esc(a.detail || a.action_type)}</td><td class="td-sub">${fmtDateTime(a.created_at)}</td></tr>
+    `).join('') : '<tr><td colspan="2" style="text-align:center;color:var(--fg2);padding:2rem;">No activity in this period.</td></tr>';
+  }
+
+  function bucketLabelsForPeriod(period) {
+    const now = new Date();
+    const buckets = [];
+    if (period === 'week') {
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now); d.setDate(now.getDate() - i);
+        const start = new Date(d); start.setHours(0,0,0,0);
+        const end = new Date(d); end.setHours(23,59,59,999);
+        buckets.push({ label: d.toLocaleDateString('en-GB', { weekday: 'short' }), start, end });
+      }
+    } else if (period === 'year') {
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const start = new Date(d.getFullYear(), d.getMonth(), 1);
+        const end = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+        buckets.push({ label: d.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }), start, end });
+      }
+    } else { // month -> last ~4 weeks
+      for (let i = 3; i >= 0; i--) {
+        const end = new Date(now); end.setDate(now.getDate() - (i * 7));
+        const start = new Date(end); start.setDate(end.getDate() - 6);
+        buckets.push({ label: `${start.getDate()}/${start.getMonth()+1}–${end.getDate()}/${end.getMonth()+1}`, start, end });
+      }
+    }
+    return buckets;
+  }
+
+  function renderActivityMemberCharts(period, sessionsInPeriod, logInPeriod) {
+    if (typeof Chart === 'undefined') return;
+    const buckets = bucketLabelsForPeriod(period);
+
+    const activeByBucket = buckets.map(b =>
+      sessionsInPeriod.filter(s => { const d = new Date(s.login_at); return d >= b.start && d <= b.end; })
+        .reduce((sum, s) => sum + (s.active_seconds || 0), 0) / 3600
+    );
+    const idleByBucket = buckets.map(b =>
+      sessionsInPeriod.filter(s => { const d = new Date(s.login_at); return d >= b.start && d <= b.end; })
+        .reduce((sum, s) => sum + (s.idle_seconds || 0), 0) / 3600
+    );
+
+    upsertChart('chart-member-timeline', 'bar', {
+      labels: buckets.map(b => b.label),
+      datasets: [
+        { label: 'Active (h)', data: activeByBucket, backgroundColor: '#10B981', borderRadius: 6, stack: 's' },
+        { label: 'Idle (h)', data: idleByBucket, backgroundColor: '#F59E0B', borderRadius: 6, stack: 's' }
+      ]
+    }, { scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, grid: { color: '#E5E7EB' } } }, plugins: { legend: { display: true, position: 'bottom' } } });
+
+    const totalActive = sessionsInPeriod.reduce((sum, s) => sum + (s.active_seconds || 0), 0);
+    const totalIdle = sessionsInPeriod.reduce((sum, s) => sum + (s.idle_seconds || 0), 0);
+    upsertChart('chart-member-activesplit', 'doughnut', {
+      labels: ['Active', 'Idle'],
+      datasets: [{ data: [totalActive, totalIdle], backgroundColor: ['#10B981', '#F59E0B'] }]
+    });
+
+    const actionCounts = {};
+    logInPeriod.forEach(a => { const t = a.action_type || 'other'; actionCounts[t] = (actionCounts[t]||0) + 1; });
+    const actionLabels = Object.keys(actionCounts);
+    upsertChart('chart-member-actiontypes', 'pie', {
+      labels: actionLabels,
+      datasets: [{ data: actionLabels.map(t => actionCounts[t]), backgroundColor: CHART_PALETTE }]
+    });
+  }
+
+
   // ══════════════════ ASSIGNMENTS TAB (Reviewer quick-assign) ══════════════════
   function renderAssignApps() {
     const tbody = document.getElementById('assign-apps-tbody');
@@ -3254,14 +3706,25 @@ renderTalentPool();
 
     if (reviewerId && reviewerId !== previousReviewerId) {
       notifyReviewerAssigned(reviewerId, allApplications[idx].full_name, 'applications', appId);
+      logActivity('assignment', `Reassigned ${allApplications[idx].full_name}'s application to ${reviewerLabel(reviewerId)}`, 'applications', appId);
     }
   }
 
   // ── Inactivity auto-logout (6 hours) ─────────────────────────
   const INACTIVITY_LIMIT_MS = 6 * 60 * 60 * 1000; // 6 hours
   const ACTIVITY_KEY = 'diraflow_last_activity';
+  const IDLE_THRESHOLD_MS = 2 * 60 * 1000;   // 2 minutes with no input counts as idle
+  const HEARTBEAT_INTERVAL_MS = 30 * 1000;   // write active/idle totals every 30s
+  const ACTIVITY_SESSION_ID_KEY = 'diraflow_activity_session_id';
+
+  let currentActivitySessionId = null;
+  let lastUserActivityAt = Date.now();
+  let sessionActiveSeconds = 0;
+  let sessionIdleSeconds = 0;
+  let heartbeatIntervalHandle = null;
 
   function markActivity() {
+    lastUserActivityAt = Date.now();
     // Only bother tracking once someone is actually logged in.
     if (currentUser) localStorage.setItem(ACTIVITY_KEY, String(Date.now()));
   }
@@ -3275,9 +3738,77 @@ renderTalentPool();
   }
 
   async function forceLogoutForInactivity() {
-    await doLogout();
+    await doLogout('inactivity');
     localStorage.removeItem(ACTIVITY_KEY);
     alert('You have been signed out after 6 hours of inactivity for security purposes. Please sign in again.');
+  }
+
+  // ── Activity session tracking (logged-in time, active vs idle) ──
+  async function startOrResumeActivitySession() {
+    const storedId = localStorage.getItem(ACTIVITY_SESSION_ID_KEY);
+    if (storedId) {
+      const { data, error } = await sb.from('activity_sessions').select('*').eq('id', storedId).is('logout_at', null).maybeSingle();
+      if (!error && data) {
+        currentActivitySessionId = data.id;
+        sessionActiveSeconds = data.active_seconds || 0;
+        sessionIdleSeconds = data.idle_seconds || 0;
+        startHeartbeat();
+        return;
+      }
+    }
+    const { data, error } = await sb.from('activity_sessions')
+      .insert({ team_member_id: currentUser.id })
+      .select().single();
+    if (error) { console.error('Could not start activity session:', error); return; }
+    currentActivitySessionId = data.id;
+    sessionActiveSeconds = 0;
+    sessionIdleSeconds = 0;
+    localStorage.setItem(ACTIVITY_SESSION_ID_KEY, data.id);
+    startHeartbeat();
+  }
+
+  function startHeartbeat() {
+    if (heartbeatIntervalHandle) return;
+    lastUserActivityAt = Date.now();
+    heartbeatIntervalHandle = setInterval(activityHeartbeatTick, HEARTBEAT_INTERVAL_MS);
+  }
+
+  async function activityHeartbeatTick() {
+    if (!currentActivitySessionId) return;
+    const idleFor = Date.now() - lastUserActivityAt;
+    if (idleFor < IDLE_THRESHOLD_MS) sessionActiveSeconds += HEARTBEAT_INTERVAL_MS / 1000;
+    else sessionIdleSeconds += HEARTBEAT_INTERVAL_MS / 1000;
+
+    const { error } = await sb.from('activity_sessions').update({
+      active_seconds: sessionActiveSeconds,
+      idle_seconds: sessionIdleSeconds,
+      last_heartbeat_at: new Date().toISOString()
+    }).eq('id', currentActivitySessionId);
+    if (error) console.error('Could not write activity heartbeat:', error);
+  }
+
+  async function endActivitySession(reason) {
+    if (!currentActivitySessionId) return;
+    if (heartbeatIntervalHandle) { clearInterval(heartbeatIntervalHandle); heartbeatIntervalHandle = null; }
+    await sb.from('activity_sessions').update({
+      logout_at: new Date().toISOString(),
+      active_seconds: sessionActiveSeconds,
+      idle_seconds: sessionIdleSeconds,
+      logout_reason: reason || 'manual'
+    }).eq('id', currentActivitySessionId);
+    localStorage.removeItem(ACTIVITY_SESSION_ID_KEY);
+    currentActivitySessionId = null;
+    sessionActiveSeconds = 0;
+    sessionIdleSeconds = 0;
+  }
+
+  async function logActivity(actionType, detail, relatedTable, relatedId) {
+    if (!currentUser) return;
+    const { error } = await sb.from('activity_log').insert({
+      team_member_id: currentUser.id, action_type: actionType, detail,
+      related_table: relatedTable || null, related_id: relatedId ? String(relatedId) : null
+    });
+    if (error) console.error('Could not log activity:', error);
   }
 
   ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'].forEach(evt => {
