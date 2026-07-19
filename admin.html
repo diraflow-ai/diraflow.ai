@@ -1248,6 +1248,8 @@
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   // ── State ─────────────────────────────────────────────────────
+  let pendingLoginEmail = null;
+  let pendingLoginPassword = null;
   let currentUser   = null;
   let currentMember = null;   // row from team_members for the logged-in user
   let allApplications = [];
@@ -1327,6 +1329,7 @@ function clearStoredSessionId() { localStorage.removeItem(SESSION_ID_KEY); }
     }
 
     window.pendingUser = data.user;
+
     const { data: mfaSetting } = await sb.from('site_settings').select('mfa_required_roles').eq('id', 1).single();
     const { data: memberRow } = await sb.from('team_members').select('role').eq('id', data.user.id).single();
     const mfaRequiredRoles = (mfaSetting && mfaSetting.mfa_required_roles) || ['admin', 'reviewer', 'viewer'];
@@ -1339,6 +1342,7 @@ function clearStoredSessionId() { localStorage.removeItem(SESSION_ID_KEY); }
       return;
     }
 
+    // Send the code while still authenticated — the function needs a valid session.
     const { error: codeError } = await sb.functions.invoke("send-login-code", {
       body: { userId: data.user.id, email: data.user.email }
     });
@@ -1348,6 +1352,14 @@ function clearStoredSessionId() { localStorage.removeItem(SESSION_ID_KEY); }
       btn.disabled = false; btn.textContent = 'Sign in →';
       return;
     }
+
+    // Code is sent — now drop the session immediately. Nobody is considered
+    // "logged in" until the code is actually verified. Credentials are held
+    // only in memory (never localStorage) so verifyCode() can re-establish
+    // the real session once the code checks out.
+    pendingLoginEmail = email;
+    pendingLoginPassword = password;
+    await sb.auth.signOut();
 
     hideAllAuthScreens();
     document.getElementById("verify-screen").style.display = "flex";
@@ -1548,7 +1560,21 @@ async function claimSession(userId) {
       return;
     }
 
-    checkTeamAccess(window.pendingUser, true);
+    // Code confirmed — only now do we establish the real, persisted session.
+    const email = pendingLoginEmail;
+    const password = pendingLoginPassword;
+    pendingLoginPassword = null; // clear from memory immediately, success or not
+
+    const { data: reAuthData, error: reAuthError } = await sb.auth.signInWithPassword({ email, password });
+    if (reAuthError || !reAuthData.user) {
+      errorBox.textContent = "Could not complete sign-in. Please try again.";
+      errorBox.className = "verify-error show";
+      btn.disabled = false;
+      btn.innerHTML = 'Verify →';
+      return;
+    }
+
+    checkTeamAccess(reAuthData.user, true);
   }
 
   async function doLogout(reason) {
