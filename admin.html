@@ -92,6 +92,16 @@
     padding: .625rem .875rem; font-family: inherit; font-size: .9375rem; color: var(--fg);
     transition: border-color .2s;
   }
+  .password-field-wrap { position: relative; }
+  .password-toggle-btn {
+    position: absolute; right: .75rem; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; font-size: 1rem;
+    color: var(--fg2); padding: 0; line-height: 1;
+  }
+  .password-toggle-btn:hover { color: var(--primary); }
+
+
+
   .field input:focus, .field select:focus { outline: none; border-color: var(--primary); }
   .btn-primary {
     width: 100%; background: var(--primary); color: #fff; border: none; border-radius: var(--radius);
@@ -546,7 +556,10 @@
     </div>
     <div class="field">
       <label>Password</label>
-      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+      <div class="password-field-wrap">
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+        <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('login-password', this)">👁️</button>
+      </div>
     </div>
     <button class="btn-primary" id="login-btn" onclick="doLogin()">Sign in →</button>
     <p class="login-err" id="login-err"></p>
@@ -1102,12 +1115,39 @@
           </div>
         </div>
 
-        <div class="section-header" style="margin-top:1.5rem;"><h2 style="font-size:.95rem;">Sessions</h2></div>
-        <div class="table-wrap" style="margin-bottom:1.5rem;">
-          <table>
-            <thead><tr><th>Login</th><th>Logout</th><th>Duration</th><th>Active</th><th>Idle</th><th>Device</th><th>IP address</th><th>Flags</th></tr></thead>
-            <tbody id="activity-member-sessions-tbody"></tbody>
-          </table>
+        <div class="section-header" style="margin-top:1.5rem;"><h2 style="font-size:.95rem;">Sessions (daily summary)</h2></div>
+        <div class="insights-grid" style="grid-template-columns: 2fr 1fr; margin-bottom:1.5rem; align-items:start;">
+          <div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Date</th><th>Sessions</th><th>Total</th><th>Active</th><th>Idle</th><th>Break</th><th>Flags</th></tr></thead>
+                <tbody id="activity-member-sessions-tbody"></tbody>
+              </table>
+            </div>
+            <div style="text-align:center; padding:1rem 0;">
+              <button class="btn-secondary" id="sessions-load-more-btn" onclick="loadMoreSessionDays()" style="display:none;">Load more</button>
+            </div>
+          </div>
+
+          <div class="profile-card">
+            <div class="panel-section-title">View a specific date</div>
+            <div class="action-field">
+              <input type="date" id="sessions-date-picker" onchange="renderDaySnapshot()">
+            </div>
+            <div id="sessions-day-snapshot"></div>
+
+            <div class="info-divider"></div>
+
+            <div class="panel-section-title">Select a range</div>
+            <div style="font-size:.8125rem; color:var(--fg2); margin-bottom:.5rem;">
+              <strong id="range-start-label"></strong> — <strong id="range-end-label"></strong>
+            </div>
+            <label style="font-size:.7rem; color:var(--subtle); text-transform:uppercase;">Start</label>
+            <input type="range" id="range-slider-start" min="0" max="0" value="0" style="width:100%;" oninput="onRangeSliderInput()">
+            <label style="font-size:.7rem; color:var(--subtle); text-transform:uppercase;">End</label>
+            <input type="range" id="range-slider-end" min="0" max="0" value="0" style="width:100%;" oninput="onRangeSliderInput()">
+            <div id="sessions-range-snapshot" style="margin-top:1rem;"></div>
+          </div>
         </div>
 
         <div class="section-header"><h2 style="font-size:.95rem;">Activity history</h2></div>
@@ -1461,6 +1501,8 @@ async function claimSession(userId) {
       }
       if (memberError) {
         console.error('Could not record team_members row for new signup:', memberError);
+        errEl.textContent = 'Account created, but could not register it for approval (' + memberError.message + '). Please contact an admin.';
+        errEl.className = 'login-err show';
       }
     }
 
@@ -2157,6 +2199,17 @@ async function exportInsightsPDF() {
     if (age >= 18 && age <= 24) return '18-24';
     if (age > 24 && age <= 40) return '25-40';
     return '40+';
+  }
+
+  function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.textContent = '🙈';
+    } else {
+      input.type = 'password';
+      btn.textContent = '👁️';
+    }
   }
 
   function memberAvatarContent(member) {
@@ -4051,7 +4104,7 @@ renderTalentPool();
     `;
 
     renderActivityMemberCharts(period, sessionsInPeriod, logInPeriod);
-    renderActivityMemberSessions(sessionsInPeriod);
+    renderActivityMemberSessions(currentActivityMemberSessions);
 
     const tbody = document.getElementById('activity-member-log-tbody');
     tbody.innerHTML = logInPeriod.length ? logInPeriod.map(a => `
@@ -4114,27 +4167,157 @@ renderTalentPool();
     URL.revokeObjectURL(url);
   }
 
-  function renderActivityMemberSessions(sessions) {
-    const tbody = document.getElementById('activity-member-sessions-tbody');
-    const sorted = sessions.slice().sort((a,b) => new Date(b.login_at) - new Date(a.login_at));
-    tbody.innerHTML = sorted.length ? sorted.map(s => {
-      const totalSec = (s.active_seconds || 0) + (s.idle_seconds || 0);
+  let sessionDayRollupAll = [];
+  let sessionDayRollupShown = 10;
+  let sliderDays = [];
+
+  function dayKey(dateStr) {
+    const d = new Date(dateStr);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+  function todayKey() { return dayKey(new Date()); }
+  function fmtDateLabel(key) {
+    if (!key) return '—';
+    const [y,m,d] = key.split('-').map(Number);
+    return new Date(y, m-1, d).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  }
+
+  // Groups raw session rows so that if a session spans a day change, or several
+  // logins happen on the same calendar day, they all compile into one row for that day.
+  function buildDailySessionRollup(sessions) {
+    const map = {};
+    sessions.forEach(s => {
+      const key = dayKey(s.login_at);
+      if (!map[key]) map[key] = { date: key, sessionsCount: 0, activeSec: 0, idleSec: 0, breakSec: 0, flags: new Set() };
+      const row = map[key];
+      row.sessionsCount++;
+      row.activeSec += s.active_seconds || 0;
+      row.idleSec += s.idle_seconds || 0;
+      row.breakSec += s.break_seconds || 0;
       const loginHour = new Date(s.login_at).getHours();
-      const flags = [];
-      if ((s.active_seconds || 0) > 8 * 3600 && (s.break_seconds || 0) === 0) flags.push('<span class="status-badge s-under-review">Long session, no break</span>');
-      if (loginHour < 5 || loginHour >= 23) flags.push('<span class="status-badge s-interview-required">Off-hours login</span>');
+      if ((s.active_seconds || 0) > 8 * 3600 && (s.break_seconds || 0) === 0) row.flags.add('Long session, no break');
+      if (loginHour < 5 || loginHour >= 23) row.flags.add('Off-hours login');
+    });
+    return Object.values(map).sort((a, b) => b.date.localeCompare(a.date));
+  }
+
+  function renderActivityMemberSessions(sessions) {
+    sessionDayRollupAll = buildDailySessionRollup(sessions);
+    sessionDayRollupShown = 10;
+    renderSessionDayRows();
+    initDateAndRangeControls();
+  }
+
+  function renderSessionDayRows() {
+    const tbody = document.getElementById('activity-member-sessions-tbody');
+    const rows = sessionDayRollupAll.slice(0, sessionDayRollupShown);
+    tbody.innerHTML = rows.length ? rows.map(r => {
+      const totalSec = r.activeSec + r.idleSec + r.breakSec;
       return `
         <tr>
-          <td class="td-sub">${fmtDateTime(s.login_at)}</td>
-          <td class="td-sub">${s.logout_at ? fmtDateTime(s.logout_at) : 'Active session'}</td>
+          <td class="td-name">${fmtDateLabel(r.date)}</td>
+          <td>${r.sessionsCount}</td>
           <td>${fmtDuration(totalSec)}</td>
-          <td>${fmtDuration(s.active_seconds)}</td>
-          <td>${fmtDuration(s.idle_seconds)}</td>
-          <td class="td-sub">${esc(parseUserAgent(s.user_agent))}</td>
-          <td class="td-sub">${esc(s.ip_address || '—')}</td>
-          <td>${flags.join(' ') || '—'}</td>
+          <td>${fmtDuration(r.activeSec)}</td>
+          <td>${fmtDuration(r.idleSec)}</td>
+          <td>${fmtDuration(r.breakSec)}</td>
+          <td>${[...r.flags].map(f => `<span class="status-badge s-interview-required">${esc(f)}</span>`).join(' ') || '—'}</td>
         </tr>`;
-    }).join('') : '<tr><td colspan="8" style="text-align:center;color:var(--fg2);padding:2rem;">No sessions in this period.</td></tr>';
+    }).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--fg2);padding:2rem;">No sessions recorded.</td></tr>';
+
+    const btn = document.getElementById('sessions-load-more-btn');
+    btn.style.display = sessionDayRollupShown < sessionDayRollupAll.length ? 'inline-block' : 'none';
+  }
+
+  function loadMoreSessionDays() {
+    sessionDayRollupShown += 10;
+    renderSessionDayRows();
+  }
+
+  function renderDaySnapshot() {
+    const val = document.getElementById('sessions-date-picker').value;
+    const el = document.getElementById('sessions-day-snapshot');
+    if (!val) { el.innerHTML = ''; return; }
+    const row = sessionDayRollupAll.find(r => r.date === val);
+    if (!row) { el.innerHTML = '<p style="color:var(--fg2);font-size:.8125rem;margin-top:.75rem;">No sessions on this date.</p>'; return; }
+    const totalSec = row.activeSec + row.idleSec + row.breakSec;
+    el.innerHTML = `
+      <div class="info-grid" style="margin-top:.75rem;">
+        <div class="info-item"><div class="info-key">Sessions</div><div class="info-val">${row.sessionsCount}</div></div>
+        <div class="info-item"><div class="info-key">Total</div><div class="info-val">${fmtDuration(totalSec)}</div></div>
+        <div class="info-item"><div class="info-key">Active</div><div class="info-val">${fmtDuration(row.activeSec)}</div></div>
+        <div class="info-item"><div class="info-key">Idle</div><div class="info-val">${fmtDuration(row.idleSec)}</div></div>
+        <div class="info-item"><div class="info-key">Break</div><div class="info-val">${fmtDuration(row.breakSec)}</div></div>
+      </div>`;
+  }
+
+  function initDateAndRangeControls() {
+    const datePicker = document.getElementById('sessions-date-picker');
+    if (sessionDayRollupAll.length > 0) {
+      datePicker.min = sessionDayRollupAll[sessionDayRollupAll.length - 1].date;
+      datePicker.max = todayKey();
+      datePicker.value = sessionDayRollupAll[0].date;
+    } else {
+      datePicker.value = todayKey();
+    }
+    renderDaySnapshot();
+
+    // Slider domain: every calendar day from the earliest session to today,
+    // so the range covers real elapsed time, not just days with activity.
+    if (sessionDayRollupAll.length > 0) {
+      const earliest = sessionDayRollupAll[sessionDayRollupAll.length - 1].date;
+      const [ey, em, ed] = earliest.split('-').map(Number);
+      const start = new Date(ey, em - 1, ed);
+      const end = new Date(); end.setHours(0,0,0,0);
+      sliderDays = [];
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) sliderDays.push(dayKey(d));
+    } else {
+      sliderDays = [todayKey()];
+    }
+
+    const maxIdx = sliderDays.length - 1;
+    const startEl = document.getElementById('range-slider-start');
+    const endEl = document.getElementById('range-slider-end');
+    startEl.max = maxIdx; endEl.max = maxIdx;
+    startEl.value = Math.max(0, maxIdx - 29); // default: last 30 days
+    endEl.value = maxIdx;
+    renderRangeSnapshot();
+  }
+
+  function onRangeSliderInput() {
+    const startEl = document.getElementById('range-slider-start');
+    const endEl = document.getElementById('range-slider-end');
+    let startIdx = parseInt(startEl.value), endIdx = parseInt(endEl.value);
+    if (startIdx > endIdx) { [startIdx, endIdx] = [endIdx, startIdx]; startEl.value = startIdx; endEl.value = endIdx; }
+    renderRangeSnapshot();
+  }
+
+  function renderRangeSnapshot() {
+    const startEl = document.getElementById('range-slider-start');
+    const endEl = document.getElementById('range-slider-end');
+    const startDate = sliderDays[parseInt(startEl.value)];
+    const endDate = sliderDays[parseInt(endEl.value)];
+    document.getElementById('range-start-label').textContent = fmtDateLabel(startDate);
+    document.getElementById('range-end-label').textContent = fmtDateLabel(endDate);
+
+    const rows = sessionDayRollupAll.filter(r => r.date >= startDate && r.date <= endDate);
+    const totalActive = rows.reduce((s, r) => s + r.activeSec, 0);
+    const totalIdle = rows.reduce((s, r) => s + r.idleSec, 0);
+    const totalBreak = rows.reduce((s, r) => s + r.breakSec, 0);
+    const totalSessions = rows.reduce((s, r) => s + r.sessionsCount, 0);
+    const totalSec = totalActive + totalIdle + totalBreak;
+    const pct = totalSec > 0 ? Math.round((totalActive / totalSec) * 100) : 0;
+
+    document.getElementById('sessions-range-snapshot').innerHTML = `
+      <div class="info-grid">
+        <div class="info-item"><div class="info-key">Days active</div><div class="info-val">${rows.length}</div></div>
+        <div class="info-item"><div class="info-key">Sessions</div><div class="info-val">${totalSessions}</div></div>
+        <div class="info-item"><div class="info-key">Total</div><div class="info-val">${fmtDuration(totalSec)}</div></div>
+        <div class="info-item"><div class="info-key">Active</div><div class="info-val">${fmtDuration(totalActive)}</div></div>
+        <div class="info-item"><div class="info-key">Idle</div><div class="info-val">${fmtDuration(totalIdle)}</div></div>
+        <div class="info-item"><div class="info-key">Break</div><div class="info-val">${fmtDuration(totalBreak)}</div></div>
+        <div class="info-item"><div class="info-key">Active rate</div><div class="info-val">${pct}%</div></div>
+      </div>`;
   }
 
   function bucketLabelsForPeriod(period) {
