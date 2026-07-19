@@ -9,6 +9,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo.jpg">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.102.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -37,6 +38,21 @@
 
     --radius:    10px;
     --radius-lg: 14px;
+  }
+
+  [data-theme="dark"] {
+    --bg:        #0F1115;
+    --bg2:       #161920;
+    --card:      #1A1D24;
+    --border:    #2A2E38;
+    --fg:        #E5E7EB;
+    --fg2:       #9CA3AF;
+    --subtle:    #6B7280;
+    --primary-dim:  #1E2A4A;
+    --green-dim:    #16332A;
+    --orange-dim:   #3A2E14;
+    --red-dim:      #3A1D1D;
+    --purple-dim:   #2A1E4A;
   }
 
   body {
@@ -225,6 +241,7 @@
   }
   .btn-refresh:hover, .btn-filters-toggle:hover { border-color: var(--primary); color: var(--primary); }
   .btn-filters-toggle.active { border-color: var(--primary); color: var(--primary); background: var(--primary-dim); }
+  #break-toggle-btn.active { border-color:var(--orange); color:var(--orange); background:var(--orange-dim); }
 
   .more-filters-row {
     display: none; flex-wrap: wrap; gap: .75rem; align-items: center;
@@ -639,9 +656,15 @@
       <img src="/assets/logo.jpg" alt="Diraflow">
       <span class="topbar-title">Diraflow Admin</span>
     </div>
+    <div style="flex:1; max-width:420px; margin:0 1.5rem; position:relative;">
+      <input type="text" id="global-search-input" placeholder="Search applications, candidates, members…" oninput="handleGlobalSearch()" style="width:100%; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:.5rem .875rem; font-family:inherit; font-size:.875rem;">
+      <div id="global-search-results" style="display:none; position:absolute; top:42px; left:0; right:0; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:0 10px 30px rgba(17,24,39,.15); max-height:400px; overflow-y:auto; z-index:200;"></div>
+    </div>
     <div class="topbar-right">
       <span class="role-badge" id="role-badge"></span>
       <span class="team-email" id="user-email"></span>
+      <button class="btn-logout" id="break-toggle-btn" onclick="toggleBreak()">☕ Take a break</button>
+      <button class="btn-logout" id="theme-toggle-btn" onclick="toggleTheme()">🌙</button>
       <div style="position:relative;">
         <button class="bell-btn" id="notif-bell-btn" onclick="toggleNotifPanel()" title="Notifications">
           🔔<span class="notif-badge" id="notif-badge">0</span>
@@ -657,6 +680,7 @@
     <button class="tab-btn active" id="tab-btn-applications" onclick="switchTab('applications')">Applications</button>
     <button class="tab-btn" id="tab-btn-talent" onclick="switchTab('talent')">Talent Pool</button>
     <button class="tab-btn" id="tab-btn-insights" onclick="switchTab('insights')">Insights</button>
+    <button class="tab-btn" id="tab-btn-tasks" onclick="switchTab('tasks')">Tasks</button>
     <button class="tab-btn" id="tab-btn-members" onclick="switchTab('members')" style="display:none;">Members</button>
     <button class="tab-btn" id="tab-btn-assignments" onclick="switchTab('assignments')" style="display:none;">Assignments</button>
     <button class="tab-btn" id="tab-btn-activity" onclick="switchTab('activity')" style="display:none;">Activity</button>
@@ -701,6 +725,8 @@
             <option value="score">Highest score</option>
             <option value="az">A–Z</option>
           </select>
+          <select class="filter-select" id="app-saved-views" onchange="applySavedView(this.value)"><option value="">Saved views…</option></select>
+          <button class="btn-refresh" onclick="saveCurrentView()">💾 Save view</button>
           <button class="btn-refresh" onclick="loadApplications()">↻ Refresh</button>
         </div>
 
@@ -852,6 +878,7 @@
           <option value="40+">40+</option>
         </select>
         <button class="btn-refresh" onclick="loadInsights()">↻ Refresh data</button>
+        <button class="btn-refresh" onclick="exportInsightsPDF()">⬇ Export as PDF</button>
       </div>
 
       <div id="insights-loading"><span class="spinner"></span></div>
@@ -900,6 +927,35 @@
         </div>
       </div>
     </div>
+
+    <!-- ═══════════ TASKS TAB ═══════════ -->
+    <div class="tab-panel" id="panel-tasks">
+      <div class="section-header">
+        <h2>Tasks</h2>
+        <button class="btn-primary" style="width:auto;" onclick="openTaskModal()">+ New Task</button>
+      </div>
+      <div class="filters-row">
+        <select class="filter-select" id="tasks-filter-scope" onchange="renderTasks()">
+          <option value="mine">Assigned to me</option>
+          <option value="created">Created by me</option>
+          <option value="all">All tasks</option>
+        </select>
+        <select class="filter-select" id="tasks-filter-status" onchange="renderTasks()">
+          <option value="open">Open</option>
+          <option value="completed">Completed</option>
+          <option value="all">All</option>
+        </select>
+        <button class="btn-refresh" onclick="loadTasks()">↻ Refresh</button>
+      </div>
+      <div id="tasks-loading"><span class="spinner"></span></div>
+      <div class="table-wrap" id="tasks-table-wrap" style="display:none;">
+        <table>
+          <thead><tr><th></th><th>Task</th><th>Assignee</th><th>Related to</th><th>Due</th><th>Status</th><th></th></tr></thead>
+          <tbody id="tasks-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
 
     <!-- ═══════════ MEMBERS TAB (admin only) ═══════════ -->
     <!-- ═══════════ MEMBERS TAB (admin only) ═══════════ -->
@@ -970,21 +1026,36 @@
             <table>
               <thead><tr>
                 <th>Member</th><th>Status</th><th>Sessions</th><th>Total logged in</th>
-                <th>Active</th><th>Idle</th><th>% Active</th><th>Last login</th><th>Last logout</th>
+                <th>Active</th><th>Idle</th><th>Break</th><th>% Active</th><th>Last login</th><th>Last logout</th>
               </tr></thead>
               <tbody id="activity-stats-tbody"></tbody>
             </table>
           </div>
 
-          <div class="section-header"><h2 style="font-size:.95rem;">Recent activity</h2></div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Member</th><th>Action</th><th>When</th></tr></thead>
-              <tbody id="activity-log-tbody"></tbody>
-            </table>
-          </div>
+          <div class="section-header" style="margin-top:1.5rem;">
+          <h2 style="font-size:.95rem;">Reviewer performance</h2>
+          <select class="filter-select" id="leaderboard-period" onchange="renderLeaderboard()">
+            <option value="week">This week</option>
+            <option value="month" selected>This month</option>
+            <option value="all">All time</option>
+          </select>
+        </div>
+        <div class="table-wrap" style="margin-bottom:1.5rem;">
+          <table>
+            <thead><tr><th>#</th><th>Reviewer</th><th>Reviews completed</th><th>Avg turnaround</th><th>Fastest</th><th>Slowest</th></tr></thead>
+            <tbody id="leaderboard-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="section-header"><h2 style="font-size:.95rem;">Recent activity</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Member</th><th>Action</th><th>When</th></tr></thead>
+            <tbody id="activity-log-tbody"></tbody>
+          </table>
         </div>
       </div>
+    </div>
 
       <!-- ── per-member drill-down ── -->
       <div class="profile-view" id="activity-member-view">
@@ -997,11 +1068,21 @@
               <div class="profile-subline" id="activity-member-subline"></div>
             </div>
           </div>
-          <select class="filter-select" id="activity-member-period" onchange="renderActivityMemberPanel()">
-            <option value="week">This week</option>
-            <option value="month" selected>This month</option>
-            <option value="year">This year</option>
-          </select>
+          <div style="display:flex; gap:.5rem;">
+            <select class="filter-select" id="activity-member-period" onchange="renderActivityMemberPanel()">
+              <option value="week">This week</option>
+              <option value="month" selected>This month</option>
+              <option value="year">This year</option>
+            </select>
+            <button class="btn-refresh" onclick="exportMemberTimesheet()">⬇ Export timesheet</button>
+          </div>
+        </div>
+
+        <div class="profile-card panel-section" style="margin-bottom:1.25rem;">
+          <div class="panel-section-title">Weekly schedule (expected hours per day)</div>
+          <div class="info-grid" id="activity-member-shifts-grid" style="grid-template-columns:repeat(7,1fr);"></div>
+          <button class="btn-save" style="margin-top:1rem;" onclick="saveMemberShifts()">Save schedule</button>
+          <p class="save-msg" id="activity-member-shifts-msg"></p>
         </div>
 
         <div class="stats-row" id="activity-member-stats"></div>
@@ -1021,7 +1102,15 @@
           </div>
         </div>
 
-        <div class="section-header" style="margin-top:1.5rem;"><h2 style="font-size:.95rem;">Activity history</h2></div>
+        <div class="section-header" style="margin-top:1.5rem;"><h2 style="font-size:.95rem;">Sessions</h2></div>
+        <div class="table-wrap" style="margin-bottom:1.5rem;">
+          <table>
+            <thead><tr><th>Login</th><th>Logout</th><th>Duration</th><th>Active</th><th>Idle</th><th>Device</th><th>IP address</th><th>Flags</th></tr></thead>
+            <tbody id="activity-member-sessions-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="section-header"><h2 style="font-size:.95rem;">Activity history</h2></div>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Action</th><th>When</th></tr></thead>
@@ -1094,6 +1183,24 @@
   </div>
 </div>
 
+<!-- ── NEW TASK MODAL ── -->
+<div class="modal-overlay" id="task-new-modal">
+  <div class="modal">
+    <h2>New Task</h2>
+    <div class="field"><label>Title</label><input id="new-task-title" type="text" placeholder="e.g. Follow up with candidate"></div>
+    <div class="field"><label>Description</label><textarea id="new-task-desc" placeholder="Optional details"></textarea></div>
+    <div class="field">
+      <label>Assign to</label>
+      <select id="new-task-assignee"><option value="">Unassigned</option></select>
+    </div>
+    <div class="field"><label>Due date</label><input id="new-task-due" type="datetime-local"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="createTask()">Create</button>
+      <button class="btn-secondary" type="button" onclick="closeTaskModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── MY PROFILE MODAL ── -->
 <div class="modal-overlay" id="profile-modal">
   <div class="modal">
@@ -1155,7 +1262,7 @@
   // Bulk-selection state, keyed by table name ('applications' | 'talent')
   const selection = { applications: new Set(), talent: new Set() };
 
-  const loadedTabs = { applications:false, talent:false, members:false, assignments:false, insights:false, activity:false };
+  const loadedTabs = { applications:false, talent:false, members:false, assignments:false, insights:false, activity:false, tasks:false };
   let insightsCharts = {};
   const CHART_PALETTE = ['#2563EB','#10B981','#F59E0B','#7C3AED','#EF4444','#8B5CF6','#6B7280'];
 
@@ -1220,6 +1327,18 @@ function clearStoredSessionId() { localStorage.removeItem(SESSION_ID_KEY); }
     }
 
     window.pendingUser = data.user;
+    const { data: mfaSetting } = await sb.from('site_settings').select('mfa_required_roles').eq('id', 1).single();
+    const { data: memberRow } = await sb.from('team_members').select('role').eq('id', data.user.id).single();
+    const mfaRequiredRoles = (mfaSetting && mfaSetting.mfa_required_roles) || ['admin', 'reviewer', 'viewer'];
+    window.pendingMfaRequired = memberRow ? mfaRequiredRoles.includes(memberRow.role) : true;
+
+    if (!window.pendingMfaRequired) {
+      hideAllAuthScreens();
+      checkTeamAccess(window.pendingUser, true);
+      btn.disabled = false; btn.textContent = 'Sign in →';
+      return;
+    }
+
     const { error: codeError } = await sb.functions.invoke("send-login-code", {
       body: { userId: data.user.id, email: data.user.email }
     });
@@ -1517,6 +1636,8 @@ async function claimSession(userId) {
     subscribeNotifications();
     subscribeMemberStatus();
     startOrResumeActivitySession();
+    loadTasks();
+    applyRoleSessionTimeout();
 
     switchTab('applications');
   }
@@ -1710,6 +1831,19 @@ async function claimSession(userId) {
     }
   }
 
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
+    const btn = document.getElementById('theme-toggle-btn');
+    if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+  }
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('diraflow_theme', next);
+    applyTheme(next);
+  }
+  applyTheme(localStorage.getItem('diraflow_theme') || 'light');
+
   async function createNotification(recipientId, type, title, message, relatedTable, relatedId) {
     if (!recipientId) return;
     const { error } = await sb.from('notifications').insert({
@@ -1835,6 +1969,32 @@ async function forceLogoutForDisabled() {
   alert('Your account has been disabled by an admin. You have been signed out.');
 }
 
+async function exportInsightsPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const chartIds = ['chart-country','chart-gender','chart-age','chart-talent-status','chart-app-status','chart-projects'];
+    const titles = ['Talent pool by country','Gender distribution','Age distribution','Talent pool status','Application outcomes','Team members on projects'];
+
+    doc.setFontSize(16);
+    doc.text('Diraflow — Insights Report', 40, 40);
+    doc.setFontSize(10);
+    doc.text(new Date().toLocaleString('en-GB'), 40, 58);
+
+    let y = 80;
+    for (let i = 0; i < chartIds.length; i++) {
+      const canvas = document.getElementById(chartIds[i]);
+      if (!canvas || canvas.style.display === 'none') continue;
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      if (y > 650) { doc.addPage(); y = 40; }
+      doc.setFontSize(12);
+      doc.text(titles[i], 40, y);
+      doc.addImage(imgData, 'PNG', 40, y + 10, 500, 220);
+      y += 250;
+    }
+
+    doc.save(`diraflow-insights-${new Date().toISOString().slice(0,10)}.pdf`);
+  }
+
 
 
 
@@ -1855,9 +2015,88 @@ async function forceLogoutForDisabled() {
       if (allTeamMembers.length === 0) loadTeamMembersForDropdowns();
     }
     if (name === 'activity') { if (!loadedTabs.activity) loadActivity(); else { renderActivityStats(); renderActivityLog(); } }
+    if (name === 'tasks') { if (!loadedTabs.tasks) loadTasks(); else renderTasks(); }
   }
 
   // ── Helpers ───────────────────────────────────────────────────
+  
+  async function applyRoleSessionTimeout() {
+    const { data, error } = await sb.from('site_settings').select('session_timeout_hours').eq('id', 1).single();
+    if (error || !data || !data.session_timeout_hours) return;
+    const hours = data.session_timeout_hours[currentMember.role];
+    if (hours) INACTIVITY_LIMIT_MS = hours * 60 * 60 * 1000;
+  }
+
+
+  let globalSearchDebounce = null;
+  function handleGlobalSearch() {
+    clearTimeout(globalSearchDebounce);
+    globalSearchDebounce = setTimeout(runGlobalSearch, 200);
+  }
+
+  async function runGlobalSearch() {
+    const q = document.getElementById('global-search-input').value.trim().toLowerCase();
+    const resultsEl = document.getElementById('global-search-results');
+    if (q.length < 2) { resultsEl.style.display = 'none'; return; }
+
+    if (!loadedTabs.applications) await loadApplications();
+    if (!loadedTabs.talent) await loadTalentPool();
+    if (allTeamMembers.length === 0) await loadTeamMembersForDropdowns();
+
+    const apps = allApplications.filter(a => (a.full_name||'').toLowerCase().includes(q) || (a.email||'').toLowerCase().includes(q)).slice(0, 5);
+    const talent = allTalentPool.filter(t => (t.full_name||'').toLowerCase().includes(q) || (t.email||'').toLowerCase().includes(q)).slice(0, 5);
+    const members = allTeamMembers.filter(m => (m.email||'').toLowerCase().includes(q)).slice(0, 5);
+
+    if (apps.length + talent.length + members.length === 0) {
+      resultsEl.innerHTML = '<div class="notif-empty">No matches found.</div>';
+      resultsEl.style.display = 'block';
+      return;
+    }
+
+    const section = (label, items, onClick) => items.length ? `
+      <div class="notif-panel-header"><span>${label}</span></div>
+      ${items.map(i => `<div class="notif-item" onclick="${onClick(i)}"><div class="notif-title">${esc(i.full_name || i.email)}</div><div class="notif-msg">${esc(i.email || '')}</div></div>`).join('')}
+    ` : '';
+
+    resultsEl.innerHTML =
+      section('Applications', apps, (i) => `selectGlobalSearchResult('applications','${i.id}')`) +
+      section('Talent Pool', talent, (i) => `selectGlobalSearchResult('talent_pool','${i.id}')`) +
+      section('Team Members', members, (i) => `selectGlobalSearchResult('team_members','${i.id}')`);
+    resultsEl.style.display = 'block';
+  }
+
+  function selectGlobalSearchResult(table, id) {
+    document.getElementById('global-search-results').style.display = 'none';
+    document.getElementById('global-search-input').value = '';
+    if (table === 'applications') { switchTab('applications'); setTimeout(() => openAppPanel(id), 150); }
+    else if (table === 'talent_pool') { switchTab('talent'); setTimeout(() => openTalentPanel(id), 150); }
+    else if (table === 'team_members' && currentMember.role === 'admin') { switchTab('members'); }
+  }
+
+  document.addEventListener('click', (e) => {
+    const box = document.getElementById('global-search-results');
+    const input = document.getElementById('global-search-input');
+    if (box && box.style.display === 'block' && !box.contains(e.target) && e.target !== input) box.style.display = 'none';
+  });
+
+
+  function parseUserAgent(ua) {
+    if (!ua || ua === 'unknown') return 'Unknown device';
+    let browser = 'Unknown browser';
+    if (ua.includes('Edg/')) browser = 'Edge';
+    else if (ua.includes('Chrome/') && !ua.includes('OPR')) browser = 'Chrome';
+    else if (ua.includes('Firefox/')) browser = 'Firefox';
+    else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari';
+    let os = 'Unknown OS';
+    if (ua.includes('Windows')) os = 'Windows';
+    else if (ua.includes('Mac OS')) os = 'macOS';
+    else if (ua.includes('Android')) os = 'Android';
+    else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+    else if (ua.includes('Linux')) os = 'Linux';
+    return `${browser} · ${os}`;
+  }
+  
+  
   function esc(str) {
     return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -2158,7 +2397,8 @@ async function forceLogoutForDisabled() {
   .from('talent_pool')
   .update({
       owner_id: reviewers[idx].id,
-      status: 'Assigned'
+      status: 'Assigned',
+      assigned_at: new Date().toISOString()
   })
   .in('id', ids);
 
@@ -2226,6 +2466,7 @@ renderTalentPool();
     if (error) { console.error(error); return; }
     allApplications = data || [];
     loadedTabs.applications = true;
+    loadSavedViews();
 
     populatePositionFilter();
     populateReviewerFilter();
@@ -2379,9 +2620,9 @@ renderTalentPool();
       .map(m => `<option value="${m.id}" ${app.assigned_reviewer_id===m.id?'selected':''}>${esc(m.email)}</option>`).join('');
 
     // Profile tabs
-    const tabs = ['personal','professional','documents','timeline'];
+    const tabs = ['personal','professional','documents','comments','timeline'];
     if (isAdmin || canEdit) tabs.push('admin');
-    const tabLabels = { personal:'Personal', professional:'Professional', documents:'Documents', timeline:'Timeline', admin:'Admin' };
+    const tabLabels = { personal:'Personal', professional:'Professional', documents:'Documents', comments:'Comments', timeline:'Timeline', admin:'Admin' };
     document.getElementById('app-profile-tabs').innerHTML = tabs.map((t,i) =>
       `<button class="profile-tab-btn ${i===0?'active':''}" id="app-tabbtn-${t}" onclick="switchProfileTab('app','${t}')">${tabLabels[t]}</button>`
     ).join('');
@@ -2435,6 +2676,17 @@ renderTalentPool();
         </div>
       </div>
 
+      <div class="profile-tab-content" id="app-tab-comments">
+        <div class="profile-card panel-section">
+          <div class="panel-section-title">Comments</div>
+          <div id="app-comments-list" style="margin-bottom:1rem;"><span class="spinner" style="margin:1rem auto;"></span></div>
+          <div class="action-field">
+            <textarea id="app-comment-input" placeholder="Add a comment… type @ followed by someone's email prefix to mention them, e.g. @lawrence.john"></textarea>
+          </div>
+          <button class="btn-save" onclick="postComment('app')">Post comment</button>
+        </div>
+      </div>
+
       <div class="profile-tab-content" id="app-tab-timeline">
         <div class="profile-card panel-section">
           <div class="panel-section-title">Timeline</div>
@@ -2443,6 +2695,7 @@ renderTalentPool();
             app.status && app.status !== 'Submitted' ? { date: app.submitted_at, label: 'Status: ' + app.status } : null
           ])}
         </div>
+        ${isAdmin ? `<div class="profile-card panel-section" style="margin-top:1.25rem;"><div class="panel-section-title">Access log</div><div id="app-pii-log">Loading…</div></div>` : ''}
       </div>
 
       ${(isAdmin || canEdit) ? `
@@ -2493,6 +2746,7 @@ renderTalentPool();
             </div>
             <div>
               <button class="btn-save" id="app-save-btn" onclick="saveApplication()">Save changes</button>
+              <button class="btn-secondary" style="margin-left:.5rem;" onclick="openTaskModal('applications','${app.id}','Follow up: ${esc(app.full_name).replace(/'/g,"\\'")}')">+ Add task</button>
               <p class="save-msg" id="app-save-msg"></p>
             </div>
           </div>
@@ -2502,6 +2756,9 @@ renderTalentPool();
 
     document.getElementById('app-list-view').style.display = 'none';
     document.getElementById('app-profile-view').classList.add('open');
+    loadAndRenderComments('app', 'applications', app.id);
+    logPiiView('applications', app.id);
+    if (isAdmin) renderPiiViewLog('app-pii-log', 'applications', app.id);
   }
 
   function closeAppPanel() {
@@ -2582,7 +2839,14 @@ renderTalentPool();
       reviewer_notes: document.getElementById('app-action-notes').value || null
     };
     const reviewerSel = document.getElementById('app-action-reviewer');
-    if (reviewerSel) update.assigned_reviewer_id = reviewerSel.value || null;
+    if (reviewerSel) {
+      update.assigned_reviewer_id = reviewerSel.value || null;
+      if (update.assigned_reviewer_id && update.assigned_reviewer_id !== previousReviewerId) update.assigned_at = new Date().toISOString();
+    }
+    const decisiveStatusesForTimestamp = ['Passed', 'Failed', 'Interview Required', 'Accepted'];
+    if (decisiveStatusesForTimestamp.includes(update.status) && update.status !== previousStatus) {
+      update.reviewed_at = new Date().toISOString();
+    }
 
     const { error } = await sb.from('applications').update(update).eq('id', currentApp.id);
 
@@ -2614,6 +2878,45 @@ renderTalentPool();
   }
 
   // ══════════════════════ TALENT POOL TAB ══════════════════════
+
+  let savedViewsCache = [];
+  async function loadSavedViews() {
+    const { data, error } = await sb.from('saved_views').select('*').eq('team_member_id', currentUser.id).eq('tab', 'applications');
+    if (error) { console.error(error); return; }
+    savedViewsCache = data || [];
+    const sel = document.getElementById('app-saved-views');
+    sel.innerHTML = '<option value="">Saved views…</option>' + savedViewsCache.map(v => `<option value="${v.id}">${esc(v.name)}</option>`).join('');
+  }
+
+  async function saveCurrentView() {
+    const name = prompt('Name this saved view:');
+    if (!name || !name.trim()) return;
+    const filters = {
+      status: document.getElementById('app-filter-status').value,
+      position: document.getElementById('app-filter-position').value,
+      reviewer: document.getElementById('app-filter-reviewer').value,
+      archived: document.getElementById('app-filter-archived').value,
+      sort: document.getElementById('app-sort').value
+    };
+    const { error } = await sb.from('saved_views').insert({ team_member_id: currentUser.id, tab: 'applications', name: name.trim(), filters });
+    if (error) { alert('Error saving view: ' + error.message); return; }
+    loadSavedViews();
+  }
+
+  function applySavedView(viewId) {
+    if (!viewId) return;
+    const view = savedViewsCache.find(v => v.id === viewId);
+    if (!view) return;
+    const f = view.filters;
+    document.getElementById('app-filter-status').value = f.status || '';
+    document.getElementById('app-filter-position').value = f.position || '';
+    if (f.reviewer) document.getElementById('app-filter-reviewer').value = f.reviewer;
+    document.getElementById('app-filter-archived').value = f.archived || 'active';
+    document.getElementById('app-sort').value = f.sort || 'newest';
+    renderApplications();
+  }
+
+
   let currentTalentRowsRendered = [];
 
   async function loadTalentPool() {
@@ -2750,9 +3053,9 @@ renderTalentPool();
     const skills = getCandidateSkills(t);
     const expertise = toList(t.areas_of_expertise);
 
-    const tabs = ['personal','employment','education','skills','documents','timeline'];
+    const tabs = ['personal','employment','education','skills','documents','comments','timeline'];
     if (canEdit) tabs.push('admin');
-    const tabLabels = { personal:'Personal', employment:'Employment', education:'Education', skills:'Skills', documents:'Documents', timeline:'Timeline', admin: isAdmin ? 'Admin' : 'Review' };
+    const tabLabels = { personal:'Personal', employment:'Employment', education:'Education', skills:'Skills', documents:'Documents', comments:'Comments', timeline:'Timeline', admin: isAdmin ? 'Admin' : 'Review' };
     document.getElementById('talent-profile-tabs').innerHTML = tabs.map((tb,i) =>
       `<button class="profile-tab-btn ${i===0?'active':''}" id="talent-tabbtn-${tb}" onclick="switchProfileTab('talent','${tb}')">${tabLabels[tb]}</button>`
     ).join('');
@@ -2828,6 +3131,17 @@ renderTalentPool();
         </div>
       </div>
 
+      <div class="profile-tab-content" id="talent-tab-comments">
+        <div class="profile-card panel-section">
+          <div class="panel-section-title">Comments</div>
+          <div id="talent-comments-list" style="margin-bottom:1rem;"><span class="spinner" style="margin:1rem auto;"></span></div>
+          <div class="action-field">
+            <textarea id="talent-comment-input" placeholder="Add a comment… type @ followed by someone's email prefix to mention them, e.g. @lawrence.john"></textarea>
+          </div>
+          <button class="btn-save" onclick="postComment('talent')">Post comment</button>
+        </div>
+      </div>
+
       <div class="profile-tab-content" id="talent-tab-timeline">
         <div class="profile-card panel-section">
           <div class="panel-section-title">Timeline</div>
@@ -2875,6 +3189,7 @@ renderTalentPool();
             </div>`}
             <div>
               <button class="btn-save" id="talent-save-btn" onclick="saveTalent()">Save changes</button>
+              <button class="btn-secondary" style="margin-left:.5rem;" onclick="openTaskModal('talent_pool','${t.id}','Follow up: ${esc(t.full_name).replace(/'/g,"\\'")}')">+ Add task</button>
               <p class="save-msg" id="talent-save-msg"></p>
             </div>
           </div>
@@ -2884,6 +3199,9 @@ renderTalentPool();
 
     document.getElementById('talent-list-view').style.display = 'none';
     document.getElementById('talent-profile-view').classList.add('open');
+    loadAndRenderComments('talent', 'talent_pool', t.id);
+    logPiiView('talent_pool', t.id);
+    if (isAdmin) renderPiiViewLog('talent-pii-log', 'talent_pool', t.id);
   }
 
   function closeTalentPanel() {
@@ -2909,9 +3227,14 @@ renderTalentPool();
     const reviewer_notes = document.getElementById('talent-action-notes').value || null;
     const ownerSel = document.getElementById('talent-action-owner');
     const owner_id = ownerSel ? (ownerSel.value || null) : undefined;
+    const previousOwnerId = currentTalent.owner_id;
 
     const update = { status, reviewer_score, reviewer_notes };
-    if (owner_id !== undefined) update.owner_id = owner_id;
+    if (owner_id !== undefined) {
+      update.owner_id = owner_id;
+      if (owner_id && owner_id !== previousOwnerId) update.assigned_at = new Date().toISOString();
+    }
+    if (status !== previousStatus) update.reviewed_at = new Date().toISOString();
 
     const { error } = await sb.from('talent_pool').update(update).eq('id', currentTalent.id);
 
@@ -3189,11 +3512,16 @@ renderTalentPool();
   }
 
   async function changeRole(id, role) {
+    const member = allTeamMembers.find(m => m.id === id);
+    const previousRole = member ? member.role : null;
     const { error } = await sb.from('team_members').update({ role }).eq('id', id);
     if (error) { alert('Error updating role: ' + error.message); return; }
     const idx = allTeamMembers.findIndex(m => m.id === id);
     if (idx !== -1) allTeamMembers[idx].role = role;
     populateReviewerFilter();
+    if (member && previousRole !== role) {
+      logActivity('role_change', `Changed ${member.email}'s role from ${previousRole} to ${role}`, 'team_members', id);
+    }
   }
 
   async function approveMember(id) {
@@ -3207,6 +3535,7 @@ renderTalentPool();
 
     Object.assign(member, update);
     updateMembersStats(); renderTeamMembers();
+    logActivity('member_approved', `Approved ${member.email} as ${member.role}`, 'team_members', id);
 
     const { error: emailError } = await sb.functions.invoke('notify-member-application-decision', {
       body: { email: member.email, decision: 'approved', role: member.role }
@@ -3229,6 +3558,7 @@ renderTalentPool();
 
     Object.assign(member, update);
     updateMembersStats(); renderTeamMembers();
+    logActivity('member_rejected', `Rejected ${member.email}'s account request${reason ? ` — Reason: ${reason}` : ''}`, 'team_members', id);
 
     const { error: emailError } = await sb.functions.invoke('notify-member-application-decision', {
       body: { email: member.email, decision: 'rejected', role: member.role, reason: reason || null }
@@ -3264,6 +3594,7 @@ renderTalentPool();
 
 
   async function toggleMember(id, active) {
+  const member = allTeamMembers.find(m => m.id === id);
   const willBeActive = !active;
   const update = { active: willBeActive };
 
@@ -3282,6 +3613,7 @@ renderTalentPool();
   if (idx !== -1) Object.assign(allTeamMembers[idx], update);
   updateMembersStats();
   renderTeamMembers();
+  if (member) logActivity(willBeActive ? 'member_activated' : 'member_disabled', `${willBeActive ? 'Activated' : 'Disabled'} ${member.email}`, 'team_members', id);
 }
 
   function openInvite() { document.getElementById("invite-modal").classList.add('show'); }
@@ -3357,6 +3689,7 @@ renderTalentPool();
     allProjects.unshift(data);
     renderProjects();
     closeProjectNewModal();
+    logActivity('project_created', `Created project "${name}"`, 'projects', data.id);
   }
 
   function openProjectModal(id) {
@@ -3418,6 +3751,9 @@ renderTalentPool();
     renderProjectMembers();
     renderProjects();
     if (loadedTabs.members) renderTeamMembers();
+    const addedMember = allTeamMembers.find(m => m.id === memberId);
+    const project = allProjects.find(p => p.id === currentProjectId);
+    logActivity('project_member_added', `Added ${addedMember ? addedMember.email : memberId} to project "${project ? project.name : currentProjectId}"`, 'projects', currentProjectId);
 
     const assignedIds = allProjectMembers.filter(pm => pm.project_id === currentProjectId).map(pm => pm.team_member_id);
     const available = allTeamMembers.filter(m => m.active && !assignedIds.includes(m.id));
@@ -3427,6 +3763,9 @@ renderTalentPool();
   }
 
   async function removeProjectMember(pmId) {
+    const pmRow = allProjectMembers.find(pm => pm.id === pmId);
+    const removedMember = pmRow ? allTeamMembers.find(m => m.id === pmRow.team_member_id) : null;
+    const project = pmRow ? allProjects.find(p => p.id === pmRow.project_id) : null;
     const { error } = await sb.from('project_members').delete().eq('id', pmId);
     if (error) { alert('Error removing member: ' + error.message); return; }
     allProjectMembers = allProjectMembers.filter(pm => pm.id !== pmId);
@@ -3434,18 +3773,73 @@ renderTalentPool();
     renderProjects();
     if (loadedTabs.members) renderTeamMembers();
     openProjectModal(currentProjectId);
+    logActivity('project_member_removed', `Removed ${removedMember ? removedMember.email : 'a member'} from project "${project ? project.name : ''}"`, 'projects', pmRow ? pmRow.project_id : null);
   }
 
   async function updateProjectStatus() {
     const status = document.getElementById('project-status-select').value;
+    const project = allProjects.find(p => p.id === currentProjectId);
     const { error } = await sb.from('projects').update({ status }).eq('id', currentProjectId);
     if (error) { alert('Error updating status: ' + error.message); return; }
     const idx = allProjects.findIndex(p => p.id === currentProjectId);
     if (idx !== -1) allProjects[idx].status = status;
     renderProjects();
+    if (project) logActivity('project_status_change', `Changed project "${project.name}" status to ${status}`, 'projects', currentProjectId);
   }
 
   // ══════════════════════ ACTIVITY TAB ══════════════════════
+
+  function fmtHours(h) {
+    if (h == null || isNaN(h)) return '—';
+    if (h < 1) return Math.round(h * 60) + 'm';
+    return h.toFixed(1) + 'h';
+  }
+
+  function computeReviewTurnarounds(records) {
+    return records
+      .filter(r => r.assigned_at && r.reviewed_at && new Date(r.reviewed_at) > new Date(r.assigned_at))
+      .map(r => ({ reviewerId: r.assigned_reviewer_id || r.owner_id, hours: (new Date(r.reviewed_at) - new Date(r.assigned_at)) / 3600000, reviewedAt: r.reviewed_at }));
+  }
+
+  async function renderLeaderboard() {
+    if (allTeamMembers.length === 0) await loadTeamMembersForDropdowns();
+    if (!loadedTabs.applications) await loadApplications();
+    if (!loadedTabs.talent) await loadTalentPool();
+
+    const period = document.getElementById('leaderboard-period').value;
+    const cutoff = period === 'all' ? null : periodRange(period === 'week' ? 'week' : 'month').start;
+
+    const allTurnarounds = [
+      ...computeReviewTurnarounds(allApplications),
+      ...computeReviewTurnarounds(allTalentPool)
+    ].filter(t => !cutoff || new Date(t.reviewedAt) >= cutoff);
+
+    const reviewers = allTeamMembers.filter(m => m.role === 'reviewer' || m.role === 'admin');
+    const rows = reviewers.map(r => {
+      const mine = allTurnarounds.filter(t => t.reviewerId === r.id);
+      const hours = mine.map(t => t.hours);
+      return {
+        member: r,
+        count: mine.length,
+        avg: hours.length ? hours.reduce((a,b) => a+b, 0) / hours.length : null,
+        fastest: hours.length ? Math.min(...hours) : null,
+        slowest: hours.length ? Math.max(...hours) : null
+      };
+    }).filter(r => r.count > 0).sort((a,b) => b.count - a.count);
+
+    const tbody = document.getElementById('leaderboard-tbody');
+    tbody.innerHTML = rows.length ? rows.map((r, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td class="td-name"><span class="row-avatar">${memberAvatarContent(r.member)}</span>${esc(r.member.email)}</td>
+        <td>${r.count}</td>
+        <td>${fmtHours(r.avg)}</td>
+        <td>${fmtHours(r.fastest)}</td>
+        <td>${fmtHours(r.slowest)}</td>
+      </tr>
+    `).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--fg2);padding:2rem;">No completed reviews in this period.</td></tr>';
+  }
+
   let allActivitySessions = [];
   let allActivityLog = [];
 
@@ -3477,6 +3871,7 @@ renderTalentPool();
 
     renderActivityStats();
     renderActivityLog();
+    renderLeaderboard();
   }
 
   function fmtDuration(totalSeconds) {
@@ -3495,7 +3890,8 @@ renderTalentPool();
       const sessions = allActivitySessions.filter(s => s.team_member_id === m.id);
       const activeSec = sessions.reduce((sum, s) => sum + (s.active_seconds || 0), 0);
       const idleSec = sessions.reduce((sum, s) => sum + (s.idle_seconds || 0), 0);
-      const totalSec = activeSec + idleSec;
+      const breakSec = sessions.reduce((sum, s) => sum + (s.break_seconds || 0), 0);
+      const totalSec = activeSec + idleSec + breakSec;
       const pctActive = totalSec > 0 ? Math.round((activeSec / totalSec) * 100) : 0;
       const lastLogin = sessions.length ? sessions.reduce((a,b) => new Date(a.login_at) > new Date(b.login_at) ? a : b) : null;
       const loggedOutSessions = sessions.filter(s => s.logout_at);
@@ -3510,6 +3906,7 @@ renderTalentPool();
           <td>${fmtDuration(totalSec)}</td>
           <td>${fmtDuration(activeSec)}</td>
           <td>${fmtDuration(idleSec)}</td>
+          <td>${fmtDuration(breakSec)}</td>
           <td>${pctActive}%</td>
           <td class="td-sub">${lastLogin ? fmtDateTime(lastLogin.login_at) : '—'}</td>
           <td class="td-sub">${lastLogout ? fmtDateTime(lastLogout.logout_at) : (sessions.some(s=>!s.logout_at) ? 'Active session' : '—')}</td>
@@ -3534,6 +3931,11 @@ renderTalentPool();
   }
 
   // ══════════════════════ ACTIVITY — MEMBER DRILL-DOWN ══════════════════════
+  
+  let currentMemberShifts = [0,0,0,0,0,0,0]; // Sun–Sat expected hours
+  const WEEKDAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+
   let currentActivityMemberId = null;
   let currentActivityMemberSessions = [];
   let currentActivityMemberLog = [];
@@ -3547,15 +3949,19 @@ renderTalentPool();
     document.getElementById('activity-member-avatar').innerHTML = memberAvatarContent(member);
     document.getElementById('activity-member-subline').textContent = member.role;
 
-    const [sessionsRes, logRes] = await Promise.all([
+    const [sessionsRes, logRes, shiftsRes] = await Promise.all([
       sb.from('activity_sessions').select('*').eq('team_member_id', memberId).order('login_at', { ascending: false }),
-      sb.from('activity_log').select('*').eq('team_member_id', memberId).order('created_at', { ascending: false }).limit(500)
+      sb.from('activity_log').select('*').eq('team_member_id', memberId).order('created_at', { ascending: false }).limit(500),
+      sb.from('shifts').select('*').eq('team_member_id', memberId)
     ]);
     if (sessionsRes.error) { alert('Error loading sessions: ' + sessionsRes.error.message); return; }
     if (logRes.error) { alert('Error loading activity: ' + logRes.error.message); return; }
 
     currentActivityMemberSessions = sessionsRes.data || [];
     currentActivityMemberLog = logRes.data || [];
+    currentMemberShifts = [0,0,0,0,0,0,0];
+    (shiftsRes.data || []).forEach(s => { currentMemberShifts[s.day_of_week] = s.expected_hours; });
+    renderShiftEditor();
 
     document.getElementById('activity-list-view').style.display = 'none';
     document.getElementById('activity-member-view').classList.add('open');
@@ -3588,24 +3994,121 @@ renderTalentPool();
 
     const activeSec = sessionsInPeriod.reduce((sum, s) => sum + (s.active_seconds || 0), 0);
     const idleSec = sessionsInPeriod.reduce((sum, s) => sum + (s.idle_seconds || 0), 0);
-    const totalSec = activeSec + idleSec;
+    const breakSec = sessionsInPeriod.reduce((sum, s) => sum + (s.break_seconds || 0), 0);
+    const totalSec = activeSec + idleSec + breakSec;
     const pctActive = totalSec > 0 ? Math.round((activeSec / totalSec) * 100) : 0;
+
+    const dayCounts = [0,0,0,0,0,0,0];
+    for (let d = new Date(start); d <= new Date(); d.setDate(d.getDate() + 1)) dayCounts[d.getDay()]++;
+    const expectedHours = dayCounts.reduce((sum, count, i) => sum + count * currentMemberShifts[i], 0);
+    const actualHours = totalSec / 3600;
+    const expectedPct = expectedHours > 0 ? Math.round((actualHours / expectedHours) * 100) : null;
+
+    const memberTurnarounds = [
+      ...computeReviewTurnarounds(allApplications.filter(a => a.assigned_reviewer_id === currentActivityMemberId)),
+      ...computeReviewTurnarounds(allTalentPool.filter(t => t.owner_id === currentActivityMemberId))
+    ].filter(t => new Date(t.reviewedAt) >= start);
+    const memberTurnaroundText = memberTurnarounds.length
+      ? fmtHours(memberTurnarounds.reduce((sum, t) => sum + t.hours, 0) / memberTurnarounds.length)
+      : '—';
 
     document.getElementById('activity-member-stats').innerHTML = `
       <div class="stat-card" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);"><div class="stat-num">${sessionsInPeriod.length}</div><div class="stat-label">Sessions</div></div>
       <div class="stat-card" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);"><div class="stat-num">${fmtDuration(totalSec)}</div><div class="stat-label">Total logged in</div></div>
       <div class="stat-card" style="--stat-color:var(--green); --stat-dim:var(--green-dim);"><div class="stat-num">${fmtDuration(activeSec)}</div><div class="stat-label">Active time</div></div>
       <div class="stat-card" style="--stat-color:var(--orange); --stat-dim:var(--orange-dim);"><div class="stat-num">${fmtDuration(idleSec)}</div><div class="stat-label">Idle time</div></div>
+      <div class="stat-card" style="--stat-color:var(--purple2); --stat-dim:var(--purple-dim);"><div class="stat-num">${fmtDuration(breakSec)}</div><div class="stat-label">Break time</div></div>
       <div class="stat-card" style="--stat-color:var(--purple); --stat-dim:var(--purple-dim);"><div class="stat-num">${pctActive}%</div><div class="stat-label">Active rate</div></div>
+      <div class="stat-card" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);"><div class="stat-num">${expectedPct !== null ? expectedPct + '%' : '—'}</div><div class="stat-label">Of ${expectedHours.toFixed(1)}h scheduled</div></div>
       <div class="stat-card" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);"><div class="stat-num">${logInPeriod.length}</div><div class="stat-label">Actions logged</div></div>
+      <div class="stat-card" style="--stat-color:var(--green); --stat-dim:var(--green-dim);"><div class="stat-num">${memberTurnaroundText}</div><div class="stat-label">Avg review turnaround</div></div>
     `;
 
     renderActivityMemberCharts(period, sessionsInPeriod, logInPeriod);
+    renderActivityMemberSessions(sessionsInPeriod);
 
     const tbody = document.getElementById('activity-member-log-tbody');
     tbody.innerHTML = logInPeriod.length ? logInPeriod.map(a => `
       <tr><td>${esc(a.detail || a.action_type)}</td><td class="td-sub">${fmtDateTime(a.created_at)}</td></tr>
     `).join('') : '<tr><td colspan="2" style="text-align:center;color:var(--fg2);padding:2rem;">No activity in this period.</td></tr>';
+  }
+
+  function renderShiftEditor() {
+    const grid = document.getElementById('activity-member-shifts-grid');
+    grid.innerHTML = WEEKDAY_LABELS.map((label, i) => `
+      <div class="info-item">
+        <div class="info-key">${label}</div>
+        <input type="number" min="0" max="24" step="0.5" value="${currentMemberShifts[i]}" id="shift-day-${i}" style="width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:.4rem; font-family:inherit;">
+      </div>
+    `).join('');
+  }
+
+  async function saveMemberShifts() {
+    const msg = document.getElementById('activity-member-shifts-msg');
+    msg.className = 'save-msg';
+    const rows = WEEKDAY_LABELS.map((_, i) => ({
+      team_member_id: currentActivityMemberId,
+      day_of_week: i,
+      expected_hours: parseFloat(document.getElementById(`shift-day-${i}`).value) || 0,
+      updated_by: currentUser.id,
+      updated_at: new Date().toISOString()
+    }));
+    const { error } = await sb.from('shifts').upsert(rows, { onConflict: 'team_member_id,day_of_week' });
+    if (error) { msg.textContent = 'Error saving: ' + error.message; msg.className = 'save-msg err show'; return; }
+    currentMemberShifts = rows.map(r => r.expected_hours);
+    msg.textContent = 'Schedule saved.';
+    msg.className = 'save-msg ok show';
+    setTimeout(() => { msg.className = 'save-msg'; }, 3000);
+    renderActivityMemberPanel();
+  }
+
+  function exportMemberTimesheet() {
+    const member = allTeamMembers.find(m => m.id === currentActivityMemberId);
+    const period = document.getElementById('activity-member-period').value;
+    const { start } = periodRange(period);
+    const sessions = currentActivityMemberSessions.filter(s => new Date(s.login_at) >= start)
+      .sort((a,b) => new Date(a.login_at) - new Date(b.login_at));
+
+    const cols = ['login_at','logout_at','duration_hours','active_hours','idle_hours','break_hours','device','ip_address'];
+    const rows = sessions.map(s => {
+      const totalSec = (s.active_seconds||0) + (s.idle_seconds||0) + (s.break_seconds||0);
+      return [
+        s.login_at, s.logout_at || 'still active',
+        (totalSec/3600).toFixed(2), ((s.active_seconds||0)/3600).toFixed(2),
+        ((s.idle_seconds||0)/3600).toFixed(2), ((s.break_seconds||0)/3600).toFixed(2),
+        parseUserAgent(s.user_agent), s.ip_address || ''
+      ];
+    });
+    const csv = [cols.join(',')].concat(rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(','))).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `timesheet-${member ? member.email : 'member'}-${period}-${Date.now()}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function renderActivityMemberSessions(sessions) {
+    const tbody = document.getElementById('activity-member-sessions-tbody');
+    const sorted = sessions.slice().sort((a,b) => new Date(b.login_at) - new Date(a.login_at));
+    tbody.innerHTML = sorted.length ? sorted.map(s => {
+      const totalSec = (s.active_seconds || 0) + (s.idle_seconds || 0);
+      const loginHour = new Date(s.login_at).getHours();
+      const flags = [];
+      if ((s.active_seconds || 0) > 8 * 3600 && (s.break_seconds || 0) === 0) flags.push('<span class="status-badge s-under-review">Long session, no break</span>');
+      if (loginHour < 5 || loginHour >= 23) flags.push('<span class="status-badge s-interview-required">Off-hours login</span>');
+      return `
+        <tr>
+          <td class="td-sub">${fmtDateTime(s.login_at)}</td>
+          <td class="td-sub">${s.logout_at ? fmtDateTime(s.logout_at) : 'Active session'}</td>
+          <td>${fmtDuration(totalSec)}</td>
+          <td>${fmtDuration(s.active_seconds)}</td>
+          <td>${fmtDuration(s.idle_seconds)}</td>
+          <td class="td-sub">${esc(parseUserAgent(s.user_agent))}</td>
+          <td class="td-sub">${esc(s.ip_address || '—')}</td>
+          <td>${flags.join(' ') || '—'}</td>
+        </tr>`;
+    }).join('') : '<tr><td colspan="8" style="text-align:center;color:var(--fg2);padding:2rem;">No sessions in this period.</td></tr>';
   }
 
   function bucketLabelsForPeriod(period) {
@@ -3672,6 +4175,133 @@ renderTalentPool();
     });
   }
 
+  // ══════════════════════ TASKS TAB ══════════════════════
+  let allTasks = [];
+  let currentTaskRelated = null;
+
+  function openTaskModal(relatedTable, relatedId, defaultTitle) {
+    currentTaskRelated = relatedTable ? { table: relatedTable, id: relatedId } : null;
+    document.getElementById('new-task-title').value = defaultTitle || '';
+    document.getElementById('new-task-desc').value = '';
+    document.getElementById('new-task-due').value = '';
+    const sel = document.getElementById('new-task-assignee');
+    sel.innerHTML = '<option value="">Unassigned</option>' +
+      allTeamMembers.filter(m => m.active).map(m => `<option value="${m.id}">${esc(m.email)}</option>`).join('');
+    document.getElementById('task-new-modal').classList.add('show');
+  }
+  function closeTaskModal() {
+    document.getElementById('task-new-modal').classList.remove('show');
+    currentTaskRelated = null;
+  }
+
+  async function createTask() {
+    const title = document.getElementById('new-task-title').value.trim();
+    if (!title) { alert('Task title is required.'); return; }
+    const description = document.getElementById('new-task-desc').value.trim() || null;
+    const assignee_id = document.getElementById('new-task-assignee').value || null;
+    const dueVal = document.getElementById('new-task-due').value;
+    const due_at = dueVal ? new Date(dueVal).toISOString() : null;
+
+    const insertRow = {
+      title, description, assignee_id, created_by: currentUser.id, due_at,
+      related_table: currentTaskRelated ? currentTaskRelated.table : null,
+      related_id: currentTaskRelated ? String(currentTaskRelated.id) : null
+    };
+    const { data, error } = await sb.from('tasks').insert(insertRow).select().single();
+    if (error) { alert('Error creating task: ' + error.message); return; }
+
+    allTasks.unshift(data);
+    loadedTabs.tasks = true;
+    renderTasks();
+    updateTaskBadge();
+    closeTaskModal();
+
+    if (assignee_id && assignee_id !== currentUser.id) {
+      await createNotification(assignee_id, 'task_assigned', 'New task assigned',
+        `${currentMember.email} assigned you a task: "${title}"`, insertRow.related_table, insertRow.related_id);
+    }
+    logActivity('task_created', `Created task "${title}"${assignee_id ? ` — assigned to ${reviewerLabel(assignee_id)}` : ''}`, insertRow.related_table, insertRow.related_id);
+  }
+
+  async function loadTasks() {
+    document.getElementById('tasks-loading').style.display = 'block';
+    document.getElementById('tasks-table-wrap').style.display = 'none';
+    if (allTeamMembers.length === 0) await loadTeamMembersForDropdowns();
+
+    const { data, error } = await sb.from('tasks').select('*').order('due_at', { ascending: true, nullsFirst: false });
+    document.getElementById('tasks-loading').style.display = 'none';
+    document.getElementById('tasks-table-wrap').style.display = 'block';
+    if (error) { console.error(error); return; }
+
+    allTasks = data || [];
+    loadedTabs.tasks = true;
+    renderTasks();
+    updateTaskBadge();
+  }
+
+  function relatedRecordLabel(relatedTable, relatedId) {
+    if (!relatedTable || !relatedId) return '—';
+    const source = relatedTable === 'applications' ? allApplications : relatedTable === 'talent_pool' ? allTalentPool : [];
+    const rec = source.find(r => String(r.id) === String(relatedId));
+    return rec ? esc(rec.full_name) : relatedTable;
+  }
+
+  function renderTasks() {
+    const scope = document.getElementById('tasks-filter-scope').value;
+    const statusFilter = document.getElementById('tasks-filter-status').value;
+    const rows = allTasks.filter(t => {
+      const matchScope = scope === 'mine' ? t.assignee_id === currentUser.id
+        : scope === 'created' ? t.created_by === currentUser.id : true;
+      const matchStatus = statusFilter === 'open' ? !t.completed
+        : statusFilter === 'completed' ? t.completed : true;
+      return matchScope && matchStatus;
+    });
+
+    const tbody = document.getElementById('tasks-tbody');
+    if (rows.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--fg2);padding:2rem;">No tasks match these filters.</td></tr>'; return; }
+
+    tbody.innerHTML = rows.map(t => {
+      const assignee = allTeamMembers.find(m => m.id === t.assignee_id);
+      const isOverdue = !t.completed && t.due_at && new Date(t.due_at) < new Date();
+      return `
+        <tr>
+          <td><input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTaskComplete('${t.id}', this.checked)"></td>
+          <td class="td-name" style="${t.completed ? 'text-decoration:line-through;color:var(--fg2);' : ''}">${esc(t.title)}</td>
+          <td>${assignee ? esc(assignee.email) : 'Unassigned'}</td>
+          <td class="td-sub">${relatedRecordLabel(t.related_table, t.related_id)}</td>
+          <td class="td-sub" style="${isOverdue ? 'color:var(--red);font-weight:600;' : ''}">${t.due_at ? fmtDateTime(t.due_at) : '—'}</td>
+          <td>${t.completed ? '<span class="status-badge s-accepted">Done</span>' : isOverdue ? '<span class="status-badge s-failed">Overdue</span>' : '<span class="status-badge s-under-review">Open</span>'}</td>
+          <td><button class="icon-btn" onclick="deleteTask('${t.id}')" title="Delete task">🗑️</button></td>
+        </tr>`;
+    }).join('');
+  }
+
+  async function toggleTaskComplete(id, completed) {
+    const update = { completed, completed_at: completed ? new Date().toISOString() : null };
+    const { error } = await sb.from('tasks').update(update).eq('id', id);
+    if (error) { alert('Error updating task: ' + error.message); return; }
+    const idx = allTasks.findIndex(t => t.id === id);
+    if (idx !== -1) Object.assign(allTasks[idx], update);
+    renderTasks();
+    updateTaskBadge();
+  }
+
+  async function deleteTask(id) {
+    if (!confirm('Delete this task?')) return;
+    const { error } = await sb.from('tasks').delete().eq('id', id);
+    if (error) { alert('Error deleting task: ' + error.message); return; }
+    allTasks = allTasks.filter(t => t.id !== id);
+    renderTasks();
+    updateTaskBadge();
+  }
+
+  function updateTaskBadge() {
+    const btn = document.getElementById('tab-btn-tasks');
+    if (!btn) return;
+    const myOpenCount = allTasks.filter(t => t.assignee_id === currentUser.id && !t.completed).length;
+    btn.textContent = myOpenCount > 0 ? `Tasks (${myOpenCount})` : 'Tasks';
+  }
+
 
   // ══════════════════ ASSIGNMENTS TAB (Reviewer quick-assign) ══════════════════
   function renderAssignApps() {
@@ -3698,10 +4328,12 @@ renderTalentPool();
     const idxBefore = allApplications.findIndex(a => a.id === appId);
     const previousReviewerId = idxBefore !== -1 ? allApplications[idxBefore].assigned_reviewer_id : null;
 
-    const { error } = await sb.from('applications').update({ assigned_reviewer_id: reviewerId || null }).eq('id', appId);
+    const assignUpdate = { assigned_reviewer_id: reviewerId || null };
+    if (reviewerId && reviewerId !== previousReviewerId) assignUpdate.assigned_at = new Date().toISOString();
+    const { error } = await sb.from('applications').update(assignUpdate).eq('id', appId);
     if (error) { alert('Error assigning reviewer: ' + error.message); return; }
     const idx = allApplications.findIndex(a => a.id === appId);
-    if (idx !== -1) allApplications[idx].assigned_reviewer_id = reviewerId || null;
+    if (idx !== -1) Object.assign(allApplications[idx], assignUpdate);
     if (document.getElementById('panel-applications').classList.contains('active')) renderApplications();
 
     if (reviewerId && reviewerId !== previousReviewerId) {
@@ -3711,7 +4343,7 @@ renderTalentPool();
   }
 
   // ── Inactivity auto-logout (6 hours) ─────────────────────────
-  const INACTIVITY_LIMIT_MS = 6 * 60 * 60 * 1000; // 6 hours
+  let INACTIVITY_LIMIT_MS = 6 * 60 * 60 * 1000; // default 6 hours, overridden per-role after login
   const ACTIVITY_KEY = 'diraflow_last_activity';
   const IDLE_THRESHOLD_MS = 2 * 60 * 1000;   // 2 minutes with no input counts as idle
   const HEARTBEAT_INTERVAL_MS = 30 * 1000;   // write active/idle totals every 30s
@@ -3721,7 +4353,10 @@ renderTalentPool();
   let lastUserActivityAt = Date.now();
   let sessionActiveSeconds = 0;
   let sessionIdleSeconds = 0;
+  let sessionBreakSeconds = 0;
   let heartbeatIntervalHandle = null;
+  let isOnBreak = false;
+  let currentBreakId = null;
 
   function markActivity() {
     lastUserActivityAt = Date.now();
@@ -3749,11 +4384,27 @@ renderTalentPool();
     if (storedId) {
       const { data, error } = await sb.from('activity_sessions').select('*').eq('id', storedId).is('logout_at', null).maybeSingle();
       if (!error && data) {
-        currentActivitySessionId = data.id;
-        sessionActiveSeconds = data.active_seconds || 0;
-        sessionIdleSeconds = data.idle_seconds || 0;
-        startHeartbeat();
-        return;
+        const loginDay = new Date(data.login_at).toDateString();
+        const today = new Date().toDateString();
+        if (loginDay === today) {
+          // Same calendar day — genuinely still the same working session, resume it.
+          currentActivitySessionId = data.id;
+          sessionActiveSeconds = data.active_seconds || 0;
+          sessionIdleSeconds = data.idle_seconds || 0;
+          sessionBreakSeconds = data.break_seconds || 0;
+          startHeartbeat();
+          return;
+        }
+        // Left open from a previous day (tab closed without logging out, crash, etc.)
+        // Close it out using the last heartbeat as the best-known end time, then start fresh.
+        await sb.from('activity_sessions').update({
+          logout_at: data.last_heartbeat_at || data.login_at,
+          active_seconds: data.active_seconds,
+          idle_seconds: data.idle_seconds,
+          break_seconds: data.break_seconds,
+          logout_reason: 'day_rollover'
+        }).eq('id', data.id);
+        localStorage.removeItem(ACTIVITY_SESSION_ID_KEY);
       }
     }
     const { data, error } = await sb.from('activity_sessions')
@@ -3763,8 +4414,11 @@ renderTalentPool();
     currentActivitySessionId = data.id;
     sessionActiveSeconds = 0;
     sessionIdleSeconds = 0;
+    sessionBreakSeconds = 0;
     localStorage.setItem(ACTIVITY_SESSION_ID_KEY, data.id);
     startHeartbeat();
+    sb.functions.invoke('record-session-meta', { body: { sessionId: data.id } })
+      .catch(err => console.warn('Could not record session metadata:', err));
   }
 
   function startHeartbeat() {
@@ -3775,13 +4429,19 @@ renderTalentPool();
 
   async function activityHeartbeatTick() {
     if (!currentActivitySessionId) return;
-    const idleFor = Date.now() - lastUserActivityAt;
-    if (idleFor < IDLE_THRESHOLD_MS) sessionActiveSeconds += HEARTBEAT_INTERVAL_MS / 1000;
-    else sessionIdleSeconds += HEARTBEAT_INTERVAL_MS / 1000;
+
+    if (isOnBreak) {
+      sessionBreakSeconds += HEARTBEAT_INTERVAL_MS / 1000;
+    } else {
+      const idleFor = Date.now() - lastUserActivityAt;
+      if (idleFor < IDLE_THRESHOLD_MS) sessionActiveSeconds += HEARTBEAT_INTERVAL_MS / 1000;
+      else sessionIdleSeconds += HEARTBEAT_INTERVAL_MS / 1000;
+    }
 
     const { error } = await sb.from('activity_sessions').update({
       active_seconds: sessionActiveSeconds,
       idle_seconds: sessionIdleSeconds,
+      break_seconds: sessionBreakSeconds,
       last_heartbeat_at: new Date().toISOString()
     }).eq('id', currentActivitySessionId);
     if (error) console.error('Could not write activity heartbeat:', error);
@@ -3790,16 +4450,120 @@ renderTalentPool();
   async function endActivitySession(reason) {
     if (!currentActivitySessionId) return;
     if (heartbeatIntervalHandle) { clearInterval(heartbeatIntervalHandle); heartbeatIntervalHandle = null; }
+    if (isOnBreak && currentBreakId) {
+      await sb.from('activity_breaks').update({ end_at: new Date().toISOString() }).eq('id', currentBreakId);
+    }
     await sb.from('activity_sessions').update({
       logout_at: new Date().toISOString(),
       active_seconds: sessionActiveSeconds,
       idle_seconds: sessionIdleSeconds,
+      break_seconds: sessionBreakSeconds,
       logout_reason: reason || 'manual'
     }).eq('id', currentActivitySessionId);
     localStorage.removeItem(ACTIVITY_SESSION_ID_KEY);
     currentActivitySessionId = null;
     sessionActiveSeconds = 0;
     sessionIdleSeconds = 0;
+    sessionBreakSeconds = 0;
+    isOnBreak = false;
+    currentBreakId = null;
+  }
+
+  async function toggleBreak() {
+    const btn = document.getElementById('break-toggle-btn');
+    if (!isOnBreak) {
+      const { data, error } = await sb.from('activity_breaks')
+        .insert({ session_id: currentActivitySessionId, team_member_id: currentUser.id })
+        .select().single();
+      if (error) { alert('Could not start break: ' + error.message); return; }
+      currentBreakId = data.id;
+      isOnBreak = true;
+      btn.textContent = '▶ Resume work';
+      btn.classList.add('active');
+      logActivity('break_started', 'Started a break');
+    } else {
+      await sb.from('activity_breaks').update({ end_at: new Date().toISOString() }).eq('id', currentBreakId);
+      isOnBreak = false;
+      currentBreakId = null;
+      lastUserActivityAt = Date.now();
+      btn.textContent = '☕ Take a break';
+      btn.classList.remove('active');
+      logActivity('break_ended', 'Ended break');
+    }
+  }
+
+  function extractMentions(body) {
+    const matches = [...body.matchAll(/@([a-zA-Z0-9._-]+)/g)].map(m => m[1].toLowerCase());
+    if (matches.length === 0) return [];
+    return allTeamMembers.filter(m => matches.includes((m.email.split('@')[0] || '').toLowerCase()));
+  }
+
+  async function loadAndRenderComments(prefix, relatedTable, relatedId) {
+    const listEl = document.getElementById(`${prefix}-comments-list`);
+    const { data, error } = await sb.from('comments')
+      .select('*').eq('related_table', relatedTable).eq('related_id', String(relatedId))
+      .order('created_at', { ascending: true });
+    if (error) { listEl.innerHTML = '<p style="color:var(--red);font-size:.8125rem;">Could not load comments.</p>'; return; }
+    if (!data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--fg2);font-size:.875rem;">No comments yet.</p>'; return; }
+    listEl.innerHTML = data.map(c => {
+      const author = allTeamMembers.find(m => m.id === c.author_id);
+      return `
+        <div style="display:flex; gap:.625rem; margin-bottom:1rem;">
+          <span class="row-avatar">${author ? memberAvatarContent(author) : '?'}</span>
+          <div style="flex:1;">
+            <div style="font-size:.8125rem;"><strong>${esc(author ? author.email : 'Unknown')}</strong> <span style="color:var(--subtle);">${fmtDateTime(c.created_at)}</span></div>
+            <div class="qa-a" style="margin-top:.3rem; white-space:pre-wrap;">${esc(c.body)}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  async function postComment(prefix) {
+    const record = prefix === 'app' ? currentApp : currentTalent;
+    const relatedTable = prefix === 'app' ? 'applications' : 'talent_pool';
+    if (!record) return;
+    const input = document.getElementById(`${prefix}-comment-input`);
+    const body = input.value.trim();
+    if (!body) return;
+
+    const { error } = await sb.from('comments').insert({
+      related_table: relatedTable, related_id: String(record.id),
+      author_id: currentUser.id, body
+    });
+    if (error) { alert('Error posting comment: ' + error.message); return; }
+
+    input.value = '';
+    loadAndRenderComments(prefix, relatedTable, record.id);
+    logActivity('comment', `Commented on ${record.full_name}`, relatedTable, record.id);
+
+    const mentioned = extractMentions(body);
+    for (const m of mentioned) {
+      if (m.id === currentUser.id) continue;
+      await createNotification(m.id, 'mention', 'You were mentioned in a comment',
+        `${currentMember.email} mentioned you on ${record.full_name}: "${body.slice(0, 120)}"`, relatedTable, record.id);
+    }
+  }
+
+  async function renderPiiViewLog(elId, relatedTable, relatedId) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const { data, error } = await sb.from('pii_view_log')
+      .select('*').eq('related_table', relatedTable).eq('related_id', String(relatedId))
+      .order('viewed_at', { ascending: false }).limit(20);
+    if (error) { el.innerHTML = '<p style="color:var(--red);font-size:.8125rem;">Could not load access log.</p>'; return; }
+    if (!data || data.length === 0) { el.innerHTML = '<p style="color:var(--fg2);font-size:.875rem;">No views recorded yet.</p>'; return; }
+    el.innerHTML = data.map(v => {
+      const viewer = allTeamMembers.find(m => m.id === v.viewer_id);
+      return `<div style="font-size:.8125rem; padding:.3rem 0; border-bottom:1px solid var(--border);">${esc(viewer ? viewer.email : 'Unknown')} <span style="color:var(--subtle);">— ${fmtDateTime(v.viewed_at)}</span></div>`;
+    }).join('');
+  }
+
+  async function logPiiView(relatedTable, relatedId) {
+    if (!currentUser) return;
+    const { error } = await sb.from('pii_view_log').insert({
+      viewer_id: currentUser.id, related_table: relatedTable, related_id: String(relatedId)
+    });
+    if (error) console.error('Could not log PII view:', error);
   }
 
   async function logActivity(actionType, detail, relatedTable, relatedId) {
