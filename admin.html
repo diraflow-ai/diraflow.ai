@@ -1039,7 +1039,7 @@
           <div class="table-wrap" style="margin-bottom:1.5rem;">
             <table>
               <thead><tr>
-                <th>Member</th><th>Status</th><th>Sessions</th><th>Total logged in</th>
+                <th>Member</th><th>Status</th><th>Sessions (today)</th><th>Logged in (today)</th>
                 <th>Active</th><th>Idle</th><th>Break</th><th>% Active</th><th>Last login</th><th>Last logout</th>
               </tr></thead>
               <tbody id="activity-stats-tbody"></tbody>
@@ -1681,6 +1681,22 @@ async function claimSession(userId) {
   markActivity();
   showDashboard();
 }
+
+window.addEventListener('beforeunload', () => {
+    if (currentActivitySessionId && !isOnBreak) {
+      const payload = new Blob([JSON.stringify({
+        active_seconds: sessionActiveSeconds,
+        idle_seconds: sessionIdleSeconds,
+        break_seconds: sessionBreakSeconds,
+        logout_at: new Date().toISOString(),
+        logout_reason: 'tab_closed'
+      })], { type: 'application/json' });
+      navigator.sendBeacon(
+        `${SUPABASE_URL}/rest/v1/activity_sessions?id=eq.${currentActivitySessionId}`,
+        payload
+      );
+    }
+  });
 
   function showDashboard() {
     hideAllAuthScreens();
@@ -3965,31 +3981,42 @@ renderTalentPool();
     const memberFilter = document.getElementById('activity-filter-member').value;
     const tbody = document.getElementById('activity-stats-tbody');
     const members = memberFilter ? allTeamMembers.filter(m => m.id === memberFilter) : allTeamMembers;
+    const today = todayKey();
 
     tbody.innerHTML = members.map(m => {
-      const sessions = allActivitySessions.filter(s => s.team_member_id === m.id);
-      const activeSec = sessions.reduce((sum, s) => sum + (s.active_seconds || 0), 0);
-      const idleSec = sessions.reduce((sum, s) => sum + (s.idle_seconds || 0), 0);
-      const breakSec = sessions.reduce((sum, s) => sum + (s.break_seconds || 0), 0);
+      const allSessions = allActivitySessions.filter(s => s.team_member_id === m.id);
+      // Summary table always reflects today only — resets automatically at midnight.
+      const todaySessions = allSessions.filter(s => dayKey(s.login_at) === today);
+
+      const activeSec = todaySessions.reduce((sum, s) => sum + (s.active_seconds || 0), 0);
+      const idleSec = todaySessions.reduce((sum, s) => sum + (s.idle_seconds || 0), 0);
+      const breakSec = todaySessions.reduce((sum, s) => sum + (s.break_seconds || 0), 0);
       const totalSec = activeSec + idleSec + breakSec;
       const pctActive = totalSec > 0 ? Math.round((activeSec / totalSec) * 100) : 0;
-      const lastLogin = sessions.length ? sessions.reduce((a,b) => new Date(a.login_at) > new Date(b.login_at) ? a : b) : null;
-      const loggedOutSessions = sessions.filter(s => s.logout_at);
+
+      // Last login/logout stay historical — most recent ever, not just today's —
+      // so a member who hasn't logged in today doesn't show blank here.
+      const lastLogin = allSessions.length ? allSessions.reduce((a,b) => new Date(a.login_at) > new Date(b.login_at) ? a : b) : null;
+      const loggedOutSessions = allSessions.filter(s => s.logout_at);
       const lastLogout = loggedOutSessions.length ? loggedOutSessions.reduce((a,b) => new Date(a.logout_at) > new Date(b.logout_at) ? a : b) : null;
       const isOnline = typeof onlineMemberIds !== 'undefined' && onlineMemberIds.has(m.id);
 
       return `
         <tr class="clickable" onclick="openActivityMemberPanel('${m.id}')">
-          <td class="td-name"><span class="row-avatar">${memberAvatarContent(m)}</span>${esc(m.email)}</td>
+          <td class="td-name">
+            <span class="row-avatar">${memberAvatarContent(m)}</span>
+            ${isOnline ? '<span title="Online now" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-left:.4rem;margin-right:.3rem;"></span>' : ''}
+            ${esc(m.email)}
+          </td>
           <td>${isOnline ? '<span class="status-badge s-accepted">Online</span>' : '<span class="status-badge s-inactive">Offline</span>'}</td>
-          <td>${sessions.length}</td>
+          <td>${todaySessions.length}</td>
           <td>${fmtDuration(totalSec)}</td>
           <td>${fmtDuration(activeSec)}</td>
           <td>${fmtDuration(idleSec)}</td>
           <td>${fmtDuration(breakSec)}</td>
           <td>${pctActive}%</td>
           <td class="td-sub">${lastLogin ? fmtDateTime(lastLogin.login_at) : '—'}</td>
-          <td class="td-sub">${lastLogout ? fmtDateTime(lastLogout.logout_at) : (sessions.some(s=>!s.logout_at) ? 'Active session' : '—')}</td>
+          <td class="td-sub">${lastLogout ? fmtDateTime(lastLogout.logout_at) : (allSessions.some(s=>!s.logout_at) ? 'Active session' : '—')}</td>
         </tr>`;
     }).join('');
   }
