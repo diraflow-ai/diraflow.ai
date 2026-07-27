@@ -216,6 +216,9 @@
   .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
   .tab-panel { display:none; }
   .tab-panel.active { display:block; }
+  .clock-status-display { margin-left: auto; display:flex; align-items:center; gap:.5rem; font-size:.8125rem; font-weight:600; color:var(--fg2); padding:0 1rem; white-space:nowrap; flex-shrink:0; }
+  .clock-status-time { font-family:'DM Mono', monospace; color:var(--fg); }
+  @media (max-width: 640px) { .clock-status-display { padding: 0 .5rem; font-size: .72rem; } }
 
   /* ── MAIN CONTENT ── */
   .main { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
@@ -541,6 +544,58 @@
     .info-grid { grid-template-columns: 1fr; }
     .profile-header { flex-direction: column; align-items: flex-start; }
   }
+
+  /* ══════════════ RESPONSIVE — TABLET & MOBILE ══════════════ */
+
+  html, body { overflow-x: hidden; max-width: 100vw; }
+
+  @media (max-width: 900px) {
+    .topbar { flex-wrap: wrap; height: auto; min-height: 56px; padding: .6rem .75rem; gap: .5rem; row-gap: .5rem; }
+    .topbar-left { flex: 0 0 auto; }
+    #global-search-wrap { order: 2; flex: 1 1 100px; min-width: 0; max-width: none !important; margin: 0 .5rem !important; }
+    #global-search-wrap input { font-size: .8125rem; padding: .45rem .7rem; }
+    .topbar-right { order: 3; flex: 1 1 100%; flex-wrap: wrap; justify-content: flex-end; gap: .4rem; row-gap: .5rem; }
+    .team-email { display: none; }
+    .btn-label { display: none; }
+    .btn-label-short { display: inline !important; }
+    .tabs-bar { top: auto; }
+  }
+
+  @media (max-width: 640px) {
+    .main { padding: .75rem; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); gap: .6rem; }
+    .stat-card { padding: .8rem .9rem; }
+    .stat-card .stat-num { font-size: 1.5rem; }
+
+    table thead th, table td { padding: .55rem .6rem; font-size: .78rem; }
+    .table-wrap { -webkit-overflow-scrolling: touch; }
+    .table-wrap table { min-width: 640px; } /* forces clean horizontal scroll INSIDE the table only */
+
+    .filters-row { flex-direction: column; align-items: stretch; }
+    .filters-row > * { width: 100%; }
+    .more-filters-row { flex-direction: column; align-items: stretch; }
+
+    .modal { padding: 1.25rem; width: 94vw; }
+    .profile-header { flex-direction: column; align-items: flex-start; padding: 1rem; }
+    .profile-header-left { width: 100%; }
+    .profile-tabs { overflow-x: auto; }
+    .profile-tab-btn { flex-shrink: 0; }
+
+    .insights-grid { grid-template-columns: 1fr; }
+    .chart-card-canvas-wrap { height: 220px; }
+
+    .section-header { flex-direction: column; align-items: flex-start; gap: .5rem; }
+
+    /* Sessions daily-summary two-column layout collapses to one column */
+    .insights-grid[style*="2fr 1fr"] { grid-template-columns: 1fr !important; }
+  }
+
+  @media (max-width: 420px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .role-badge { display: none; } /* icon-only crowding on very small phones */
+  }
+
+
 </style>
 </head>
 <body>
@@ -670,14 +725,15 @@
       <img src="/assets/logo.jpg" alt="Diraflow">
       <span class="topbar-title">Diraflow Admin</span>
     </div>
-    <div style="flex:1; max-width:420px; margin:0 1.5rem; position:relative;">
+    <div id="global-search-wrap" style="flex:1; max-width:420px; margin:0 1.5rem; position:relative;">
       <input type="text" id="global-search-input" placeholder="Search applications, candidates, members…" oninput="handleGlobalSearch()" style="width:100%; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:.5rem .875rem; font-family:inherit; font-size:.875rem;">
       <div id="global-search-results" style="display:none; position:absolute; top:42px; left:0; right:0; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:0 10px 30px rgba(17,24,39,.15); max-height:400px; overflow-y:auto; z-index:200;"></div>
     </div>
     <div class="topbar-right">
       <span class="role-badge" id="role-badge"></span>
       <span class="team-email" id="user-email"></span>
-      <button class="btn-logout" id="break-toggle-btn" onclick="toggleBreak()">☕ Take a break</button>
+      <button class="btn-logout" id="clock-toggle-btn" onclick="toggleClock()">🕐 <span class="btn-label">Clock in</span></button>
+      <button class="btn-logout" id="break-toggle-btn" onclick="toggleBreak()" style="display:none;">☕ <span class="btn-label">Take a break</span></button>
       <button class="btn-logout" id="theme-toggle-btn" onclick="toggleTheme()">🌙</button>
       <div style="position:relative;">
         <button class="bell-btn" id="notif-bell-btn" onclick="toggleNotifPanel()" title="Notifications">
@@ -686,7 +742,7 @@
         <div class="notif-panel" id="notif-panel"></div>
       </div>
       <button class="avatar-btn" id="profile-avatar-btn" onclick="openProfileModal()" title="My profile"></button>
-      <button class="btn-logout" onclick="doLogout()">Sign out</button>
+      <button class="btn-logout" onclick="doLogout()"><span class="btn-label">Sign out</span><span class="btn-label-short" style="display:none;">⏻</span></button>
     </div>
   </div>
 
@@ -698,6 +754,11 @@
     <button class="tab-btn" id="tab-btn-members" onclick="switchTab('members')" style="display:none;">Members</button>
     <button class="tab-btn" id="tab-btn-assignments" onclick="switchTab('assignments')" style="display:none;">Assignments</button>
     <button class="tab-btn" id="tab-btn-activity" onclick="switchTab('activity')" style="display:none;">Activity</button>
+    <div class="clock-status-display">
+      <span id="clock-status-dot" style="width:8px;height:8px;border-radius:50%;background:var(--subtle);display:inline-block;"></span>
+      <span id="clock-status-label">Not clocked in</span>
+      <span id="clock-status-time" class="clock-status-time">00:00:00</span>
+    </div>
   </div>
 
   <div class="main">
@@ -1071,6 +1132,8 @@
       </div>
     </div>
 
+    <!-- ═══════════ TIMESHEETS TAB (admin only) ═══════════ -->
+  
       <!-- ── per-member drill-down ── -->
       <div class="profile-view" id="activity-member-view">
         <button class="profile-back" onclick="closeActivityMemberPanel()">← Back to Activity</button>
@@ -1160,9 +1223,9 @@
         </div>
       </div>
     </div>
-
   </div>
 </div>
+
 
 <!-- ── PROJECT DETAIL / MANAGE MODAL ── -->
 <div class="modal-overlay" id="project-manage-modal">
@@ -1720,7 +1783,7 @@ window.addEventListener('beforeunload', () => {
     loadNotifications();
     subscribeNotifications();
     subscribeMemberStatus();
-    startOrResumeActivitySession();
+    checkAndResumeTodaySession();
     loadTasks();
     applyRoleSessionTimeout();
 
@@ -1976,6 +2039,52 @@ let onlineMemberIds = new Set();
 
 let memberStatusChannel = null;
 
+let clockStateStartedAt = Date.now();
+  let clockDisplayIntervalHandle = null;
+
+  function fmtClock(totalSeconds) {
+    const s = Math.max(0, Math.floor(totalSeconds));
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return [h, m, sec].map(n => String(n).padStart(2, '0')).join(':');
+  }
+
+  function updateClockDisplay() {
+    const labelEl = document.getElementById('clock-status-label');
+    const timeEl = document.getElementById('clock-status-time');
+    const dotEl = document.getElementById('clock-status-dot');
+    if (!labelEl || !timeEl) return;
+    if (!currentActivitySessionId) {
+      labelEl.textContent = 'Not clocked in';
+      timeEl.textContent = '00:00:00';
+      if (dotEl) dotEl.style.background = 'var(--subtle)';
+      return;
+    }
+    const elapsedSinceStateChange = (Date.now() - clockStateStartedAt) / 1000;
+    if (isOnBreak) {
+      labelEl.textContent = 'On break';
+      timeEl.textContent = fmtClock(sessionBreakSeconds + elapsedSinceStateChange);
+      if (dotEl) dotEl.style.background = 'var(--orange)';
+    } else {
+      labelEl.textContent = 'Clocked in';
+      timeEl.textContent = fmtClock(sessionActiveSeconds + elapsedSinceStateChange);
+      if (dotEl) dotEl.style.background = 'var(--green)';
+    }
+  }
+
+  function startClockDisplay() {
+    if (clockDisplayIntervalHandle) return;
+    clockStateStartedAt = Date.now();
+    updateClockDisplay();
+    clockDisplayIntervalHandle = setInterval(updateClockDisplay, 1000);
+  }
+
+  function stopClockDisplay() {
+    if (clockDisplayIntervalHandle) { clearInterval(clockDisplayIntervalHandle); clockDisplayIntervalHandle = null; }
+    updateClockDisplay();
+  }
+
 function subscribeMemberStatus() {
   if (!currentUser || memberStatusChannel) return;
   memberStatusChannel = sb.channel('member-status-' + currentUser.id)
@@ -2104,6 +2213,13 @@ async function exportInsightsPDF() {
   }
 
   // ── Helpers ───────────────────────────────────────────────────
+
+  
+  
+  let tsSortKey = 'name';
+  let tsSortDir = 'asc';
+
+
   
   async function applyRoleSessionTimeout() {
     const { data, error } = await sb.from('site_settings').select('session_timeout_hours').eq('id', 1).single();
@@ -3939,6 +4055,8 @@ renderTalentPool();
   let allActivitySessions = [];
   let allActivityLog = [];
 
+
+
   async function loadActivity() {
     document.getElementById('activity-loading').style.display = 'block';
     document.getElementById('activity-content').style.display = 'none';
@@ -4320,6 +4438,7 @@ renderTalentPool();
     renderRangeSnapshot();
   }
 
+
   function renderRangeSnapshot() {
     const startEl = document.getElementById('range-slider-start');
     const endEl = document.getElementById('range-slider-end');
@@ -4616,7 +4735,7 @@ renderTalentPool();
   }
 
   // ── Activity session tracking (logged-in time, active vs idle) ──
-  async function startOrResumeActivitySession() {
+  async function checkAndResumeTodaySession() {
     const storedId = localStorage.getItem(ACTIVITY_SESSION_ID_KEY);
     if (storedId) {
       const { data, error } = await sb.from('activity_sessions').select('*').eq('id', storedId).is('logout_at', null).maybeSingle();
@@ -4624,16 +4743,24 @@ renderTalentPool();
         const loginDay = new Date(data.login_at).toDateString();
         const today = new Date().toDateString();
         if (loginDay === today) {
-          // Same calendar day — genuinely still the same working session, resume it.
+          // Genuinely still today's already-started session (e.g. a page refresh) — resume it.
           currentActivitySessionId = data.id;
           sessionActiveSeconds = data.active_seconds || 0;
           sessionIdleSeconds = data.idle_seconds || 0;
           sessionBreakSeconds = data.break_seconds || 0;
+
+          const { data: openBreak } = await sb.from('activity_breaks')
+            .select('id').eq('session_id', data.id).is('end_at', null).maybeSingle();
+          if (openBreak) { isOnBreak = true; currentBreakId = openBreak.id; }
+
           startHeartbeat();
+          document.getElementById('break-toggle-btn').style.display = 'inline-flex';
+          updateClockToggleButtonUI();
+          updateBreakButtonUI();
           return;
         }
-        // Left open from a previous day (tab closed without logging out, crash, etc.)
-        // Close it out using the last heartbeat as the best-known end time, then start fresh.
+        // Left open from a previous day — close it out, but do NOT start a new one.
+        // The member has to clock in themselves for today.
         await sb.from('activity_sessions').update({
           logout_at: data.last_heartbeat_at || data.login_at,
           active_seconds: data.active_seconds,
@@ -4642,26 +4769,67 @@ renderTalentPool();
           logout_reason: 'day_rollover'
         }).eq('id', data.id);
         localStorage.removeItem(ACTIVITY_SESSION_ID_KEY);
+      } else {
+        localStorage.removeItem(ACTIVITY_SESSION_ID_KEY);
       }
     }
+    // No open session for today — leave everything at rest until they click Clock in.
+    updateClockToggleButtonUI();
+  }
+
+  async function toggleClock() {
+    if (!currentActivitySessionId) await clockIn();
+    else await clockOut();
+  }
+
+  async function clockIn() {
     const { data, error } = await sb.from('activity_sessions')
       .insert({ team_member_id: currentUser.id })
       .select().single();
-    if (error) { console.error('Could not start activity session:', error); return; }
+    if (error) { alert('Could not clock in: ' + error.message); return; }
+
     currentActivitySessionId = data.id;
     sessionActiveSeconds = 0;
     sessionIdleSeconds = 0;
     sessionBreakSeconds = 0;
+    isOnBreak = false;
+    currentBreakId = null;
     localStorage.setItem(ACTIVITY_SESSION_ID_KEY, data.id);
+
     startHeartbeat();
+    updateClockToggleButtonUI();
+    updateBreakButtonUI();
+    document.getElementById('break-toggle-btn').style.display = 'inline-flex';
+
     sb.functions.invoke('record-session-meta', { body: { sessionId: data.id } })
       .catch(err => console.warn('Could not record session metadata:', err));
+    logActivity('clock_in', 'Clocked in');
+  }
+
+  async function clockOut() {
+    await endActivitySession('manual_clock_out');
+    updateClockToggleButtonUI();
+    document.getElementById('break-toggle-btn').style.display = 'none';
+    logActivity('clock_out', 'Clocked out');
+  }
+
+  function updateClockToggleButtonUI() {
+    const btn = document.getElementById('clock-toggle-btn');
+    if (!btn) return;
+    if (currentActivitySessionId) {
+      btn.innerHTML = '⏹ <span class="btn-label">Clock out</span>';
+      btn.classList.add('active');
+    } else {
+      btn.innerHTML = '🕐 <span class="btn-label">Clock in</span>';
+      btn.classList.remove('active');
+    }
   }
 
   function startHeartbeat() {
     if (heartbeatIntervalHandle) return;
     lastUserActivityAt = Date.now();
     heartbeatIntervalHandle = setInterval(activityHeartbeatTick, HEARTBEAT_INTERVAL_MS);
+    startClockDisplay();
   }
 
   async function activityHeartbeatTick() {
@@ -4674,6 +4842,7 @@ renderTalentPool();
       if (idleFor < IDLE_THRESHOLD_MS) sessionActiveSeconds += HEARTBEAT_INTERVAL_MS / 1000;
       else sessionIdleSeconds += HEARTBEAT_INTERVAL_MS / 1000;
     }
+    clockStateStartedAt = Date.now();
 
     const { error } = await sb.from('activity_sessions').update({
       active_seconds: sessionActiveSeconds,
@@ -4687,6 +4856,7 @@ renderTalentPool();
   async function endActivitySession(reason) {
     if (!currentActivitySessionId) return;
     if (heartbeatIntervalHandle) { clearInterval(heartbeatIntervalHandle); heartbeatIntervalHandle = null; }
+    stopClockDisplay();
     if (isOnBreak && currentBreakId) {
       await sb.from('activity_breaks').update({ end_at: new Date().toISOString() }).eq('id', currentBreakId);
     }
@@ -4704,10 +4874,24 @@ renderTalentPool();
     sessionBreakSeconds = 0;
     isOnBreak = false;
     currentBreakId = null;
+    updateClockToggleButtonUI();
+    const breakBtn = document.getElementById('break-toggle-btn');
+    if (breakBtn) breakBtn.style.display = 'none';
+  }
+
+  function updateBreakButtonUI() {
+    const btn = document.getElementById('break-toggle-btn');
+    if (!btn) return;
+    if (isOnBreak) {
+      btn.innerHTML = '▶ <span class="btn-label">Clock in</span>';
+      btn.classList.add('active');
+    } else {
+      btn.innerHTML = '🕐 <span class="btn-label">Break</span>';
+      btn.classList.remove('active');
+    }
   }
 
   async function toggleBreak() {
-    const btn = document.getElementById('break-toggle-btn');
     if (!isOnBreak) {
       const { data, error } = await sb.from('activity_breaks')
         .insert({ session_id: currentActivitySessionId, team_member_id: currentUser.id })
@@ -4715,16 +4899,18 @@ renderTalentPool();
       if (error) { alert('Could not start break: ' + error.message); return; }
       currentBreakId = data.id;
       isOnBreak = true;
-      btn.textContent = '▶ Resume work';
-      btn.classList.add('active');
+      clockStateStartedAt = Date.now();
+      updateBreakButtonUI();
+      updateClockDisplay();
       logActivity('break_started', 'Started a break');
     } else {
       await sb.from('activity_breaks').update({ end_at: new Date().toISOString() }).eq('id', currentBreakId);
       isOnBreak = false;
       currentBreakId = null;
       lastUserActivityAt = Date.now();
-      btn.textContent = '☕ Take a break';
-      btn.classList.remove('active');
+      clockStateStartedAt = Date.now();
+      updateBreakButtonUI();
+      updateClockDisplay();
       logActivity('break_ended', 'Ended break');
     }
   }
