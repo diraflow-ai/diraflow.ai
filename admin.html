@@ -741,6 +741,7 @@
         </button>
         <div class="notif-panel" id="notif-panel"></div>
       </div>
+      <button class="btn-logout" id="announcements-admin-btn" onclick="openAnnouncementsModal()" style="display:none;" title="Manage announcements">📢</button>
       <button class="avatar-btn" id="profile-avatar-btn" onclick="openProfileModal()" title="My profile"></button>
       <button class="btn-logout" onclick="doLogout()"><span class="btn-label">Sign out</span><span class="btn-label-short" style="display:none;">⏻</span></button>
     </div>
@@ -751,15 +752,23 @@
     <button class="tab-btn" id="tab-btn-talent" onclick="switchTab('talent')">Talent Pool</button>
     <button class="tab-btn" id="tab-btn-insights" onclick="switchTab('insights')">Insights</button>
     <button class="tab-btn" id="tab-btn-tasks" onclick="switchTab('tasks')">Tasks</button>
+    <button class="tab-btn" id="tab-btn-pipeline" onclick="switchTab('pipeline')">Pipeline</button>
     <button class="tab-btn" id="tab-btn-members" onclick="switchTab('members')" style="display:none;">Members</button>
     <button class="tab-btn" id="tab-btn-assignments" onclick="switchTab('assignments')" style="display:none;">Assignments</button>
     <button class="tab-btn" id="tab-btn-activity" onclick="switchTab('activity')" style="display:none;">Activity</button>
+    <button class="tab-btn" id="tab-btn-security" onclick="switchTab('security')" style="display:none;">Security</button>
+    <button class="tab-btn" id="tab-btn-reports" onclick="switchTab('reports')" style="display:none;">Reports</button>
+    <button class="tab-btn" id="tab-btn-syshealth" onclick="switchTab('syshealth')" style="display:none;">System Health</button>
+    <button class="tab-btn" id="tab-btn-leave" onclick="switchTab('leave')">Leave</button>
+    <button class="tab-btn" id="tab-btn-calendar" onclick="switchTab('calendar')">Calendar</button>
     <div class="clock-status-display">
       <span id="clock-status-dot" style="width:8px;height:8px;border-radius:50%;background:var(--subtle);display:inline-block;"></span>
       <span id="clock-status-label">Not clocked in</span>
       <span id="clock-status-time" class="clock-status-time">00:00:00</span>
     </div>
   </div>
+
+  <div id="announcements-banner-wrap" style="max-width:1400px;margin:1rem auto 0;padding:0 1.5rem;"></div>
 
   <div class="main">
 
@@ -794,6 +803,13 @@
             <option value="archived">Archived</option>
             <option value="all">All</option>
           </select>
+          <select class="filter-select" id="app-filter-sla" onchange="renderApplications()">
+            <option value="">All wait times</option>
+            <option value="ontrack">On track (&lt;2d)</option>
+            <option value="warning">Warning (2–4d)</option>
+            <option value="risk">At risk (5–9d)</option>
+            <option value="overdue">Overdue (10d+)</option>
+          </select>
           <select class="filter-select" id="app-sort" onchange="renderApplications()">
             <option value="newest">Newest</option>
             <option value="oldest">Oldest</option>
@@ -820,7 +836,7 @@
           <table>
             <thead><tr>
               <th class="th-check"><input type="checkbox" onchange="toggleSelectAll('applications', this.checked)"></th>
-              <th>Name</th><th>Position</th><th>Country</th><th>Status</th>
+              <th>Name</th><th>Position</th><th>Country</th><th>Status</th><th>Waiting</th>
               <th>Assigned reviewer</th><th>Submitted</th><th>Score</th>
             </tr></thead>
             <tbody id="applications-tbody"></tbody>
@@ -843,6 +859,7 @@
           </div>
           <span class="status-badge" id="app-profile-status"></span>
         </div>
+        <div id="app-duplicate-banner" style="display:none;"></div>
         <div class="profile-tabs" id="app-profile-tabs"></div>
         <div id="app-panel-body"></div>
       </div>
@@ -891,6 +908,7 @@
         <div class="bulk-toolbar" id="talent-bulk-toolbar">
           <span class="bulk-count"><span id="talent-bulk-count">0</span> selected</span>
           <button onclick="bulkAssign('talent')">Assign</button>
+          <button onclick="openCompareModal()">Compare</button>
           <button onclick="bulkShortlist('talent')">Shortlist</button>
           <button onclick="bulkExport('talent')">Export</button>
           <button onclick="bulkEmail('talent')">Email</button>
@@ -927,6 +945,7 @@
           </div>
           <span class="status-badge" id="talent-profile-status"></span>
         </div>
+        <div id="talent-duplicate-banner" style="display:none;"></div>
         <div class="profile-tabs" id="talent-profile-tabs"></div>
         <div id="talent-panel-body"></div>
       </div>
@@ -955,6 +974,8 @@
         <button class="btn-refresh" onclick="loadInsights()">↻ Refresh data</button>
         <button class="btn-refresh" onclick="exportInsightsPDF()">⬇ Export as PDF</button>
       </div>
+
+      <div class="stats-row" id="insights-kpi-row" style="display:none;"></div>
 
       <div id="insights-loading"><span class="spinner"></span></div>
       <div class="insights-grid" id="insights-grid-wrap" style="display:none;">
@@ -1031,8 +1052,110 @@
       </div>
     </div>
 
+    <!-- ═══════════ PIPELINE TAB (Kanban) ═══════════ -->
+    <div class="tab-panel" id="panel-pipeline">
+      <div class="section-header"><h2>Recruitment Pipeline</h2><button class="btn-refresh" onclick="loadApplications().then(renderPipelineBoard)">↻ Refresh</button></div>
+      <div id="pipeline-board" style="display:flex; gap:1rem; overflow-x:auto; padding-bottom:1rem;"></div>
+    </div>
 
-    <!-- ═══════════ MEMBERS TAB (admin only) ═══════════ -->
+    <!-- ═══════════ CALENDAR TAB ═══════════ -->
+    <div class="tab-panel" id="panel-calendar">
+      <div class="section-header">
+        <h2 id="calendar-month-label">Calendar</h2>
+        <div style="display:flex; gap:.5rem;">
+          <button class="btn-refresh" onclick="shiftCalendarMonth(-1)">← Prev</button>
+          <button class="btn-refresh" onclick="shiftCalendarMonth(0)">Today</button>
+          <button class="btn-refresh" onclick="shiftCalendarMonth(1)">Next →</button>
+          <button class="btn-primary" style="width:auto;" onclick="openCalendarEventModal()">+ Add Event</button>
+        </div>
+      </div>
+      <div id="calendar-loading"><span class="spinner"></span></div>
+      <div id="calendar-grid" style="display:none; grid-template-columns:repeat(7,1fr); gap:.4rem;"></div>
+    </div>
+
+    <!-- ═══════════ LEAVE TAB ═══════════ -->
+    <div class="tab-panel" id="panel-leave">
+      <div class="section-header">
+        <h2>Leave Management</h2>
+        <button class="btn-primary" style="width:auto;" onclick="openLeaveModal()">+ Request Leave</button>
+      </div>
+
+      <div class="stats-row" id="leave-admin-stats" style="display:none;">
+        <div class="stat-card clickable" style="--stat-color:var(--orange); --stat-dim:var(--orange-dim);" onclick="filterLeaveByStatus('Pending')"><div class="stat-num" id="leave-stat-pending">–</div><div class="stat-label">Pending approval</div></div>
+        <div class="stat-card clickable" style="--stat-color:var(--green); --stat-dim:var(--green-dim);" onclick="filterLeaveByStatus('Approved')"><div class="stat-num" id="leave-stat-approved">–</div><div class="stat-label">Approved</div></div>
+        <div class="stat-card clickable" style="--stat-color:var(--red); --stat-dim:var(--red-dim);" onclick="filterLeaveByStatus('Rejected')"><div class="stat-num" id="leave-stat-rejected">–</div><div class="stat-label">Rejected</div></div>
+        <div class="stat-card clickable" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);" onclick="filterLeaveByStatus('')"><div class="stat-num" id="leave-stat-all">–</div><div class="stat-label">Total</div></div>
+      </div>
+
+      <div class="filters-row">
+        <select class="filter-select" id="leave-filter-scope" onchange="renderLeaveRequests()">
+          <option value="mine">My requests</option>
+          <option value="all" id="leave-scope-all-option" style="display:none;">All members</option>
+        </select>
+        <select class="filter-select" id="leave-filter-status" onchange="renderLeaveRequests()">
+          <option value="">All statuses</option><option>Pending</option><option>Approved</option><option>Rejected</option>
+        </select>
+        <button class="btn-refresh" onclick="loadLeaveRequests()">↻ Refresh</button>
+      </div>
+
+      <div id="leave-loading"><span class="spinner"></span></div>
+      <div class="table-wrap" id="leave-table-wrap" style="display:none;">
+        <table>
+          <thead><tr><th>Member</th><th>Type</th><th>Dates</th><th>Days</th><th>Reason</th><th>Status</th><th></th></tr></thead>
+          <tbody id="leave-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- ═══════════ SYSTEM HEALTH TAB (admin only) ═══════════ -->
+    <div class="tab-panel" id="panel-syshealth">
+      <div class="section-header"><h2>System Health</h2><button class="btn-refresh" onclick="loadSystemHealth()">↻ Check now</button></div>
+      <div class="stats-row" id="syshealth-stats-row"></div>
+      <p style="color:var(--fg2);font-size:.8125rem;margin-top:1rem;">
+        Database ping, this browser's Realtime status, and pending notification/task/leave figures are live.
+        Storage usage totals, email delivery status, daily backups, and infrastructure-level API error logs
+        aren't retrievable from inside the app — check the
+        <a href="https://supabase.com/dashboard" target="_blank" rel="noopener" style="color:var(--primary);">Supabase dashboard</a> for those.
+      </p>
+    </div>
+
+
+    <!-- ═══════════ REPORTS TAB (admin only) ═══════════ -->
+    <div class="tab-panel" id="panel-reports">
+      <div class="section-header"><h2>Reports Center</h2></div>
+      <div class="project-grid">
+        <div class="project-card" onclick="generateHiringReport()"><h3>Monthly Hiring Report</h3><p>Applications submitted this month with outcomes.</p></div>
+        <div class="project-card" onclick="generateReviewerReport()"><h3>Reviewer Report</h3><p>Reviews completed and turnaround per reviewer, all time.</p></div>
+        <div class="project-card" onclick="generateTimesheetReport()"><h3>Timesheet Report</h3><p>Logged hours per team member, last 30 days.</p></div>
+        <div class="project-card" onclick="generateTalentReport()"><h3>Talent Report</h3><p>Full talent pool export.</p></div>
+        <div class="project-card" onclick="generateCountryReport()"><h3>Country Report</h3><p>Candidate distribution by country.</p></div>
+        <div class="project-card" onclick="generateSkillsReport()"><h3>Skills Report</h3><p>Skill distribution across the talent pool.</p></div>
+        <div class="project-card" onclick="generateProjectsReport()"><h3>Projects Report</h3><p>Projects with status and team size.</p></div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════ SECURITY TAB (admin only) ═══════════ -->
+    <div class="tab-panel" id="panel-security">
+      <div class="section-header"><h2>Security Center</h2><button class="btn-refresh" onclick="loadSecurityCenter()">↻ Refresh</button></div>
+
+      <div class="section-header" style="margin-top:0;"><h2 style="font-size:.95rem;">Active sessions</h2></div>
+      <div class="table-wrap" style="margin-bottom:1.5rem;">
+        <table>
+          <thead><tr><th>Member</th><th>Status</th><th>Last device</th><th>Last IP</th><th>Last login</th><th>MFA required</th><th></th></tr></thead>
+          <tbody id="security-sessions-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="section-header"><h2 style="font-size:.95rem;">Recent failed sign-in attempts</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Email</th><th>Reason</th><th>Device</th><th>When</th></tr></thead>
+          <tbody id="security-failed-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+
     <!-- ═══════════ MEMBERS TAB (admin only) ═══════════ -->
     <div class="tab-panel" id="panel-members">
       <div class="section-header">
@@ -1050,7 +1173,7 @@
       <div id="members-loading"><span class="spinner"></span></div>
       <div class="table-wrap" id="members-table-wrap" style="display:none;">
         <table>
-          <thead><tr><th>Email</th><th>Phone</th><th>Requested/Role</th><th>Status</th><th>Projects</th><th>Action</th></tr></thead>
+          <thead><tr><th>Email</th><th>Phone</th><th>Details</th><th>Requested/Role</th><th>Status</th><th>Projects</th><th>Action</th></tr></thead>
           <tbody id="members-tbody"></tbody>
         </table>
       </div>
@@ -1069,6 +1192,7 @@
       <div class="section-header" style="margin-top:1rem;">
         <h2>Reviewer Assignment</h2>
         <button class="btn-refresh" onclick="loadApplications()">↻ Refresh</button>
+        <button class="btn-refresh" onclick="suggestBestReviewer()">💡 Suggest reviewer</button>
       </div>
       <p style="color:var(--fg2); font-size:.8125rem; margin-bottom:1rem;">
         Quickly assign or reassign which reviewer is responsible for each application. A reviewer only sees applications assigned to them.
@@ -1121,6 +1245,17 @@
             <tbody id="leaderboard-tbody"></tbody>
           </table>
         </div>
+
+        <div class="section-header" style="margin-top:1.5rem;"><h2 style="font-size:.95rem;">Workforce Analytics (last 30 days)</h2></div>
+          <div class="stats-row" id="workforce-analytics-row" style="margin-bottom:1.5rem;"></div>
+          <div class="table-wrap" style="margin-bottom:1.5rem;">
+            <table>
+              <thead><tr><th>Member</th><th>Avg daily hours</th><th>Attendance</th><th>Late clock-ins</th><th>Early clock-outs</th><th>Overtime</th></tr></thead>
+              <tbody id="workforce-analytics-tbody"></tbody>
+            </table>
+          </div>
+
+       
 
         <div class="section-header"><h2 style="font-size:.95rem;">Recent activity</h2></div>
         <div class="table-wrap">
@@ -1237,6 +1372,22 @@
         <option>Active</option><option>Paused</option><option>Completed</option>
       </select>
     </div>
+    <div class="panel-section-title" style="margin-top:1rem;">Requirements (for Smart Match)</div>
+    <div class="field"><label>Required skills (comma-separated)</label><input id="project-req-skills" type="text" placeholder="e.g. Python, Annotation"></div>
+    <div class="field"><label>Required country</label><input id="project-req-country" type="text" placeholder="e.g. Kenya"></div>
+    <div class="field"><label>Min. years experience</label><input id="project-req-experience" type="text" placeholder="e.g. 2"></div>
+    <div class="field"><label>Required languages (comma-separated)</label><input id="project-req-languages" type="text" placeholder="e.g. English, French"></div>
+    <button class="btn-secondary" onclick="saveProjectRequirements()">Save requirements</button>
+
+    <div class="panel-section-title" style="margin-top:1.25rem;">Best matches in Talent Pool</div>
+    <div class="assign-list" id="project-matches-list"></div>
+
+    <div class="field"><label>Deadline</label><input id="project-deadline" type="date" onchange="updateProjectDeadline()"></div>
+    <div class="field">
+      <label>Progress: <span id="project-progress-label">0%</span></label>
+      <input id="project-progress" type="range" min="0" max="100" step="5" oninput="document.getElementById('project-progress-label').textContent = this.value + '%'" onchange="updateProjectProgress(this.value)">
+    </div>
+
     <div class="panel-section-title" style="margin-top:1rem;">Members on this project</div>
     <div class="assign-list" id="project-members-list"></div>
     <div class="add-member-row">
@@ -1244,6 +1395,18 @@
       <input type="text" id="add-member-role" placeholder="Role on project (optional)">
       <button class="btn-primary" style="width:auto;" onclick="addProjectMember()">Add</button>
     </div>
+    <div class="panel-section-title" style="margin-top:1.25rem;">Files</div>
+    <div class="assign-list" id="project-files-list"></div>
+    <div class="add-member-row">
+      <input type="file" id="project-file-input" style="flex:1;">
+      <button class="btn-primary" style="width:auto;" onclick="uploadProjectFile()">Upload</button>
+    </div>
+
+    <div class="panel-section-title" style="margin-top:1.25rem;">Notes</div>
+    <div id="project-notes-list" style="margin-bottom:.75rem;"></div>
+    <div class="field"><textarea id="project-note-input" placeholder="Add a note…"></textarea></div>
+    <button class="btn-secondary" onclick="postProjectNote()">Post note</button>
+
     <div class="modal-actions">
       <button class="btn-secondary" type="button" onclick="closeProjectModal()">Close</button>
     </div>
@@ -1286,6 +1449,128 @@
     </div>
   </div>
 </div>
+<!-- ── EMAIL TEMPLATES MODAL ── -->
+<div class="modal-overlay" id="templates-modal">
+  <div class="modal">
+    <h2>Email Templates</h2>
+    <div class="panel-section-title">Existing templates</div>
+    <div class="assign-list" id="templates-list"></div>
+    <div class="info-divider"></div>
+    <div class="panel-section-title">New template</div>
+    <div class="field"><label>Name</label><input id="new-template-name" type="text" placeholder="e.g. Interview Invitation"></div>
+    <div class="field"><label>Subject</label><input id="new-template-subject" type="text" placeholder="Interview invitation for {{position}}"></div>
+    <div class="field"><label>Body (use {{name}}, {{position}}, {{date}})</label><textarea id="new-template-body" placeholder="Hi {{name}}, we'd like to invite you to interview for {{position}} on {{date}}…"></textarea></div>
+    <button class="btn-primary" onclick="createTemplate()">Save template</button>
+    <div class="modal-actions">
+      <button class="btn-secondary" type="button" onclick="closeTemplatesModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CALENDAR EVENT MODAL ── -->
+<div class="modal-overlay" id="calendar-event-modal">
+  <div class="modal">
+    <h2>New Calendar Event</h2>
+    <div class="field"><label>Title</label><input id="cal-event-title" type="text" placeholder="e.g. Team meeting"></div>
+    <div class="field">
+      <label>Type</label>
+      <select id="cal-event-type"><option>Meeting</option><option>Holiday</option><option>Reviewer Deadline</option><option>Other</option></select>
+    </div>
+    <div class="field"><label>Start</label><input id="cal-event-start" type="datetime-local"></div>
+    <div class="field"><label>End (optional)</label><input id="cal-event-end" type="datetime-local"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="createCalendarEvent()">Create</button>
+      <button class="btn-secondary" type="button" onclick="closeCalendarEventModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── LEAVE REQUEST MODAL ── -->
+<div class="modal-overlay" id="leave-modal">
+  <div class="modal">
+    <h2>Request Leave</h2>
+    <div class="field">
+      <label>Leave type</label>
+      <select id="leave-type"><option>Vacation</option><option>Sick Leave</option><option>Emergency Leave</option><option>Other</option></select>
+    </div>
+    <div class="field"><label>Start date</label><input id="leave-start" type="date"></div>
+    <div class="field"><label>End date</label><input id="leave-end" type="date"></div>
+    <div class="field"><label>Reason (optional)</label><textarea id="leave-reason" placeholder="Brief reason…"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="submitLeaveRequest()">Submit request</button>
+      <button class="btn-secondary" type="button" onclick="closeLeaveModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MEMBER PROFILE DETAILS MODAL (admin only) ── -->
+<div class="modal-overlay" id="member-profile-edit-modal">
+  <div class="modal">
+    <h2>Member Details</h2>
+    <div class="field"><label>Department</label><input id="mpe-department" type="text" placeholder="e.g. Data Operations"></div>
+    <div class="field">
+      <label>Manager</label>
+      <select id="mpe-manager"><option value="">— None —</option></select>
+    </div>
+    <div class="field">
+      <label>Employment type</label>
+      <select id="mpe-employment-type"><option value="">— Unset —</option><option>Full-time</option><option>Part-time</option><option>Contract</option><option>Intern</option></select>
+    </div>
+    <div class="field"><label>Timezone</label><input id="mpe-timezone" type="text" placeholder="e.g. Africa/Nairobi (GMT+3)"></div>
+    <div class="field"><label>Certificates (one per line)</label><textarea id="mpe-certificates" placeholder="e.g. Data Annotation Specialist – Scale AI (2023)"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveMemberProfileEdit()">Save</button>
+      <button class="btn-secondary" type="button" onclick="closeMemberProfileEditModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PERMISSIONS MODAL (admin only) ── -->
+<div class="modal-overlay" id="permissions-modal">
+  <div class="modal">
+    <h2>Permissions — <span id="perm-modal-email"></span></h2>
+    <p style="font-size:.8125rem;color:var(--fg2);margin-bottom:1rem;">Overrides this member's role defaults. Unchecked means "use the role default."</p>
+    <div class="checkbox-row" id="perm-checkbox-list"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="savePermissions()">Save</button>
+      <button class="btn-secondary" type="button" onclick="closePermissionsModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ANNOUNCEMENTS MODAL (admin only) ── -->
+<div class="modal-overlay" id="announcements-modal">
+  <div class="modal">
+    <h2>Announcements</h2>
+    <div class="panel-section-title">Active</div>
+    <div class="assign-list" id="announcements-admin-list" style="margin-bottom:1.25rem;"></div>
+    <div class="info-divider"></div>
+    <div class="panel-section-title">New announcement</div>
+    <div class="field"><label>Title</label><input id="new-announcement-title" type="text"></div>
+    <div class="field">
+      <label>Category</label>
+      <select id="new-announcement-category"><option>General</option><option>System Maintenance</option><option>Holiday</option><option>Meeting</option><option>New Project</option><option>Policy Change</option></select>
+    </div>
+    <div class="field"><label>Message</label><textarea id="new-announcement-body"></textarea></div>
+    <div class="field"><label>Expires (optional)</label><input id="new-announcement-expires" type="datetime-local"></div>
+    <button class="btn-primary" onclick="createAnnouncement()">Post announcement</button>
+    <div class="modal-actions">
+      <button class="btn-secondary" type="button" onclick="closeAnnouncementsModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CANDIDATE COMPARISON MODAL ── -->
+<div class="modal-overlay" id="compare-modal">
+  <div class="modal" style="max-width:900px;">
+    <h2>Compare Candidates</h2>
+    <div class="table-wrap" style="overflow-x:auto;"><table id="compare-table"><tbody></tbody></table></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" type="button" onclick="closeCompareModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- ── NEW TASK MODAL ── -->
 <div class="modal-overlay" id="task-new-modal">
@@ -1324,8 +1609,38 @@
         <label>Phone number</label>
         <input type="tel" id="profile-phone" placeholder="+254 7XX XXX XXX">
       </div>
+      <div class="info-grid" style="margin-bottom:1rem;">
+        <div class="info-item"><div class="info-key">Department</div><div class="info-val" id="profile-department-display">—</div></div>
+        <div class="info-item"><div class="info-key">Manager</div><div class="info-val" id="profile-manager-display">—</div></div>
+        <div class="info-item"><div class="info-key">Employment type</div><div class="info-val" id="profile-employment-display">—</div></div>
+      </div>
+      <div class="field"><label>Timezone</label><input type="text" id="profile-timezone" placeholder="e.g. Africa/Nairobi (GMT+3)"></div>
+      <div class="field"><label>Certificates (one per line)</label><textarea id="profile-certificates" placeholder="Optional — your certifications"></textarea></div>
       <button class="btn-primary" id="profile-save-info-btn" onclick="saveProfileInfo()">Save changes</button>
       <p class="save-msg" id="profile-info-msg"></p>
+    </div>
+
+    <div class="profile-divider"></div>
+
+    <div class="profile-section">
+      <div class="panel-section-title" style="margin-bottom:1rem;">Preferences</div>
+      <div class="field">
+        <label>Theme</label>
+        <select id="profile-theme-select" onchange="localStorage.setItem('diraflow_theme', this.value); applyTheme(this.value);">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+      <div class="checkbox-row" style="margin-bottom:1rem;">
+        <label class="checkbox-item"><input type="checkbox" id="profile-notif-inapp"> In-app notifications</label>
+        <label class="checkbox-item"><input type="checkbox" id="profile-notif-email"> Email notifications</label>
+      </div>
+      <div class="field">
+        <label>Language</label>
+        <select id="profile-language"><option value="en">English</option><option value="sw">Swahili</option><option value="fr">French</option></select>
+      </div>
+      <button class="btn-primary" id="profile-save-prefs-btn" onclick="saveProfilePrefs()">Save preferences</button>
+      <p class="save-msg" id="profile-prefs-msg"></p>
     </div>
 
     <div class="profile-divider"></div>
@@ -1368,7 +1683,8 @@
   // Bulk-selection state, keyed by table name ('applications' | 'talent')
   const selection = { applications: new Set(), talent: new Set() };
 
-  const loadedTabs = { applications:false, talent:false, members:false, assignments:false, insights:false, activity:false, tasks:false };
+  const loadedTabs = { applications:false, talent:false, members:false, assignments:false, insights:false, activity:false, tasks:false, templates:false, security:false, leave:false, calendar:false, syshealth:false };
+  let allEmailTemplates = [];
   let insightsCharts = {};
   const CHART_PALETTE = ['#2563EB','#10B981','#F59E0B','#7C3AED','#EF4444','#8B5CF6','#6B7280'];
 
@@ -1427,6 +1743,7 @@ function clearStoredSessionId() { localStorage.removeItem(SESSION_ID_KEY); }
 
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if (error) {
+      sb.from('failed_logins').insert({ email, reason: error.message, user_agent: navigator.userAgent }).then(() => {}, () => {});
       errEl.textContent = error.message; errEl.className = 'login-err show';
       btn.disabled = false; btn.textContent = 'Sign in →';
       return;
@@ -1687,6 +2004,7 @@ async function claimSession(userId) {
     unsubscribeNotifications();
     unsubscribeMemberStatus();
     unsubscribeOnlinePresence();
+    unsubscribeDataRealtime();
     await endActivitySession(reason || 'manual');
     allNotifications = [];
     await sb.auth.signOut();
@@ -1774,8 +2092,12 @@ window.addEventListener('beforeunload', () => {
     document.getElementById('tab-btn-members').style.display     = isAdmin ? 'inline-block' : 'none';
     document.getElementById('tab-btn-assignments').style.display = isAdmin ? 'inline-block' : 'none';
     document.getElementById('tab-btn-activity').style.display    = isAdmin ? 'inline-block' : 'none';
+    document.getElementById('tab-btn-security').style.display    = isAdmin ? 'inline-block' : 'none';
+    document.getElementById('tab-btn-reports').style.display     = isAdmin ? 'inline-block' : 'none';
+    document.getElementById('tab-btn-syshealth').style.display    = isAdmin ? 'inline-block' : 'none';
     document.getElementById('app-filter-reviewer').style.display = isAdmin ? 'inline-block' : 'none';
     document.getElementById('app-bulk-delete-btn').style.display    = isAdmin ? 'inline-block' : 'none';
+    document.getElementById('announcements-admin-btn').style.display = isAdmin ? 'inline-flex' : 'none';
     document.getElementById('talent-bulk-delete-btn').style.display = isAdmin ? 'inline-block' : 'none';
 
     document.getElementById('profile-avatar-btn').innerHTML = memberAvatarContent(currentMember);
@@ -1783,8 +2105,12 @@ window.addEventListener('beforeunload', () => {
     loadNotifications();
     subscribeNotifications();
     subscribeMemberStatus();
+    subscribeApplicationsRealtime();
+    subscribeTalentRealtime();
     checkAndResumeTodaySession();
     loadTasks();
+    loadEmailTemplates();
+    loadAnnouncements();
     applyRoleSessionTimeout();
 
     switchTab('applications');
@@ -1795,6 +2121,16 @@ window.addEventListener('beforeunload', () => {
     document.getElementById('profile-email').value = currentMember.email || '';
     document.getElementById('profile-role').value = currentMember.role || '';
     document.getElementById('profile-phone').value = currentMember.phone || '';
+    document.getElementById('profile-timezone').value = currentMember.timezone || '';
+    document.getElementById('profile-certificates').value = toList(currentMember.certificates).join('\n');
+    document.getElementById('profile-department-display').textContent = currentMember.department || '—';
+    document.getElementById('profile-employment-display').textContent = currentMember.employment_type || '—';
+    const mgr = allTeamMembers.find(m => m.id === currentMember.manager_id);
+    document.getElementById('profile-manager-display').textContent = mgr ? mgr.email : '—';
+    document.getElementById('profile-theme-select').value = localStorage.getItem('diraflow_theme') || 'light';
+    document.getElementById('profile-notif-inapp').checked = currentMember.notif_inapp !== false;
+    document.getElementById('profile-notif-email').checked = currentMember.notif_email !== false;
+    document.getElementById('profile-language').value = currentMember.language || 'en';
     document.getElementById('profile-current-password').value = '';
     document.getElementById('profile-new-password').value = '';
     document.getElementById('profile-new-password2').value = '';
@@ -1817,9 +2153,11 @@ window.addEventListener('beforeunload', () => {
     const msg = document.getElementById('profile-info-msg');
     msg.className = 'save-msg';
     const phone = document.getElementById('profile-phone').value.trim() || null;
+    const timezone = document.getElementById('profile-timezone').value.trim() || null;
+    const certificates = document.getElementById('profile-certificates').value.trim() || null;
 
     btn.disabled = true; btn.textContent = 'Saving…';
-    const { error } = await sb.from('team_members').update({ phone }).eq('id', currentUser.id);
+    const { error } = await sb.from('team_members').update({ phone, timezone, certificates }).eq('id', currentUser.id);
     btn.disabled = false; btn.textContent = 'Save changes';
 
     if (error) {
@@ -1827,10 +2165,31 @@ window.addEventListener('beforeunload', () => {
       msg.className = 'save-msg err show';
       return;
     }
-    currentMember.phone = phone;
+    Object.assign(currentMember, { phone, timezone, certificates });
     const idx = allTeamMembers.findIndex(m => m.id === currentUser.id);
-    if (idx !== -1) allTeamMembers[idx].phone = phone;
+    if (idx !== -1) Object.assign(allTeamMembers[idx], { phone, timezone, certificates });
     msg.textContent = 'Changes saved.';
+    msg.className = 'save-msg ok show';
+    setTimeout(() => { msg.className = 'save-msg'; }, 3000);
+  }
+
+  async function saveProfilePrefs() {
+    const btn = document.getElementById('profile-save-prefs-btn');
+    const msg = document.getElementById('profile-prefs-msg');
+    msg.className = 'save-msg';
+    const update = {
+      notif_inapp: document.getElementById('profile-notif-inapp').checked,
+      notif_email: document.getElementById('profile-notif-email').checked,
+      language: document.getElementById('profile-language').value
+    };
+    btn.disabled = true; btn.textContent = 'Saving…';
+    const { error } = await sb.from('team_members').update(update).eq('id', currentUser.id);
+    btn.disabled = false; btn.textContent = 'Save preferences';
+    if (error) { msg.textContent = 'Error saving: ' + error.message; msg.className = 'save-msg err show'; return; }
+    Object.assign(currentMember, update);
+    const idx = allTeamMembers.findIndex(m => m.id === currentUser.id);
+    if (idx !== -1) Object.assign(allTeamMembers[idx], update);
+    msg.textContent = 'Preferences saved.';
     msg.className = 'save-msg ok show';
     setTimeout(() => { msg.className = 'save-msg'; }, 3000);
   }
@@ -1992,8 +2351,17 @@ window.addEventListener('beforeunload', () => {
   }
   applyTheme(localStorage.getItem('diraflow_theme') || 'light');
 
+  function memberWantsInApp(id) {
+    const m = allTeamMembers.find(x => x.id === id);
+    return !m || m.notif_inapp !== false;
+  }
+  function memberWantsEmail(id) {
+    const m = allTeamMembers.find(x => x.id === id);
+    return !m || m.notif_email !== false;
+  }
+
   async function createNotification(recipientId, type, title, message, relatedTable, relatedId) {
-    if (!recipientId) return;
+    if (!recipientId || !memberWantsInApp(recipientId)) return;
     const { error } = await sb.from('notifications').insert({
       recipient_id: recipientId, type, title, message,
       related_table: relatedTable, related_id: relatedId ? String(relatedId) : null
@@ -2007,6 +2375,7 @@ window.addEventListener('beforeunload', () => {
       reviewerId, 'assignment', 'New review assigned',
       `You've been assigned to review ${applicantName}.`, relatedTable, relatedId
     );
+    if (!memberWantsEmail(reviewerId)) return;
     const { error } = await sb.functions.invoke('notify-reviewer-assigned', {
       body: { reviewerId, applicantName, relatedTable, relatedId }
     });
@@ -2022,16 +2391,41 @@ window.addEventListener('beforeunload', () => {
         `${currentMember.email} finished reviewing ${applicantName}.`, relatedTable, relatedId
       );
     }
-    const { error } = await sb.functions.invoke('notify-admin-review-completed', {
-      body: {
-        reviewerEmail: currentMember.email, applicantName, relatedTable, relatedId,
-        adminEmails: admins.map(a => a.email)
-      }
-    });
-    if (error) console.error('notify-admin-review-completed email failed:', error);
+    const emailableAdmins = admins.filter(a => memberWantsEmail(a.id));
+    if (emailableAdmins.length > 0) {
+      const { error } = await sb.functions.invoke('notify-admin-review-completed', {
+        body: {
+          reviewerEmail: currentMember.email, applicantName, relatedTable, relatedId,
+          adminEmails: emailableAdmins.map(a => a.email)
+        }
+      });
+      if (error) console.error('notify-admin-review-completed email failed:', error);
+    }
   }
 
   // ══════════════════════ FORCE LOGOUT ON DISABLE ══════════════════════
+
+let appsRealtimeChannel = null;
+  let talentRealtimeChannel = null;
+  function subscribeApplicationsRealtime() {
+    if (appsRealtimeChannel) return;
+    appsRealtimeChannel = sb.channel('applications-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, () => {
+        loadApplications().then(() => { if (document.getElementById('panel-pipeline').classList.contains('active')) renderPipelineBoard(); });
+      })
+      .subscribe();
+  }
+  function subscribeTalentRealtime() {
+    if (talentRealtimeChannel) return;
+    talentRealtimeChannel = sb.channel('talent-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'talent_pool' }, () => { loadTalentPool(); })
+      .subscribe();
+  }
+  function unsubscribeDataRealtime() {
+    if (appsRealtimeChannel) { sb.removeChannel(appsRealtimeChannel); appsRealtimeChannel = null; }
+    if (talentRealtimeChannel) { sb.removeChannel(talentRealtimeChannel); talentRealtimeChannel = null; }
+  }
+
 
 let presenceChannel = null;
 let onlineMemberIds = new Set();
@@ -2209,7 +2603,18 @@ async function exportInsightsPDF() {
       if (allTeamMembers.length === 0) loadTeamMembersForDropdowns();
     }
     if (name === 'activity') { if (!loadedTabs.activity) loadActivity(); else { renderActivityStats(); renderActivityLog(); } }
+    if (name === 'security') { if (!loadedTabs.security) loadSecurityCenter(); }
+    if (name === 'leave') { if (!loadedTabs.leave) loadLeaveRequests(); else renderLeaveRequests(); }
+    if (name === 'calendar') { if (!loadedTabs.calendar) loadCalendarData(); else renderCalendarGrid(); }
+    if (name === 'syshealth') { loadSystemHealth(); }
+    if (name === 'reports') {
+      if (!loadedTabs.applications) loadApplications();
+      if (!loadedTabs.talent) loadTalentPool();
+      if (allProjects.length === 0) loadProjectsRaw();
+      if (allTeamMembers.length === 0) loadTeamMembersForDropdowns();
+    }
     if (name === 'tasks') { if (!loadedTabs.tasks) loadTasks(); else renderTasks(); }
+    if (name === 'pipeline') { if (!loadedTabs.applications) loadApplications().then(renderPipelineBoard); else renderPipelineBoard(); }
   }
 
   // ── Helpers ───────────────────────────────────────────────────
@@ -2296,7 +2701,50 @@ async function exportInsightsPDF() {
     else if (ua.includes('Linux')) os = 'Linux';
     return `${browser} · ${os}`;
   }
+
+  const ROLE_DEFAULT_PERMISSIONS = {
+    admin:    { can_delete:true,  can_export:true, can_assign:true,  can_invite:true,  can_archive:true, can_edit_scores:true, can_create_projects:true },
+    reviewer: { can_delete:false, can_export:true, can_assign:true,  can_invite:false, can_archive:true, can_edit_scores:true, can_create_projects:false },
+    viewer:   { can_delete:false, can_export:false,can_assign:false, can_invite:false, can_archive:false,can_edit_scores:false,can_create_projects:false }
+  };
+  function hasPermission(action) {
+    if (!currentMember) return false;
+    const defaults = ROLE_DEFAULT_PERMISSIONS[currentMember.role] || {};
+    const overrides = currentMember.permissions || {};
+    return overrides[action] !== undefined ? !!overrides[action] : !!defaults[action];
+  }
   
+  let allAnnouncements = [];
+  async function loadAnnouncements() {
+    const { data, error } = await sb.from('announcements').select('*').order('created_at', { ascending:false });
+    if (error) { console.error(error); return; }
+    const now = Date.now();
+    allAnnouncements = (data||[]).filter(a => !a.expires_at || new Date(a.expires_at).getTime() > now);
+    renderAnnouncementsBanner();
+  }
+  function dismissedAnnouncementIds() {
+    try { return JSON.parse(localStorage.getItem('diraflow_dismissed_announcements') || '[]'); } catch { return []; }
+  }
+  function dismissAnnouncement(id) {
+    const ids = dismissedAnnouncementIds();
+    ids.push(id);
+    localStorage.setItem('diraflow_dismissed_announcements', JSON.stringify(ids));
+    renderAnnouncementsBanner();
+  }
+  function renderAnnouncementsBanner() {
+    const el = document.getElementById('announcements-banner-wrap');
+    if (!el) return;
+    const dismissed = dismissedAnnouncementIds();
+    const visible = allAnnouncements.filter(a => !dismissed.includes(a.id));
+    el.innerHTML = visible.map(a => `
+      <div style="background:var(--primary-dim); border:1px solid var(--primary); border-radius:var(--radius); padding:.75rem 1rem; margin-bottom:.6rem; display:flex; justify-content:space-between; gap:1rem; align-items:flex-start;">
+        <div>
+          <div style="font-weight:700; font-size:.85rem;">📢 ${esc(a.title)} <span class="badge" style="margin-left:.4rem;">${esc(a.category)}</span></div>
+          <div style="font-size:.8125rem; margin-top:.3rem; white-space:pre-wrap;">${esc(a.body)}</div>
+        </div>
+        <button class="icon-btn" onclick="dismissAnnouncement('${a.id}')" title="Dismiss">✕</button>
+      </div>`).join('');
+  }
   
   function esc(str) {
     return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -2314,6 +2762,161 @@ async function exportInsightsPDF() {
   function fmtDateShort(iso) {
     if (!iso) return '—';
     return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+  }
+
+  function daysWaitingFor(row) {
+    const pendingStatuses = ['Submitted', 'Under Review'];
+    if (!pendingStatuses.includes(row.status)) return null;
+    const since = row.assigned_at || row.submitted_at;
+    if (!since) return null;
+    return Math.floor((Date.now() - new Date(since).getTime()) / 86400000);
+  }
+  function slaBadge(days) {
+    if (days == null) return '—';
+    if (days >= 10) return `<span class="status-badge s-failed">Overdue · ${days}d</span>`;
+    if (days >= 5)  return `<span class="status-badge s-interview-required">${days}d</span>`;
+    if (days >= 2)  return `<span class="status-badge s-under-review">${days}d</span>`;
+    return `<span class="status-badge s-passed">${days}d</span>`;
+  }
+
+  async function loadDocuments(relatedTable, relatedId, containerId) {
+    const el = document.getElementById(containerId);
+    const { data, error } = await sb.from('candidate_documents')
+      .select('*').eq('related_table', relatedTable).eq('related_id', relatedId)
+      .order('doc_type').order('version', { ascending: false });
+    if (error) { el.innerHTML = '<p style="color:var(--red);font-size:.875rem;">Could not load documents.</p>'; return; }
+    const grouped = {};
+    (data || []).forEach(d => { (grouped[d.doc_type] = grouped[d.doc_type] || []).push(d); });
+    const types = Object.keys(grouped);
+    el.innerHTML = types.length ? types.map(type => {
+      const versions = grouped[type];
+      const latest = versions[0];
+      return `
+        <div class="panel-section">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div><strong>${esc(type)}</strong> <span style="color:var(--fg2);font-size:.78rem;">v${latest.version}</span></div>
+            <button class="btn-resume" onclick="downloadFile('documents','${esc(latest.file_path)}')">📄 Download</button>
+          </div>
+          ${versions.length > 1 ? `<div style="font-size:.78rem; color:var(--fg2); margin-top:.4rem;">
+            ${versions.slice(1).map(v => `v${v.version} — ${fmtDateTime(v.uploaded_at)} <a style="color:var(--primary);cursor:pointer;" onclick="downloadFile('documents','${esc(v.file_path)}')">download</a>`).join('<br>')}
+          </div>` : ''}
+        </div>`;
+    }).join('') : '<p style="color:var(--fg2);font-size:.875rem;">No documents uploaded yet.</p>';
+  }
+
+  async function uploadDocument(relatedTable, relatedId, docType, file, containerId) {
+    if (!file) { alert('Choose a file first.'); return; }
+    const { data: existing } = await sb.from('candidate_documents')
+      .select('version').eq('related_table', relatedTable).eq('related_id', relatedId).eq('doc_type', docType)
+      .order('version', { ascending: false }).limit(1);
+    const nextVersion = existing && existing.length ? existing[0].version + 1 : 1;
+    const ext = file.name.split('.').pop();
+    const path = `${relatedTable}/${relatedId}/${docType}-v${nextVersion}.${ext}`;
+    const { error: upErr } = await sb.storage.from('documents').upload(path, file, { upsert: true });
+    if (upErr) { alert('Upload failed: ' + upErr.message); return; }
+    const { error } = await sb.from('candidate_documents').insert({
+      related_table: relatedTable, related_id: relatedId, doc_type: docType,
+      file_path: path, version: nextVersion, uploaded_by: currentUser.id
+    });
+    if (error) { alert('Error saving document record: ' + error.message); return; }
+    logActivity('document_uploaded', `Uploaded ${docType} (v${nextVersion})`, relatedTable, relatedId);
+    loadDocuments(relatedTable, relatedId, containerId);
+  }
+
+  async function loadCommunications(relatedTable, relatedId, containerId) {
+    const el = document.getElementById(containerId);
+    const { data, error } = await sb.from('communications')
+      .select('*').eq('related_table', relatedTable).eq('related_id', relatedId)
+      .order('sent_at', { ascending: false });
+    if (error) { el.innerHTML = '<p style="color:var(--red);font-size:.875rem;">Could not load communications.</p>'; return; }
+    if (!data || data.length === 0) { el.innerHTML = '<p style="color:var(--fg2);font-size:.875rem;">No communications logged yet.</p>'; return; }
+    el.innerHTML = data.map(c => {
+      const sender = allTeamMembers.find(m => m.id === c.sent_by);
+      return `
+        <div style="border-bottom:1px solid var(--border); padding:.6rem 0;">
+          <div style="display:flex;justify-content:space-between;font-size:.8125rem;">
+            <span><span class="badge primary">${esc(c.channel)}</span> ${c.subject ? '<strong>'+esc(c.subject)+'</strong>' : ''}</span>
+            <span style="color:var(--subtle);">${fmtDateTime(c.sent_at)}</span>
+          </div>
+          <div class="qa-a" style="margin-top:.4rem; white-space:pre-wrap;">${esc(c.body||'')}</div>
+          <div style="font-size:.72rem; color:var(--fg2); margin-top:.3rem;">Logged by ${esc(sender ? sender.email : 'Unknown')}</div>
+        </div>`;
+    }).join('');
+  }
+
+  async function logCommunication(relatedTable, relatedId, prefix) {
+    const channel = document.getElementById(prefix + '-comm-channel').value;
+    const subject = document.getElementById(prefix + '-comm-subject').value.trim() || null;
+    const body = document.getElementById(prefix + '-comm-body').value.trim();
+    if (!body) { alert('Enter a message or summary before logging.'); return; }
+    const { error } = await sb.from('communications').insert({
+      related_table: relatedTable, related_id: relatedId, channel, subject, body,
+      direction: 'outbound', sent_by: currentUser.id
+    });
+    if (error) { alert('Error logging communication: ' + error.message); return; }
+    document.getElementById(prefix + '-comm-subject').value = '';
+    document.getElementById(prefix + '-comm-body').value = '';
+    logActivity('communication_logged', `Logged ${channel} communication`, relatedTable, relatedId);
+    loadCommunications(relatedTable, relatedId, prefix + '-comms-list');
+  }
+
+  async function loadEmailTemplates() {
+    const { data, error } = await sb.from('email_templates').select('*').order('name');
+    if (error) { console.error(error); return; }
+    allEmailTemplates = data || [];
+    loadedTabs.templates = true;
+  }
+
+  function fillTemplate(body, vars) {
+    return body.replace(/\{\{(\w+)\}\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));
+  }
+
+  function applyTemplateToComm(prefix, record) {
+    const sel = document.getElementById(prefix + '-comm-template');
+    if (!sel || !sel.value || !record) return;
+    const tpl = allEmailTemplates.find(t => t.id == sel.value);
+    if (!tpl) return;
+    const vars = { name: record.full_name, position: record.position || '', date: fmtDate(new Date().toISOString()) };
+    document.getElementById(prefix + '-comm-subject').value = fillTemplate(tpl.subject, vars);
+    document.getElementById(prefix + '-comm-body').value = fillTemplate(tpl.body, vars);
+  }
+
+  function openTemplatesModal() {
+    document.getElementById('templates-modal').classList.add('show');
+    renderTemplatesList();
+  }
+  function closeTemplatesModal() { document.getElementById('templates-modal').classList.remove('show'); }
+
+  function renderTemplatesList() {
+    const el = document.getElementById('templates-list');
+    el.innerHTML = allEmailTemplates.length ? allEmailTemplates.map(t => `
+      <div class="assign-row">
+        <div class="assign-info"><div class="assign-name">${esc(t.name)}</div><div class="assign-role">${esc(t.subject)}</div></div>
+        <button class="btn-secondary" style="border-color:var(--red);color:var(--red);" onclick="deleteTemplate('${t.id}')">Delete</button>
+      </div>
+    `).join('') : '<p style="color:var(--fg2);font-size:.875rem;">No templates yet.</p>';
+  }
+
+  async function createTemplate() {
+    const name = document.getElementById('new-template-name').value.trim();
+    const subject = document.getElementById('new-template-subject').value.trim();
+    const body = document.getElementById('new-template-body').value.trim();
+    if (!name || !subject || !body) { alert('Name, subject and body are all required.'); return; }
+    const { data, error } = await sb.from('email_templates').insert({ name, subject, body, created_by: currentUser.id }).select().single();
+    if (error) { alert('Error creating template: ' + error.message); return; }
+    allEmailTemplates.push(data);
+    document.getElementById('new-template-name').value = '';
+    document.getElementById('new-template-subject').value = '';
+    document.getElementById('new-template-body').value = '';
+    renderTemplatesList();
+  }
+
+  async function deleteTemplate(id) {
+    if (!confirm('Delete this template?')) return;
+    const { error } = await sb.from('email_templates').delete().eq('id', id);
+    if (error) { alert('Error deleting: ' + error.message); return; }
+    allEmailTemplates = allEmailTemplates.filter(t => t.id != id);
+    renderTemplatesList();
   }
 
   function calcAge(dobStr) {
@@ -2447,7 +3050,7 @@ async function exportInsightsPDF() {
   // Make sure we have a lightweight roster of reviewers/admins for dropdowns,
   // even on a session where the Members tab itself hasn't been opened yet.
   async function loadTeamMembersForDropdowns() {
-    const { data, error } = await sb.from('team_members').select('id,email,role,active').eq('active', true);
+    const { data, error } = await sb.from('team_members').select('id,email,role,active,notif_email,notif_inapp,manager_id,department,employment_type,timezone,certificates,permissions').eq('active', true);
     if (!error && data) allTeamMembers = data;
   }
 
@@ -2518,21 +3121,112 @@ async function exportInsightsPDF() {
 
     return source.filter(r => selection[table].has(r.id));
 }
-  function bulkExport(table) {
-    const rows = selectedRows(table);
-    if (rows.length === 0) { alert('Select at least one row to export.'); return; }
-    const cols = table === 'applications'
-      ? ['full_name','email','position','country','status','reviewer_score','submitted_at']
-      : ['full_name','email','phone','country','status','years_experience','education_level','submitted_at'];
+  function downloadCSV(filename, cols, rows) {
     const csv = [cols.join(',')].concat(
       rows.map(r => cols.map(c => `"${String(r[c] ?? '').replace(/"/g,'""')}"`).join(','))
     ).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = `${table}-export-${Date.now()}.csv`;
+    a.href = url; a.download = filename;
     document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
+  }
+
+  function generateHiringReport() {
+    const now = new Date();
+    const rows = activeApplications().filter(a => a.submitted_at && new Date(a.submitted_at).getMonth() === now.getMonth() && new Date(a.submitted_at).getFullYear() === now.getFullYear());
+    downloadCSV(`hiring-report-${now.getFullYear()}-${now.getMonth()+1}.csv`,
+      ['full_name','email','position','country','status','submitted_at','reviewed_at'], rows);
+  }
+
+  function generateReviewerReport() {
+    const turnarounds = [...computeReviewTurnarounds(allApplications), ...computeReviewTurnarounds(allTalentPool)];
+    const reviewers = allTeamMembers.filter(m => m.role === 'reviewer' || m.role === 'admin');
+    const rows = reviewers.map(r => {
+      const mine = turnarounds.filter(t => t.reviewerId === r.id).map(t => t.hours);
+      return {
+        reviewer: r.email,
+        reviews_completed: mine.length,
+        avg_turnaround_hours: mine.length ? (mine.reduce((a,b)=>a+b,0)/mine.length).toFixed(1) : ''
+      };
+    });
+    downloadCSV(`reviewer-report-${Date.now()}.csv`, ['reviewer','reviews_completed','avg_turnaround_hours'], rows);
+  }
+
+  async function generateTimesheetReport() {
+    const { start } = periodRange('month');
+    const { data, error } = await sb.from('activity_sessions').select('*').gte('login_at', start.toISOString());
+    if (error) { alert('Error loading sessions: ' + error.message); return; }
+    const rows = allTeamMembers.map(m => {
+      const mine = (data || []).filter(s => s.team_member_id === m.id);
+      const activeSec = mine.reduce((s,x)=>s+(x.active_seconds||0),0);
+      const idleSec = mine.reduce((s,x)=>s+(x.idle_seconds||0),0);
+      const breakSec = mine.reduce((s,x)=>s+(x.break_seconds||0),0);
+      return { member: m.email, sessions: mine.length, active_hours: (activeSec/3600).toFixed(1), idle_hours: (idleSec/3600).toFixed(1), break_hours: (breakSec/3600).toFixed(1) };
+    });
+    downloadCSV(`timesheet-report-${Date.now()}.csv`, ['member','sessions','active_hours','idle_hours','break_hours'], rows);
+  }
+
+  function generateTalentReport() {
+    downloadCSV(`talent-report-${Date.now()}.csv`,
+      ['full_name','email','phone','country','status','years_experience','education_level','submitted_at'], allTalentPool);
+  }
+
+  function generateCountryReport() {
+    const counts = {};
+    [...allApplications, ...allTalentPool].forEach(r => { const c = r.country || 'Unknown'; counts[c] = (counts[c]||0)+1; });
+    const rows = Object.entries(counts).map(([country,count]) => ({ country, count })).sort((a,b)=>b.count-a.count);
+    downloadCSV(`country-report-${Date.now()}.csv`, ['country','count'], rows);
+  }
+
+  function generateSkillsReport() {
+    const counts = {};
+    allTalentPool.forEach(r => getCandidateSkills(r).forEach(s => { counts[s] = (counts[s]||0)+1; }));
+    const rows = Object.entries(counts).map(([skill,count]) => ({ skill, count })).sort((a,b)=>b.count-a.count);
+    downloadCSV(`skills-report-${Date.now()}.csv`, ['skill','count'], rows);
+  }
+
+  function generateProjectsReport() {
+    const rows = allProjects.map(p => ({
+      project: p.name, status: p.status,
+      members: allProjectMembers.filter(pm => pm.project_id === p.id).length,
+      description: p.description || ''
+    }));
+    downloadCSV(`projects-report-${Date.now()}.csv`, ['project','status','members','description'], rows);
+  }
+
+  async function loadSystemHealth() {
+    const el = document.getElementById('syshealth-stats-row');
+    el.innerHTML = '<div class="stat-card"><div class="stat-num">…</div><div class="stat-label">Checking…</div></div>';
+
+    const dbStart = performance.now();
+    const { error: dbError } = await sb.from('team_members').select('id').limit(1);
+    const dbLatency = Math.round(performance.now() - dbStart);
+    const realtimeOk = presenceChannel && presenceChannel.state === 'joined';
+
+    const { count: pendingNotifCount } = await sb.from('notifications').select('id', { count: 'exact', head: true }).eq('is_read', false);
+    const { count: openTasksCount } = await sb.from('tasks').select('id', { count: 'exact', head: true }).eq('completed', false);
+    const { count: pendingLeaveCount } = await sb.from('leave_requests').select('id', { count: 'exact', head: true }).eq('status', 'Pending');
+
+    el.innerHTML = `
+      <div class="stat-card" style="--stat-color:${dbError?'var(--red)':'var(--green)'}; --stat-dim:${dbError?'var(--red-dim)':'var(--green-dim)'};"><div class="stat-num">${dbError ? 'Down' : dbLatency+'ms'}</div><div class="stat-label">Database ${dbError ? '' : '(latency)'}</div></div>
+      <div class="stat-card" style="--stat-color:${realtimeOk?'var(--green)':'var(--orange)'}; --stat-dim:${realtimeOk?'var(--green-dim)':'var(--orange-dim)'};"><div class="stat-num">${realtimeOk ? 'Connected' : 'Unknown'}</div><div class="stat-label">Realtime (this session)</div></div>
+      <div class="stat-card" style="--stat-color:var(--orange); --stat-dim:var(--orange-dim);"><div class="stat-num">${pendingNotifCount ?? '—'}</div><div class="stat-label">Unread notifications (all users)</div></div>
+      <div class="stat-card" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);"><div class="stat-num">${openTasksCount ?? '—'}</div><div class="stat-label">Open tasks</div></div>
+      <div class="stat-card" style="--stat-color:var(--purple); --stat-dim:var(--purple-dim);"><div class="stat-num">${pendingLeaveCount ?? '—'}</div><div class="stat-label">Pending leave requests</div></div>
+    `;
+    loadedTabs.syshealth = true;
+  }
+
+  function bulkExport(table) {
+    if (!hasPermission('can_export')) { alert('You do not have permission to export records.'); return; }
+    const rows = selectedRows(table);
+    if (rows.length === 0) { alert('Select at least one row to export.'); return; }
+    const cols = table === 'applications'
+      ? ['full_name','email','position','country','status','reviewer_score','submitted_at']
+      : ['full_name','email','phone','country','status','years_experience','education_level','submitted_at'];
+    downloadCSV(`${table}-export-${Date.now()}.csv`, cols, rows);
   }
   function bulkEmail(table) {
     const rows = selectedRows(table);
@@ -2542,6 +3236,7 @@ async function exportInsightsPDF() {
   }
 
   async function bulkArchive(table, archive) {
+    if (!hasPermission('can_archive')) { alert('You do not have permission to archive records.'); return; }
     const rows = selectedRows(table);
     if (rows.length === 0) { alert(`Select at least one row to ${archive ? 'archive' : 'unarchive'}.`); return; }
     const tableName = table === 'applications' ? 'applications' : 'talent_pool';
@@ -2552,6 +3247,10 @@ async function exportInsightsPDF() {
 
     const { error } = await sb.from(tableName).update(update).in('id', ids);
     if (error) { alert('Error updating: ' + error.message); return; }
+
+    for (const r of rows) {
+      logActivity(archive ? 'archived' : 'unarchived', `${archive ? 'Archived' : 'Unarchived'} ${r.full_name}`, tableName, r.id);
+    }
 
     const source = table === 'applications' ? allApplications : allTalentPool;
     source.forEach(r => { if (ids.includes(r.id)) Object.assign(r, update); });
@@ -2568,12 +3267,15 @@ async function exportInsightsPDF() {
 
 
   async function bulkDelete(table) {
-  if (currentMember.role !== 'admin') { alert('Only admins can delete records.'); return; }
+  if (!hasPermission('can_delete')) { alert('You do not have permission to delete records.'); return; }
   const rows = selectedRows(table);
     if (rows.length === 0) { alert('Select at least one row to delete.'); return; }
     if (!confirm(`Delete ${rows.length} record(s)? This cannot be undone.`)) return;
     const tableName = table === 'applications' ? 'applications' : 'talent_pool';
     const ids = rows.map(r => r.id);
+    for (const r of rows) {
+      logActivity('deleted', `Permanently deleted ${r.full_name}`, tableName, r.id);
+    }
     const { error } = await sb.from(tableName).delete().in('id', ids);
     if (error) { alert('Error deleting: ' + error.message); return; }
     if (table === 'applications') {
@@ -2592,10 +3294,14 @@ async function exportInsightsPDF() {
     const ids = rows.map(r => r.id);
     const { error } = await sb.from('talent_pool').update({ status: 'Shortlisted' }).in('id', ids);
     if (error) { alert('Error shortlisting: ' + error.message); return; }
+    for (const r of rows) {
+      logActivity('shortlisted', `Shortlisted ${r.full_name}`, 'talent_pool', r.id);
+    }
     allTalentPool.forEach(r => { if (ids.includes(r.id)) r.status = 'Shortlisted'; });
     updateTalentStats(); renderTalentPool();
   }
   async function bulkAssign(table) {
+    if (!hasPermission('can_assign')) { alert('You do not have permission to assign candidates.'); return; }
     const rows = selectedRows(table);
     if (rows.length === 0) { alert('Select at least one candidate to assign.'); return; }
     if (allTeamMembers.length === 0) await loadTeamMembersForDropdowns();
@@ -2643,6 +3349,7 @@ for (const id of ids) {
         `You've been assigned to review ${candidate ? candidate.full_name : 'a candidate'}.`,
         'talent_pool', id
     );
+    logActivity('assignment', `Assigned ${candidate ? candidate.full_name : 'a candidate'} to ${reviewers[idx].email}`, 'talent_pool', id);
 }
 
 allTalentPool.forEach(r => {
@@ -2735,6 +3442,7 @@ renderTalentPool();
     const revFilter = document.getElementById('app-filter-reviewer').value;
     const sortMode  = document.getElementById('app-sort').value;
     const archivedFilter = document.getElementById('app-filter-archived').value;
+    const slaFilter = document.getElementById('app-filter-sla').value;
 
     // Keep stat-card highlighting in sync even when the status dropdown is changed directly.
     document.querySelectorAll('#app-list-view .stat-card.clickable').forEach(c => c.classList.remove('active'));
@@ -2756,7 +3464,14 @@ renderTalentPool();
       const matchArchived = archivedFilter === 'all' ? true
         : archivedFilter === 'archived' ? !!r.is_archived
         : !r.is_archived;
-      return matchSearch && matchPos && matchSt && matchRev && matchArchived;
+      const days = daysWaitingFor(r);
+      const matchSla = !slaFilter ? true
+        : slaFilter === 'ontrack' ? (days != null && days < 2)
+        : slaFilter === 'warning' ? (days != null && days >= 2 && days < 5)
+        : slaFilter === 'risk'    ? (days != null && days >= 5 && days < 10)
+        : slaFilter === 'overdue' ? (days != null && days >= 10)
+        : true;
+      return matchSearch && matchPos && matchSt && matchRev && matchArchived && matchSla;
     });
 
     rows = sortRows(rows, sortMode);
@@ -2774,6 +3489,7 @@ renderTalentPool();
         <td>${esc(r.position)}</td>
         <td>${esc(r.country || '—')}</td>
         <td><span class="status-badge ${statusClass(r.status)}">${esc(r.status)}</span></td>
+        <td>${slaBadge(daysWaitingFor(r))}</td>
         <td>${esc(reviewerLabel(r.assigned_reviewer_id))}</td>
         <td class="td-sub">${fmtDate(r.submitted_at)}</td>
         <td>${r.reviewer_score != null ? r.reviewer_score + '/10' : '—'}</td>
@@ -2802,7 +3518,8 @@ renderTalentPool();
     if (btn) btn.classList.add('active');
   }
 
-  function openAppPanel(id) {
+  async function openAppPanel(id) {
+    if (!loadedTabs.talent) await loadTalentPool();
     const app = allApplications.find(r => r.id == id);
     if (!app) return;
     currentApp = app;
@@ -2832,9 +3549,9 @@ renderTalentPool();
       .map(m => `<option value="${m.id}" ${app.assigned_reviewer_id===m.id?'selected':''}>${esc(m.email)}</option>`).join('');
 
     // Profile tabs
-    const tabs = ['personal','professional','documents','comments','timeline'];
+    const tabs = ['personal','professional','documents','communications','comments','timeline'];
     if (isAdmin || canEdit) tabs.push('admin');
-    const tabLabels = { personal:'Personal', professional:'Professional', documents:'Documents', comments:'Comments', timeline:'Timeline', admin:'Admin' };
+    const tabLabels = { personal:'Personal', professional:'Professional', documents:'Documents', communications:'Communications', comments:'Comments', timeline:'Timeline', admin:'Admin' };
     document.getElementById('app-profile-tabs').innerHTML = tabs.map((t,i) =>
       `<button class="profile-tab-btn ${i===0?'active':''}" id="app-tabbtn-${t}" onclick="switchProfileTab('app','${t}')">${tabLabels[t]}</button>`
     ).join('');
@@ -2881,10 +3598,39 @@ renderTalentPool();
 
       <div class="profile-tab-content" id="app-tab-documents">
         <div class="profile-card panel-section">
-          <div class="panel-section-title">Resume / CV</div>
+          <div class="panel-section-title">Resume / CV (original submission)</div>
           ${app.resume_path
             ? `<button class="btn-resume" onclick="downloadFile('resumes','${esc(app.resume_path)}')">📄 Download resume</button>`
             : '<p style="color:var(--fg2);font-size:.875rem;">No resume uploaded.</p>'}
+        </div>
+        <div class="profile-card panel-section" style="margin-top:1.25rem;">
+          <div class="panel-section-title">Additional documents</div>
+          <div id="app-documents-list"><span class="spinner" style="margin:1rem auto;"></span></div>
+          <div class="add-member-row" style="margin-top:1rem;">
+            <select id="app-doc-type"><option>Cover Letter</option><option>Portfolio</option><option>Certificate</option><option>ID</option><option>Passport</option><option>NDA</option><option>Contract</option></select>
+            <input type="file" id="app-doc-file" style="flex:1;">
+            <button class="btn-primary" style="width:auto;" onclick="uploadDocument('applications','${app.id}',document.getElementById('app-doc-type').value,document.getElementById('app-doc-file').files[0],'app-documents-list')">Upload</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-tab-content" id="app-tab-communications">
+        <div class="profile-card panel-section">
+          <div class="panel-section-title">Communication history</div>
+          <div id="app-comms-list" style="margin-bottom:1rem;"><span class="spinner" style="margin:1rem auto;"></span></div>
+          <div class="action-row">
+            <div class="action-field">
+              <label>Channel</label>
+              <select id="app-comm-channel"><option>Email</option><option>SMS</option><option>WhatsApp</option><option>Phone call</option><option>Interview Invitation</option><option>Offer Letter</option><option>Rejection Letter</option></select>
+            </div>
+            <div class="action-field">
+              <label>Template <button class="btn-secondary" style="padding:.2rem .5rem;font-size:.7rem;margin-left:.5rem;" type="button" onclick="openTemplatesModal()">Manage</button></label>
+              <select id="app-comm-template" onchange="applyTemplateToComm('app', currentApp)"><option value="">— None —</option>${allEmailTemplates.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select>
+            </div>
+            <div class="action-field"><label>Subject (optional)</label><input type="text" id="app-comm-subject"></div>
+            <div class="action-field"><label>Message / summary</label><textarea id="app-comm-body" placeholder="What was sent or discussed…"></textarea></div>
+            <button class="btn-save" onclick="logCommunication('applications','${app.id}','app')">Log communication</button>
+          </div>
         </div>
       </div>
 
@@ -2902,10 +3648,7 @@ renderTalentPool();
       <div class="profile-tab-content" id="app-tab-timeline">
         <div class="profile-card panel-section">
           <div class="panel-section-title">Timeline</div>
-          ${buildTimeline([
-            { date: app.submitted_at, label: 'Application submitted' },
-            app.status && app.status !== 'Submitted' ? { date: app.submitted_at, label: 'Status: ' + app.status } : null
-          ])}
+          <div id="app-timeline-container"><span class="spinner" style="margin:1rem auto;"></span></div>
         </div>
         ${isAdmin ? `<div class="profile-card panel-section" style="margin-top:1.25rem;"><div class="panel-section-title">Access log</div><div id="app-pii-log">Loading…</div></div>` : ''}
       </div>
@@ -2935,6 +3678,21 @@ renderTalentPool();
         </div>` : ''}
 
         <div class="profile-card panel-section" style="margin-top:${isAdmin?'1.25rem':'0'};">
+          <div class="panel-section-title">Interview</div>
+          <div id="app-interview-container"><span class="spinner" style="margin:1rem auto;"></span></div>
+        </div>
+
+        <div class="profile-card panel-section" style="margin-top:1.25rem;">
+          <div class="panel-section-title">AI Assistant</div>
+          <div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.75rem;">
+            <button class="btn-secondary" onclick="aiSummarizeApplicant('applications','${app.id}')">Summarize applicant</button>
+            <button class="btn-secondary" onclick="aiGenerateInterviewQuestions('applications','${app.id}')">Generate interview questions</button>
+            <button class="btn-secondary" onclick="aiGenerateOfferLetter('applications','${app.id}')">Draft offer letter</button>
+          </div>
+          <div id="app-ai-output" style="font-size:.8125rem; white-space:pre-wrap;"></div>
+        </div>
+
+        <div class="profile-card panel-section" style="margin-top:${isAdmin?'1.25rem':'0'};">
           <div class="panel-section-title">Reviewer actions</div>
           <div class="action-row">
             <div class="action-field">
@@ -2951,6 +3709,7 @@ renderTalentPool();
             <div class="action-field">
               <label>Score (1–10)</label>
               <input type="number" id="app-action-score" min="1" max="10" value="${app.reviewer_score != null ? app.reviewer_score : ''}">
+              <div id="app-score-history"></div>
             </div>
             <div class="action-field">
               <label>Reviewer notes</label>
@@ -2963,13 +3722,28 @@ renderTalentPool();
             </div>
           </div>
         </div>
+        ${isAdmin ? `
+        <div class="profile-card panel-section" style="margin-top:1.25rem;">
+          <div class="panel-section-title">Talent Pool</div>
+          ${app.talent_pool_id
+            ? `<p style="font-size:.8125rem; color:var(--fg2); margin-bottom:.75rem;">This applicant has been added to the Talent Pool.</p>
+               <button class="btn-secondary" onclick="switchTab('talent'); closeAppPanel(); setTimeout(() => openTalentPanel('${app.talent_pool_id}'), 150);">View in Talent Pool →</button>`
+            : `<p style="font-size:.8125rem; color:var(--fg2); margin-bottom:.75rem;">Copies this applicant's details into the Talent Pool as a new candidate record and links the two together.</p>
+               <button class="btn-secondary" id="app-move-talent-btn" onclick="moveApplicantToTalentPool()">Move to Talent Pool</button>`}
+        </div>` : ''}
       </div>` : ''}
     `;
 
     document.getElementById('app-list-view').style.display = 'none';
     document.getElementById('app-profile-view').classList.add('open');
+    renderDuplicateBanner('app', findDuplicateMatches(app.email, app.phone, 'applications', app.id));
     loadAndRenderComments('app', 'applications', app.id);
+    loadTimelineEvents('applications', app.id, 'app-timeline-container', app.submitted_at, 'Application submitted');
+    loadDocuments('applications', app.id, 'app-documents-list');
+    loadCommunications('applications', app.id, 'app-comms-list');
+    loadInterviewRecord('applications', app.id, 'app-interview-container');
     logPiiView('applications', app.id);
+    loadScoreHistory('applications', app.id, 'app-score-history');
     if (isAdmin) renderPiiViewLog('app-pii-log', 'applications', app.id);
   }
 
@@ -2977,6 +3751,119 @@ renderTalentPool();
     document.getElementById('app-profile-view').classList.remove('open');
     document.getElementById('app-list-view').style.display = 'block';
     currentApp = null;
+  }
+
+  async function loadTimelineEvents(relatedTable, relatedId, containerId, submittedAt, submittedLabel) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const { data, error } = await sb.from('activity_log')
+      .select('*')
+      .eq('related_table', relatedTable)
+      .eq('related_id', String(relatedId))
+      .order('created_at', { ascending: true });
+    if (error) {
+      el.innerHTML = '<p style="color:var(--red);font-size:.875rem;">Could not load timeline.</p>';
+      return;
+    }
+    const items = [{ date: submittedAt, label: submittedLabel }];
+    (data || []).forEach(a => {
+      const actor = allTeamMembers.find(m => m.id === a.team_member_id);
+      items.push({ date: a.created_at, label: `${actor ? actor.email : 'Someone'}: ${a.detail || a.action_type}` });
+    });
+    el.innerHTML = buildTimeline(items);
+  }
+
+  async function loadScoreHistory(relatedTable, relatedId, containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const { data, error } = await sb.from('score_history')
+      .select('*').eq('related_table', relatedTable).eq('related_id', relatedId)
+      .order('changed_at', { ascending: true });
+    if (error) { el.innerHTML = ''; return; }
+    if (!data || data.length === 0) { el.innerHTML = '<p style="color:var(--fg2);font-size:.78rem;margin-top:.4rem;">No score changes recorded yet.</p>'; return; }
+    el.innerHTML = '<div style="font-size:.78rem;color:var(--fg2);margin-top:.5rem;">' +
+      data.map(h => {
+        const who = allTeamMembers.find(m => m.id === h.changed_by);
+        return `${esc(who ? who.email : 'Unknown')}: <strong>${h.score}</strong> <span style="color:var(--subtle);">(${fmtDateTime(h.changed_at)})</span>`;
+      }).join(' → ') + '</div>';
+  }
+
+  function findDuplicateMatches(email, phone, excludeTable, excludeId) {
+    const normEmail = (email || '').trim().toLowerCase();
+    const normPhone = (phone || '').replace(/\D/g, '');
+    const matches = [];
+    const scan = (source, tableName) => {
+      source.forEach(r => {
+        if (tableName === excludeTable && r.id === excludeId) return;
+        const rEmail = (r.email || '').trim().toLowerCase();
+        const rPhone = (r.phone || '').replace(/\D/g, '');
+        const emailHit = normEmail && rEmail && rEmail === normEmail;
+        const phoneHit = !emailHit && normPhone && rPhone && rPhone === normPhone;
+        if (emailHit || phoneHit) matches.push({ table: tableName, id: r.id, name: r.full_name, matchedOn: emailHit ? 'email' : 'phone' });
+      });
+    };
+    scan(allApplications, 'applications');
+    scan(allTalentPool, 'talent_pool');
+    return matches;
+  }
+
+  function renderDuplicateBanner(prefix, matches) {
+    const el = document.getElementById(prefix + '-duplicate-banner');
+    if (!el) return;
+    if (matches.length === 0) { el.innerHTML = ''; el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    el.innerHTML = `
+      <div style="background:var(--orange-dim); border:1px solid var(--orange); border-radius:var(--radius); padding:.75rem 1rem; margin-bottom:1.25rem; font-size:.8125rem; color:var(--fg);">
+        ⚠️ <strong>Possible duplicate</strong> — matching ${matches.map(m=>m.matchedOn).join('/')} found:
+        ${matches.map(m => `<a style="color:var(--primary); font-weight:600; cursor:pointer; margin-left:.4rem;" onclick="${m.table === 'applications' ? `switchTab('applications'); closeTalentPanel(); setTimeout(()=>openAppPanel('${m.id}'),150)` : `switchTab('talent'); closeAppPanel(); setTimeout(()=>openTalentPanel('${m.id}'),150)`}">${esc(m.name)} (${m.table === 'applications' ? 'Application' : 'Talent Pool'})</a>`).join(',')}
+      </div>`;
+  }
+
+  function candidateSearchText(r) {
+    return [
+      r.full_name, r.email, r.country, r.education_level, r.education_background,
+      r.years_experience, r.experience_level, r.work_type, r.availability, r.additional_experience,
+      ...toList(r.preferred_roles), ...toList(r.areas_of_expertise), ...getCandidateSkills(r)
+    ].filter(Boolean).join(' ').toLowerCase();
+  }
+
+  function evaluateAdvancedSearch(query, row) {
+    if (!query || !query.trim()) return true;
+    let q = query;
+
+    const scoreRe = /score\s*(>=|<=|>|<|=)\s*(\d+(?:\.\d+)?)/gi;
+    let scoreOk = true, m;
+    while ((m = scoreRe.exec(query)) !== null) {
+      const op = m[1], val = parseFloat(m[2]), score = row.reviewer_score;
+      if (score == null) { scoreOk = false; continue; }
+      if (op === '>'  && !(score > val))  scoreOk = false;
+      if (op === '<'  && !(score < val))  scoreOk = false;
+      if (op === '>=' && !(score >= val)) scoreOk = false;
+      if (op === '<=' && !(score <= val)) scoreOk = false;
+      if (op === '='  && !(score === val)) scoreOk = false;
+    }
+    q = q.replace(scoreRe, ' ');
+    if (!scoreOk) return false;
+    if (!q.trim()) return true;
+
+    q = q.replace(/\bnot\s+(\S+)/gi, '-$1');
+    const text = candidateSearchText(row);
+
+    const orGroups = q.split(/\s+or\s+/i).map(s => s.trim()).filter(Boolean);
+    if (orGroups.length === 0) return true;
+
+    return orGroups.some(group => {
+      const terms = group.split(/\s+and\s+|\s+/i).map(s => s.trim()).filter(Boolean);
+      if (terms.length === 0) return true;
+      return terms.every(term => {
+        let negate = false;
+        if (term.startsWith('-')) { negate = true; term = term.slice(1); }
+        term = term.replace(/^"|"$/g, '').toLowerCase().trim();
+        if (!term) return true;
+        const hit = text.includes(term);
+        return negate ? !hit : hit;
+      });
+    });
   }
 
   function buildTimeline(items) {
@@ -2994,6 +3881,7 @@ renderTalentPool();
 
   async function toggleArchiveCurrentApp() {
     if (!currentApp) return;
+    if (!hasPermission('can_archive')) { alert('You do not have permission to archive records.'); return; }
     const archive = !currentApp.is_archived;
     const update = archive
       ? { is_archived: true, archived_at: new Date().toISOString(), archived_by: currentUser.id }
@@ -3006,6 +3894,7 @@ renderTalentPool();
     const idx = allApplications.findIndex(r => r.id === currentApp.id);
     if (idx !== -1) Object.assign(allApplications[idx], update);
     updateAppStats();
+    logActivity(archive ? 'archived' : 'unarchived', `${archive ? 'Archived' : 'Unarchived'} application for ${currentApp.full_name}`, 'applications', currentApp.id);
 
     if (archive) {
       // Archived — return to the list so it visibly disappears right away.
@@ -3020,9 +3909,10 @@ renderTalentPool();
 
   async function deleteCurrentApp() {
   if (!currentApp) return;
-  if (currentMember.role !== 'admin') { alert('Only admins can delete records.'); return; }
+  if (!hasPermission('can_delete')) { alert('You do not have permission to delete records.'); return; }
   if (!confirm(`Permanently delete ${currentApp.full_name}'s application? This cannot be undone.`)) return;
 
+    logActivity('deleted', `Permanently deleted application for ${currentApp.full_name}`, 'applications', currentApp.id);
     const { error } = await sb.from('applications').delete().eq('id', currentApp.id);
     if (error) { alert('Error deleting: ' + error.message); return; }
 
@@ -3042,12 +3932,16 @@ renderTalentPool();
 
     const previousReviewerId = currentApp.assigned_reviewer_id;
     const previousStatus = currentApp.status;
+    const previousNotes = currentApp.reviewer_notes || '';
     const applicantName = currentApp.full_name;
     const appId = currentApp.id;
 
+    const previousScore = currentApp.reviewer_score;
     const update = {
       status: document.getElementById('app-action-status').value,
-      reviewer_score: document.getElementById('app-action-score').value ? parseInt(document.getElementById('app-action-score').value) : null,
+      reviewer_score: hasPermission('can_edit_scores')
+        ? (document.getElementById('app-action-score').value ? parseInt(document.getElementById('app-action-score').value) : null)
+        : previousScore,
       reviewer_notes: document.getElementById('app-action-notes').value || null
     };
     const reviewerSel = document.getElementById('app-action-reviewer');
@@ -3082,11 +3976,74 @@ renderTalentPool();
 
       logActivity('review', `Reviewed application for ${applicantName}${update.status !== previousStatus ? ` — status changed to ${update.status}` : ''}`, 'applications', appId);
 
+      if (update.reviewer_score != null && update.reviewer_score !== previousScore) {
+        await sb.from('score_history').insert({ related_table: 'applications', related_id: appId, score: update.reviewer_score, changed_by: currentUser.id });
+        loadScoreHistory('applications', appId, 'app-score-history');
+      }
+
+      const newNotes = update.reviewer_notes || '';
+      if (newNotes && newNotes !== previousNotes) {
+        await sb.from('comments').insert({
+          related_table: 'applications', related_id: String(appId),
+          author_id: currentUser.id, body: `[Reviewer note] ${newNotes}`
+        });
+        loadAndRenderComments('app', 'applications', appId);
+      }
+
       saveMsg.textContent = 'Changes saved.';
       saveMsg.className = 'save-msg ok show';
     }
     saveBtn.disabled = false; saveBtn.textContent = 'Save changes';
     setTimeout(() => { saveMsg.className = 'save-msg'; }, 3000);
+  }
+
+  async function moveApplicantToTalentPool() {
+    if (!currentApp) return;
+    if (currentMember.role !== 'admin') { alert('Only admins can move applicants to the Talent Pool.'); return; }
+    if (currentApp.talent_pool_id) { alert('This applicant has already been added to the Talent Pool.'); return; }
+    if (!confirm(`Add ${currentApp.full_name} to the Talent Pool? This creates a new candidate record and links it to this application.`)) return;
+
+    const btn = document.getElementById('app-move-talent-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Moving…'; }
+
+    const app = currentApp;
+    const talentRow = {
+      full_name: app.full_name,
+      email: app.email,
+      phone: app.phone || null,
+      country: app.country || null,
+      resume_path: app.resume_path || null,
+      years_experience: app.years_experience || null,
+      reviewer_score: app.reviewer_score || null,
+      reviewer_notes: app.reviewer_notes || null,
+      status: 'In pool',
+      source_application_id: app.id,
+      submitted_at: new Date().toISOString()
+    };
+
+    const { data: newTalent, error: insertError } = await sb.from('talent_pool').insert(talentRow).select().single();
+    if (insertError) {
+      alert('Error creating Talent Pool record: ' + insertError.message);
+      if (btn) { btn.disabled = false; btn.textContent = 'Move to Talent Pool'; }
+      return;
+    }
+
+    const { error: updateError } = await sb.from('applications').update({ talent_pool_id: newTalent.id }).eq('id', app.id);
+    if (updateError) {
+      alert('Talent Pool record created, but could not link it back to the application: ' + updateError.message);
+    }
+
+    currentApp.talent_pool_id = newTalent.id;
+    const idx = allApplications.findIndex(r => r.id === app.id);
+    if (idx !== -1) allApplications[idx].talent_pool_id = newTalent.id;
+    allTalentPool.unshift(newTalent);
+    loadedTabs.talent = true;
+    updateTalentStats();
+
+    logActivity('moved_to_talent_pool', `Moved ${app.full_name} to Talent Pool`, 'applications', app.id);
+    logActivity('created_from_application', `Added to Talent Pool from application by ${app.full_name}`, 'talent_pool', newTalent.id);
+
+    openAppPanel(app.id);
   }
 
   // ══════════════════════ TALENT POOL TAB ══════════════════════
@@ -3190,7 +4147,7 @@ renderTalentPool();
   }
 
   function renderTalentPool() {
-    const search = document.getElementById('talent-search').value.toLowerCase();
+    const search = document.getElementById('talent-search').value;
     const stFilter = document.getElementById('talent-filter-status').value;
     const sortMode = document.getElementById('talent-sort').value;
     const countryFilter = document.getElementById('talent-filter-country').value;
@@ -3207,7 +4164,7 @@ renderTalentPool();
     if (activeCard) activeCard.classList.add('active');
 
     let rows = allTalentPool.filter(r => {
-      const matchSearch = !search || (r.full_name||'').toLowerCase().includes(search) || (r.country||'').toLowerCase().includes(search) || (r.email||'').toLowerCase().includes(search);
+      const matchSearch = evaluateAdvancedSearch(search, r);
       const matchSt = !stFilter || r.status === stFilter;
       const matchCountry = !countryFilter || r.country === countryFilter;
       const matchExp = !expFilter || (r.years_experience||r.experience_level) === expFilter;
@@ -3245,7 +4202,8 @@ renderTalentPool();
     updateBulkToolbar('talent');
   }
 
-  function openTalentPanel(id) {
+  async function openTalentPanel(id) {
+    if (!loadedTabs.applications) await loadApplications();
     const t = allTalentPool.find(r => r.id == id);
     if (!t) return;
     currentTalent = t;
@@ -3265,9 +4223,9 @@ renderTalentPool();
     const skills = getCandidateSkills(t);
     const expertise = toList(t.areas_of_expertise);
 
-    const tabs = ['personal','employment','education','skills','documents','comments','timeline'];
+    const tabs = ['personal','employment','education','skills','documents','communications','comments','timeline'];
     if (canEdit) tabs.push('admin');
-    const tabLabels = { personal:'Personal', employment:'Employment', education:'Education', skills:'Skills', documents:'Documents', comments:'Comments', timeline:'Timeline', admin: isAdmin ? 'Admin' : 'Review' };
+    const tabLabels = { personal:'Personal', employment:'Employment', education:'Education', skills:'Skills', documents:'Documents', communications:'Communications', comments:'Comments', timeline:'Timeline', admin: isAdmin ? 'Admin' : 'Review' };
     document.getElementById('talent-profile-tabs').innerHTML = tabs.map((tb,i) =>
       `<button class="profile-tab-btn ${i===0?'active':''}" id="talent-tabbtn-${tb}" onclick="switchProfileTab('talent','${tb}')">${tabLabels[tb]}</button>`
     ).join('');
@@ -3341,7 +4299,37 @@ renderTalentPool();
             ${(!t.efset_certificate_url && !t.resume_path && !t.portfolio_url) ? '<p style="color:var(--fg2);font-size:.875rem;">No documents on file.</p>' : ''}
           </div>
         </div>
+        <div class="profile-card panel-section" style="margin-top:1.25rem;">
+          <div class="panel-section-title">Additional documents</div>
+          <div id="talent-documents-list"><span class="spinner" style="margin:1rem auto;"></span></div>
+          <div class="add-member-row" style="margin-top:1rem;">
+            <select id="talent-doc-type"><option>Cover Letter</option><option>Portfolio</option><option>Certificate</option><option>ID</option><option>Passport</option><option>NDA</option><option>Contract</option></select>
+            <input type="file" id="talent-doc-file" style="flex:1;">
+            <button class="btn-primary" style="width:auto;" onclick="uploadDocument('talent_pool','${t.id}',document.getElementById('talent-doc-type').value,document.getElementById('talent-doc-file').files[0],'talent-documents-list')">Upload</button>
+          </div>
+        </div>
       </div>
+
+      <div class="profile-tab-content" id="talent-tab-communications">
+        <div class="profile-card panel-section">
+          <div class="panel-section-title">Communication history</div>
+          <div id="talent-comms-list" style="margin-bottom:1rem;"><span class="spinner" style="margin:1rem auto;"></span></div>
+          <div class="action-row">
+            <div class="action-field">
+              <label>Channel</label>
+              <select id="talent-comm-channel"><option>Email</option><option>SMS</option><option>WhatsApp</option><option>Phone call</option><option>Interview Invitation</option><option>Offer Letter</option><option>Rejection Letter</option></select>
+            </div>
+            <div class="action-field">
+              <label>Template <button class="btn-secondary" style="padding:.2rem .5rem;font-size:.7rem;margin-left:.5rem;" type="button" onclick="openTemplatesModal()">Manage</button></label>
+              <select id="talent-comm-template" onchange="applyTemplateToComm('talent', currentTalent)"><option value="">— None —</option>${allEmailTemplates.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select>
+            </div>
+            <div class="action-field"><label>Subject (optional)</label><input type="text" id="talent-comm-subject"></div>
+            <div class="action-field"><label>Message / summary</label><textarea id="talent-comm-body" placeholder="What was sent or discussed…"></textarea></div>
+            <button class="btn-save" onclick="logCommunication('talent_pool','${t.id}','talent')">Log communication</button>
+          </div>
+        </div>
+      </div>
+
 
       <div class="profile-tab-content" id="talent-tab-comments">
         <div class="profile-card panel-section">
@@ -3357,10 +4345,7 @@ renderTalentPool();
       <div class="profile-tab-content" id="talent-tab-timeline">
         <div class="profile-card panel-section">
           <div class="panel-section-title">Timeline</div>
-          ${buildTimeline([
-            { date: t.submitted_at, label: 'Candidate joined Talent Pool' },
-            t.status && t.status !== 'In pool' ? { date: t.status_updated_at || t.submitted_at, label: 'Status: ' + t.status } : null
-          ])}
+          <div id="talent-timeline-container"><span class="spinner" style="margin:1rem auto;"></span></div>
         </div>
       </div>
 
@@ -3382,6 +4367,7 @@ renderTalentPool();
             <div class="action-field">
               <label>Reviewer score</label>
               ${starRatingHtml('talent-score', t.reviewer_score, true)}
+              <div id="talent-score-history"></div>
             </div>
             <div class="action-field">
               <label>Reviewer comments</label>
@@ -3411,8 +4397,13 @@ renderTalentPool();
 
     document.getElementById('talent-list-view').style.display = 'none';
     document.getElementById('talent-profile-view').classList.add('open');
+    renderDuplicateBanner('talent', findDuplicateMatches(t.email, t.phone, 'talent_pool', t.id));
     loadAndRenderComments('talent', 'talent_pool', t.id);
+    loadTimelineEvents('talent_pool', t.id, 'talent-timeline-container', t.submitted_at, 'Candidate joined Talent Pool');
+    loadDocuments('talent_pool', t.id, 'talent-documents-list');
+    loadCommunications('talent_pool', t.id, 'talent-comms-list');
     logPiiView('talent_pool', t.id);
+    loadScoreHistory('talent_pool', t.id, 'talent-score-history');
     if (isAdmin) renderPiiViewLog('talent-pii-log', 'talent_pool', t.id);
   }
 
@@ -3430,12 +4421,16 @@ renderTalentPool();
     saveMsg.className = 'save-msg';
 
     const previousStatus = currentTalent.status;
+    const previousNotes = currentTalent.reviewer_notes || '';
     const candidateName = currentTalent.full_name;
     const talentId = currentTalent.id;
 
+    const previousScore = currentTalent.reviewer_score;
     const status = document.getElementById('talent-action-status').value;
     const scoreEl = document.getElementById('star-rating-talent-score');
-    const reviewer_score = scoreEl ? parseInt(scoreEl.dataset.value || '0') || null : null;
+    const reviewer_score = hasPermission('can_edit_scores')
+      ? (scoreEl ? parseInt(scoreEl.dataset.value || '0') || null : null)
+      : previousScore;
     const reviewer_notes = document.getElementById('talent-action-notes').value || null;
     const ownerSel = document.getElementById('talent-action-owner');
     const owner_id = ownerSel ? (ownerSel.value || null) : undefined;
@@ -3463,6 +4458,20 @@ renderTalentPool();
       }
 
       logActivity('review', `Reviewed candidate ${candidateName}${status !== previousStatus ? ` — moved to ${status}` : ''}`, 'talent_pool', talentId);
+
+      if (reviewer_score != null && reviewer_score !== previousScore) {
+        await sb.from('score_history').insert({ related_table: 'talent_pool', related_id: talentId, score: reviewer_score, changed_by: currentUser.id });
+        loadScoreHistory('talent_pool', talentId, 'talent-score-history');
+      }
+
+      const newNotes = reviewer_notes || '';
+      if (newNotes && newNotes !== previousNotes) {
+        await sb.from('comments').insert({
+          related_table: 'talent_pool', related_id: String(talentId),
+          author_id: currentUser.id, body: `[Reviewer note] ${newNotes}`
+        });
+        loadAndRenderComments('talent', 'talent_pool', talentId);
+      }
 
       saveMsg.textContent = 'Changes saved.';
       saveMsg.className = 'save-msg ok show';
@@ -3494,6 +4503,45 @@ renderTalentPool();
     loadedTabs.insights = true;
     populateInsightsFilters();
     renderInsightsCharts();
+  }
+
+  function computeInsightsKPIs(appRows) {
+    const weekAgo = Date.now() - 7 * 86400000;
+    const monthAgo = Date.now() - 30 * 86400000;
+    const appsThisWeek = appRows.filter(r => r.submitted_at && new Date(r.submitted_at).getTime() >= weekAgo).length;
+    const appsThisMonth = appRows.filter(r => r.submitted_at && new Date(r.submitted_at).getTime() >= monthAgo).length;
+
+    const decided = appRows.filter(r => ['Passed','Failed','Accepted'].includes(r.status));
+    const passed = decided.filter(r => r.status === 'Passed' || r.status === 'Accepted').length;
+    const failed = decided.filter(r => r.status === 'Failed').length;
+    const passRate = decided.length ? Math.round((passed / decided.length) * 100) : null;
+    const failRate = decided.length ? Math.round((failed / decided.length) * 100) : null;
+
+    const withTurnaround = appRows.filter(r => r.submitted_at && r.reviewed_at && new Date(r.reviewed_at) > new Date(r.submitted_at));
+    const avgHiringDays = withTurnaround.length
+      ? withTurnaround.reduce((sum, r) => sum + (new Date(r.reviewed_at) - new Date(r.submitted_at)), 0) / withTurnaround.length / 86400000
+      : null;
+
+    const interviewed = appRows.filter(r => r.status === 'Interview Required' || r.status === 'Accepted').length;
+    const accepted = appRows.filter(r => r.status === 'Accepted').length;
+    const interviewSuccessRate = interviewed ? Math.round((accepted / interviewed) * 100) : null;
+
+    return { appsThisWeek, appsThisMonth, passRate, failRate, avgHiringDays, interviewSuccessRate };
+  }
+
+  function renderInsightsKPIs(appRows) {
+    const el = document.getElementById('insights-kpi-row');
+    if (!el) return;
+    const k = computeInsightsKPIs(appRows);
+    el.style.display = 'grid';
+    el.innerHTML = `
+      <div class="stat-card" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);"><div class="stat-num">${k.appsThisWeek}</div><div class="stat-label">Applications this week</div></div>
+      <div class="stat-card" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);"><div class="stat-num">${k.appsThisMonth}</div><div class="stat-label">Applications this month</div></div>
+      <div class="stat-card" style="--stat-color:var(--green); --stat-dim:var(--green-dim);"><div class="stat-num">${k.passRate!=null?k.passRate+'%':'—'}</div><div class="stat-label">Pass rate</div></div>
+      <div class="stat-card" style="--stat-color:var(--red); --stat-dim:var(--red-dim);"><div class="stat-num">${k.failRate!=null?k.failRate+'%':'—'}</div><div class="stat-label">Fail rate</div></div>
+      <div class="stat-card" style="--stat-color:var(--orange); --stat-dim:var(--orange-dim);"><div class="stat-num">${k.avgHiringDays!=null?k.avgHiringDays.toFixed(1)+'d':'—'}</div><div class="stat-label">Avg time to decision</div></div>
+      <div class="stat-card" style="--stat-color:var(--purple); --stat-dim:var(--purple-dim);"><div class="stat-num">${k.interviewSuccessRate!=null?k.interviewSuccessRate+'%':'—'}</div><div class="stat-label">Interview → Accepted rate</div></div>
+    `;
   }
 
   function buildFilterOptions(selId, values) {
@@ -3566,6 +4614,7 @@ renderTalentPool();
       return matchCountry && matchGender && matchStatus && matchAgeBucket;
     });
     const appRows = activeApplications().filter(r => !countryFilter || r.country === countryFilter);
+    renderInsightsKPIs(appRows);
 
     // 1. Talent pool by country
     const countryCounts = {};
@@ -3658,6 +4707,50 @@ renderTalentPool();
 
   let membersStatFilter = '';
 
+  async function loadSecurityCenter() {
+    if (allTeamMembers.length === 0 || loadedTabs.members === false) await loadTeamMembers();
+    const [sessionsRes, failedRes, mfaRes] = await Promise.all([
+      sb.from('activity_sessions').select('*').order('login_at', { ascending: false }),
+      sb.from('failed_logins').select('*').order('attempted_at', { ascending: false }).limit(50),
+      sb.from('site_settings').select('mfa_required_roles').eq('id', 1).single()
+    ]);
+    const sessions = sessionsRes.data || [];
+    const failed = failedRes.data || [];
+    const mfaRoles = (mfaRes.data && mfaRes.data.mfa_required_roles) || ['admin','reviewer','viewer'];
+
+    document.getElementById('security-sessions-tbody').innerHTML = allTeamMembers.map(m => {
+      const mySessions = sessions.filter(s => s.team_member_id === m.id);
+      const last = mySessions[0];
+      const isOnline = onlineMemberIds.has(m.id);
+      return `
+        <tr>
+          <td class="td-name"><span class="row-avatar">${memberAvatarContent(m)}</span>${esc(m.email)}</td>
+          <td>${isOnline ? '<span class="status-badge s-accepted">Online</span>' : '<span class="status-badge s-inactive">Offline</span>'}</td>
+          <td class="td-sub">${last ? parseUserAgent(last.user_agent) : '—'}</td>
+          <td class="td-sub">${last ? esc(last.ip_address || '—') : '—'}</td>
+          <td class="td-sub">${last ? fmtDateTime(last.login_at) : '—'}</td>
+          <td>${mfaRoles.includes(m.role) ? '<span class="badge primary">Required</span>' : '<span class="badge">Off</span>'}</td>
+          <td><button class="btn-secondary" style="border-color:var(--red);color:var(--red);" onclick="forceLogoutMember('${m.id}')">Force logout</button></td>
+        </tr>`;
+    }).join('');
+
+    document.getElementById('security-failed-tbody').innerHTML = failed.length ? failed.map(f => `
+      <tr><td>${esc(f.email||'—')}</td><td>${esc(f.reason||'—')}</td><td class="td-sub">${parseUserAgent(f.user_agent)}</td><td class="td-sub">${fmtDateTime(f.attempted_at)}</td></tr>
+    `).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--fg2);padding:2rem;">No failed sign-in attempts recorded.</td></tr>';
+
+    loadedTabs.security = true;
+  }
+
+  async function forceLogoutMember(id) {
+    const member = allTeamMembers.find(m => m.id === id);
+    if (!member) return;
+    if (!confirm(`Force logout ${member.email} from all devices?`)) return;
+    const { error } = await sb.from('team_members').update({ active_session_id: crypto.randomUUID() }).eq('id', id);
+    if (error) { alert('Error: ' + error.message); return; }
+    logActivity('force_logout', `Force-logged-out ${member.email}`, 'team_members', id);
+    alert(`${member.email} will be signed out on their next action.`);
+  }
+
   function updateMembersStats() {
     document.getElementById('members-stat-pending').textContent = allTeamMembers.filter(m => m.request_status === 'pending').length;
     document.getElementById('members-stat-active').textContent = allTeamMembers.filter(m => m.active).length;
@@ -3709,6 +4802,11 @@ renderTalentPool();
       <tr>
         <td class="td-name"><span class="row-avatar">${memberAvatarContent(member)}</span>${isOnline ? '<span title="Online now" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-left:.4rem;margin-right:.3rem;"></span>' : ''}${esc(member.email)}</td>
         <td class="td-sub">${esc(member.phone || '—')}</td>
+        <td class="td-sub">
+          ${esc(member.department || '—')}${member.employment_type ? ' · ' + esc(member.employment_type) : ''}
+          <button class="icon-btn" onclick="openMemberProfileEditModal('${member.id}')" title="Edit profile details">✎</button>
+          <button class="icon-btn" onclick="openPermissionsModal('${member.id}')" title="Edit permissions">🔒</button>
+        </td>
         <td>
           <select onchange="changeRole('${member.id}', this.value)">
             <option ${member.role==='admin'?'selected':''}>admin</option>
@@ -3795,6 +4893,7 @@ renderTalentPool();
   });
   if (error) { alert('Error deleting member: ' + error.message); return; }
 
+  logActivity('member_deleted', `Deleted ${member.email} — Reason: ${reason.trim()}`, 'team_members', id);
   allTeamMembers = allTeamMembers.filter(m => m.id !== id);
   allProjectMembers = allProjectMembers.filter(pm => pm.team_member_id !== id);
   updateMembersStats();
@@ -3828,8 +4927,504 @@ renderTalentPool();
   if (member) logActivity(willBeActive ? 'member_activated' : 'member_disabled', `${willBeActive ? 'Activated' : 'Disabled'} ${member.email}`, 'team_members', id);
 }
 
-  function openInvite() { document.getElementById("invite-modal").classList.add('show'); }
+let mpeCurrentId = null;
+  function openMemberProfileEditModal(id) {
+    const m = allTeamMembers.find(x => x.id === id);
+    if (!m) return;
+    mpeCurrentId = id;
+    document.getElementById('mpe-department').value = m.department || '';
+    document.getElementById('mpe-employment-type').value = m.employment_type || '';
+    document.getElementById('mpe-timezone').value = m.timezone || '';
+    document.getElementById('mpe-certificates').value = toList(m.certificates).join('\n');
+    const mgrSel = document.getElementById('mpe-manager');
+    const candidates = allTeamMembers.filter(x => x.id !== id);
+    mgrSel.innerHTML = '<option value="">— None —</option>' + candidates.map(x => `<option value="${x.id}" ${m.manager_id===x.id?'selected':''}>${esc(x.email)}</option>`).join('');
+    document.getElementById('member-profile-edit-modal').classList.add('show');
+  }
+  function closeMemberProfileEditModal() {
+    document.getElementById('member-profile-edit-modal').classList.remove('show');
+    mpeCurrentId = null;
+  }
+  async function saveMemberProfileEdit() {
+    if (!mpeCurrentId) return;
+    const update = {
+      department: document.getElementById('mpe-department').value.trim() || null,
+      manager_id: document.getElementById('mpe-manager').value || null,
+      employment_type: document.getElementById('mpe-employment-type').value || null,
+      timezone: document.getElementById('mpe-timezone').value.trim() || null,
+      certificates: document.getElementById('mpe-certificates').value.trim() || null
+    };
+    const { error } = await sb.from('team_members').update(update).eq('id', mpeCurrentId);
+    if (error) { alert('Error saving: ' + error.message); return; }
+    const idx = allTeamMembers.findIndex(m => m.id === mpeCurrentId);
+    if (idx !== -1) Object.assign(allTeamMembers[idx], update);
+    logActivity('member_profile_updated', `Updated profile details for ${allTeamMembers[idx].email}`, 'team_members', mpeCurrentId);
+    renderTeamMembers();
+    closeMemberProfileEditModal();
+  }
+
+  let allLeaveRequests = [];
+  let leaveStatusFilter = '';
+
+  function daysBetweenInclusive(start, end) {
+    return Math.round((new Date(end) - new Date(start)) / 86400000) + 1;
+  }
+
+  function openLeaveModal() {
+    document.getElementById('leave-type').value = 'Vacation';
+    document.getElementById('leave-start').value = '';
+    document.getElementById('leave-end').value = '';
+    document.getElementById('leave-reason').value = '';
+    document.getElementById('leave-modal').classList.add('show');
+  }
+  function closeLeaveModal() { document.getElementById('leave-modal').classList.remove('show'); }
+
+  async function submitLeaveRequest() {
+    const leave_type = document.getElementById('leave-type').value;
+    const start_date = document.getElementById('leave-start').value;
+    const end_date = document.getElementById('leave-end').value;
+    const reason = document.getElementById('leave-reason').value.trim() || null;
+    if (!start_date || !end_date) { alert('Start and end dates are required.'); return; }
+    if (new Date(end_date) < new Date(start_date)) { alert('End date must be on or after start date.'); return; }
+
+    const { data, error } = await sb.from('leave_requests').insert({
+      team_member_id: currentUser.id, leave_type, start_date, end_date, reason
+    }).select().single();
+    if (error) { alert('Error submitting request: ' + error.message); return; }
+
+    allLeaveRequests.unshift(data);
+    logActivity('leave_requested', `Requested ${leave_type} from ${start_date} to ${end_date}`, 'leave_requests', data.id);
+
+    if (allTeamMembers.length === 0) await loadTeamMembersForDropdowns();
+    const admins = allTeamMembers.filter(m => m.role === 'admin');
+    for (const admin of admins) {
+      await createNotification(admin.id, 'leave_requested', 'New leave request', `${currentMember.email} requested ${leave_type} (${start_date} to ${end_date}).`, 'leave_requests', data.id);
+    }
+
+    closeLeaveModal();
+    renderLeaveRequests();
+    updateLeaveStats();
+  }
+
+  async function loadLeaveRequests() {
+    document.getElementById('leave-loading').style.display = 'block';
+    document.getElementById('leave-table-wrap').style.display = 'none';
+    if (allTeamMembers.length === 0) await loadTeamMembersForDropdowns();
+
+    const isAdmin = currentMember.role === 'admin';
+    document.getElementById('leave-scope-all-option').style.display = isAdmin ? 'block' : 'none';
+    document.getElementById('leave-admin-stats').style.display = isAdmin ? 'grid' : 'none';
+
+    const { data, error } = await sb.from('leave_requests').select('*').order('created_at', { ascending: false });
+    document.getElementById('leave-loading').style.display = 'none';
+    document.getElementById('leave-table-wrap').style.display = 'block';
+    if (error) { console.error(error); return; }
+
+    allLeaveRequests = data || [];
+    loadedTabs.leave = true;
+    updateLeaveStats();
+    renderLeaveRequests();
+  }
+
+  function updateLeaveStats() {
+    if (currentMember.role !== 'admin') return;
+    document.getElementById('leave-stat-pending').textContent = allLeaveRequests.filter(r => r.status === 'Pending').length;
+    document.getElementById('leave-stat-approved').textContent = allLeaveRequests.filter(r => r.status === 'Approved').length;
+    document.getElementById('leave-stat-rejected').textContent = allLeaveRequests.filter(r => r.status === 'Rejected').length;
+    document.getElementById('leave-stat-all').textContent = allLeaveRequests.length;
+  }
+
+  function filterLeaveByStatus(status) {
+    leaveStatusFilter = status;
+    document.getElementById('leave-filter-status').value = status;
+    renderLeaveRequests();
+  }
+
+  function renderLeaveRequests() {
+    const scope = document.getElementById('leave-filter-scope').value;
+    const statusFilter = document.getElementById('leave-filter-status').value;
+    const isAdmin = currentMember.role === 'admin';
+
+    const rows = allLeaveRequests.filter(r => {
+      const matchScope = (scope === 'mine' || !isAdmin) ? r.team_member_id === currentUser.id : true;
+      const matchStatus = !statusFilter ? true : r.status === statusFilter;
+      return matchScope && matchStatus;
+    });
+
+    const tbody = document.getElementById('leave-tbody');
+    tbody.innerHTML = rows.length ? rows.map(r => {
+      const member = allTeamMembers.find(m => m.id === r.team_member_id);
+      const days = daysBetweenInclusive(r.start_date, r.end_date);
+      const statusBadge = r.status === 'Pending' ? '<span class="status-badge s-under-review">Pending</span>'
+        : r.status === 'Approved' ? '<span class="status-badge s-accepted">Approved</span>'
+        : '<span class="status-badge s-failed">Rejected</span>';
+      const canManage = isAdmin && r.status === 'Pending';
+      const canCancel = r.team_member_id === currentUser.id && r.status === 'Pending';
+      return `
+        <tr>
+          <td class="td-name">${esc(member ? member.email : 'Unknown')}</td>
+          <td>${esc(r.leave_type)}</td>
+          <td class="td-sub">${fmtDate(r.start_date)} – ${fmtDate(r.end_date)}</td>
+          <td>${days}</td>
+          <td class="td-sub">${esc(r.reason || '—')}</td>
+          <td>${statusBadge}${r.status==='Rejected' && r.rejection_reason ? `<div class="td-sub" style="margin-top:.2rem;">${esc(r.rejection_reason)}</div>` : ''}</td>
+          <td>
+            ${canManage ? `<button class="btn-secondary" style="border-color:var(--green);color:var(--green);" onclick="reviewLeaveRequest('${r.id}','Approved')">Approve</button>
+              <button class="btn-secondary" style="border-color:var(--red);color:var(--red);margin-left:.4rem;" onclick="reviewLeaveRequest('${r.id}','Rejected')">Reject</button>` : ''}
+            ${canCancel ? `<button class="btn-secondary" onclick="cancelLeaveRequest('${r.id}')">Cancel</button>` : ''}
+          </td>
+        </tr>`;
+    }).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--fg2);padding:2rem;">No leave requests found.</td></tr>';
+  }
+
+  async function reviewLeaveRequest(id, decision) {
+    const req = allLeaveRequests.find(r => r.id == id);
+    if (!req) return;
+    let rejection_reason = null;
+    if (decision === 'Rejected') {
+      rejection_reason = prompt('Reason for rejecting this request (optional):');
+      if (rejection_reason === null) return;
+    } else if (!confirm(`Approve this leave request?`)) return;
+
+    const update = { status: decision, reviewed_by: currentUser.id, reviewed_at: new Date().toISOString(), rejection_reason: rejection_reason || null };
+    const { error } = await sb.from('leave_requests').update(update).eq('id', id);
+    if (error) { alert('Error updating request: ' + error.message); return; }
+
+    Object.assign(req, update);
+    logActivity('leave_' + decision.toLowerCase(), `${decision} leave request for ${allTeamMembers.find(m=>m.id===req.team_member_id)?.email || 'member'}`, 'leave_requests', id);
+    await createNotification(req.team_member_id, 'leave_decision', `Leave request ${decision.toLowerCase()}`, `Your ${req.leave_type} request (${req.start_date} to ${req.end_date}) was ${decision.toLowerCase()}.${rejection_reason ? ' Reason: ' + rejection_reason : ''}`, 'leave_requests', id);
+
+    updateLeaveStats();
+    renderLeaveRequests();
+  }
+
+  async function cancelLeaveRequest(id) {
+    if (!confirm('Cancel this leave request?')) return;
+    const { error } = await sb.from('leave_requests').delete().eq('id', id);
+    if (error) { alert('Error cancelling: ' + error.message); return; }
+    allLeaveRequests = allLeaveRequests.filter(r => r.id != id);
+    updateLeaveStats();
+    renderLeaveRequests();
+  }
+
+  let calendarViewDate = new Date();
+  let allCalendarEvents = [];
+
+  function shiftCalendarMonth(delta) {
+    if (delta === 0) calendarViewDate = new Date();
+    else calendarViewDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth() + delta, 1);
+    renderCalendarGrid();
+  }
+
+  function openCalendarEventModal() {
+    document.getElementById('cal-event-title').value = '';
+    document.getElementById('cal-event-type').value = 'Meeting';
+    document.getElementById('cal-event-start').value = '';
+    document.getElementById('cal-event-end').value = '';
+    document.getElementById('calendar-event-modal').classList.add('show');
+  }
+  function closeCalendarEventModal() { document.getElementById('calendar-event-modal').classList.remove('show'); }
+
+  async function createCalendarEvent() {
+    const title = document.getElementById('cal-event-title').value.trim();
+    const event_type = document.getElementById('cal-event-type').value;
+    const startVal = document.getElementById('cal-event-start').value;
+    const endVal = document.getElementById('cal-event-end').value;
+    if (!title || !startVal) { alert('Title and start time are required.'); return; }
+    const insertRow = {
+      title, event_type,
+      start_at: new Date(startVal).toISOString(),
+      end_at: endVal ? new Date(endVal).toISOString() : null,
+      created_by: currentUser.id
+    };
+    const { data, error } = await sb.from('calendar_events').insert(insertRow).select().single();
+    if (error) { alert('Error creating event: ' + error.message); return; }
+    allCalendarEvents.push(data);
+    logActivity('calendar_event_created', `Created calendar event "${title}"`, 'calendar_events', data.id);
+    closeCalendarEventModal();
+    renderCalendarGrid();
+  }
+
+  async function deleteCalendarEvent(id) {
+    if (!confirm('Delete this event?')) return;
+    const { error } = await sb.from('calendar_events').delete().eq('id', id);
+    if (error) { alert('Error deleting: ' + error.message); return; }
+    allCalendarEvents = allCalendarEvents.filter(e => e.id != id);
+    renderCalendarGrid();
+  }
+
+  async function loadCalendarData() {
+    document.getElementById('calendar-loading').style.display = 'block';
+    document.getElementById('calendar-grid').style.display = 'none';
+    if (!loadedTabs.applications) await loadApplications();
+    if (!loadedTabs.tasks) await loadTasks();
+    if (!loadedTabs.leave) await loadLeaveRequests();
+    if (allTeamMembers.length === 0) await loadTeamMembersForDropdowns();
+
+    const { data, error } = await sb.from('calendar_events').select('*').order('start_at');
+    if (!error) allCalendarEvents = data || [];
+    loadedTabs.calendar = true;
+
+    document.getElementById('calendar-loading').style.display = 'none';
+    document.getElementById('calendar-grid').style.display = 'grid';
+    renderCalendarGrid();
+  }
+
+  function buildCalendarDayEvents(year, month) {
+    const byDay = {};
+    const addEvent = (dateObj, label, type) => {
+      if (!dateObj) return;
+      const key = dayKey(dateObj);
+      (byDay[key] = byDay[key] || []).push({ label, type });
+    };
+
+    allCalendarEvents.forEach(e => addEvent(new Date(e.start_at), e.title, e.event_type));
+
+    activeApplications().filter(a => a.interview_at).forEach(a => addEvent(new Date(a.interview_at), `Interview: ${a.full_name}`, 'Interview'));
+
+    allTasks.filter(t => t.due_at && !t.completed).forEach(t => addEvent(new Date(t.due_at), `Task: ${t.title}`, 'Reviewer Deadline'));
+
+    allProjects.filter(p => p.deadline).forEach(p => addEvent(new Date(p.deadline + 'T00:00:00'), `Deadline: ${p.name}`, 'Project'));
+
+    allLeaveRequests.filter(r => r.status === 'Approved').forEach(r => {
+      const member = allTeamMembers.find(m => m.id === r.team_member_id);
+      for (let d = new Date(r.start_date); d <= new Date(r.end_date); d.setDate(d.getDate() + 1)) {
+        addEvent(new Date(d), `Leave: ${member ? member.email : 'Member'}`, 'Leave');
+      }
+    });
+
+    return byDay;
+  }
+
+  const CAL_TYPE_COLORS = { Meeting:'var(--primary)', Holiday:'var(--purple)', 'Reviewer Deadline':'var(--orange)', Interview:'var(--green)', Project:'var(--purple2)', Leave:'var(--red)', Other:'var(--fg2)' };
+
+  function renderCalendarGrid() {
+    const grid = document.getElementById('calendar-grid');
+    const year = calendarViewDate.getFullYear();
+    const month = calendarViewDate.getMonth();
+    document.getElementById('calendar-month-label').textContent = calendarViewDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+    const dayEvents = buildCalendarDayEvents(year, month);
+    const firstDay = new Date(year, month, 1);
+    const startOffset = firstDay.getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const todayStr = todayKey();
+
+    let cells = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<div style="font-weight:700;font-size:.75rem;color:var(--fg2);text-align:center;padding:.4rem;">${d}</div>`);
+    for (let i = 0; i < startOffset; i++) cells.push('<div></div>');
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const events = dayEvents[dateStr] || [];
+      const isToday = dateStr === todayStr;
+      cells.push(`
+        <div class="table-wrap" style="min-height:90px; padding:.4rem; ${isToday ? 'border-color:var(--primary);border-width:2px;' : ''}">
+          <div style="font-weight:700; font-size:.8rem; ${isToday ? 'color:var(--primary);' : ''}">${day}</div>
+          <div style="display:flex; flex-direction:column; gap:.2rem; margin-top:.3rem;">
+            ${events.slice(0,3).map(e => `<div style="font-size:.68rem; background:${CAL_TYPE_COLORS[e.type]||'var(--fg2)'}; color:#fff; border-radius:4px; padding:.15rem .3rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${esc(e.label)}">${esc(e.label)}</div>`).join('')}
+            ${events.length > 3 ? `<div style="font-size:.68rem;color:var(--fg2);">+${events.length-3} more</div>` : ''}
+          </div>
+        </div>`);
+    }
+    grid.innerHTML = cells.join('');
+  }
+
+  const PERMISSION_KEYS = ['can_delete','can_export','can_assign','can_invite','can_archive','can_edit_scores','can_create_projects'];
+  const PERMISSION_LABELS = { can_delete:'Can delete records', can_export:'Can export data', can_assign:'Can assign reviewers/candidates', can_invite:'Can invite team members', can_archive:'Can archive records', can_edit_scores:'Can edit reviewer scores', can_create_projects:'Can create projects' };
+
+  let permCurrentId = null;
+  function openPermissionsModal(id) {
+    const m = allTeamMembers.find(x => x.id === id);
+    if (!m) return;
+    permCurrentId = id;
+    document.getElementById('perm-modal-email').textContent = m.email;
+    const defaults = ROLE_DEFAULT_PERMISSIONS[m.role] || {};
+    const overrides = m.permissions || {};
+    document.getElementById('perm-checkbox-list').innerHTML = PERMISSION_KEYS.map(k => {
+      const checked = overrides[k] !== undefined ? overrides[k] : defaults[k];
+      return `<label class="checkbox-item"><input type="checkbox" id="perm-${k}" ${checked?'checked':''}> ${PERMISSION_LABELS[k]} <span style="color:var(--subtle);font-size:.7rem;">(default: ${defaults[k] ? 'on' : 'off'})</span></label>`;
+    }).join('');
+    document.getElementById('permissions-modal').classList.add('show');
+  }
+  function closePermissionsModal() { document.getElementById('permissions-modal').classList.remove('show'); permCurrentId = null; }
+  async function savePermissions() {
+    if (!permCurrentId) return;
+    const permissions = {};
+    PERMISSION_KEYS.forEach(k => { permissions[k] = document.getElementById('perm-'+k).checked; });
+    const { error } = await sb.from('team_members').update({ permissions }).eq('id', permCurrentId);
+    if (error) { alert('Error saving permissions: ' + error.message); return; }
+    const idx = allTeamMembers.findIndex(m => m.id === permCurrentId);
+    if (idx !== -1) allTeamMembers[idx].permissions = permissions;
+    if (permCurrentId === currentUser.id) currentMember.permissions = permissions;
+    logActivity('permissions_updated', `Updated permission overrides for ${allTeamMembers[idx].email}`, 'team_members', permCurrentId);
+    closePermissionsModal();
+  }
+
+  function openAnnouncementsModal() { renderAnnouncementsAdminList(); document.getElementById('announcements-modal').classList.add('show'); }
+  function closeAnnouncementsModal() { document.getElementById('announcements-modal').classList.remove('show'); }
+  function renderAnnouncementsAdminList() {
+    const el = document.getElementById('announcements-admin-list');
+    el.innerHTML = allAnnouncements.length ? allAnnouncements.map(a => `
+      <div class="assign-row">
+        <div class="assign-info"><div class="assign-name">${esc(a.title)}</div><div class="assign-role">${esc(a.category)} · ${fmtDateTime(a.created_at)}</div></div>
+        <button class="btn-secondary" style="border-color:var(--red);color:var(--red);" onclick="deleteAnnouncement('${a.id}')">Delete</button>
+      </div>`).join('') : '<p style="color:var(--fg2);font-size:.8125rem;">No active announcements.</p>';
+  }
+  async function createAnnouncement() {
+    const title = document.getElementById('new-announcement-title').value.trim();
+    const category = document.getElementById('new-announcement-category').value;
+    const body = document.getElementById('new-announcement-body').value.trim();
+    const expiresVal = document.getElementById('new-announcement-expires').value;
+    if (!title || !body) { alert('Title and message are required.'); return; }
+    const { data, error } = await sb.from('announcements').insert({
+      title, category, body, created_by: currentUser.id,
+      expires_at: expiresVal ? new Date(expiresVal).toISOString() : null
+    }).select().single();
+    if (error) { alert('Error posting: ' + error.message); return; }
+    allAnnouncements.unshift(data);
+    document.getElementById('new-announcement-title').value = '';
+    document.getElementById('new-announcement-body').value = '';
+    document.getElementById('new-announcement-expires').value = '';
+    logActivity('announcement_posted', `Posted announcement "${title}"`, 'announcements', data.id);
+    renderAnnouncementsAdminList();
+    renderAnnouncementsBanner();
+  }
+  async function deleteAnnouncement(id) {
+    if (!confirm('Delete this announcement?')) return;
+    const { error } = await sb.from('announcements').delete().eq('id', id);
+    if (error) { alert('Error deleting: ' + error.message); return; }
+    allAnnouncements = allAnnouncements.filter(a => a.id != id);
+    renderAnnouncementsAdminList();
+    renderAnnouncementsBanner();
+  }
+
+  function openCompareModal() {
+    const rows = selectedRows('talent').slice(0, 4);
+    if (rows.length < 2) { alert('Select at least 2 candidates to compare.'); return; }
+    const fields = [['Country','country'],['Experience','years_experience'],['Education','education_level'],['Languages','languages'],['Score','reviewer_score'],['Availability','availability'],['Work type','work_type'],['Status','status']];
+    const tbody = document.querySelector('#compare-table tbody');
+    tbody.innerHTML = `
+      <tr><th></th>${rows.map(r => `<th>${esc(r.full_name)}</th>`).join('')}</tr>
+      ${fields.map(([label,key]) => `<tr><td class="td-name">${label}</td>${rows.map(r => `<td>${esc(String(r[key] ?? '—'))}</td>`).join('')}</tr>`).join('')}
+      <tr><td class="td-name">Preferred roles</td>${rows.map(r => `<td>${toList(r.preferred_roles).map(x=>esc(x)).join(', ') || '—'}</td>`).join('')}</tr>
+      <tr><td class="td-name">Skills</td>${rows.map(r => `<td>${getCandidateSkills(r).map(x=>esc(x)).join(', ') || '—'}</td>`).join('')}</tr>
+    `;
+    document.getElementById('compare-modal').classList.add('show');
+  }
+  function closeCompareModal() { document.getElementById('compare-modal').classList.remove('show'); }
+
+
+  async function loadInterviewRecord(relatedTable, relatedId, containerId) {
+    const { data, error } = await sb.from('interview_records').select('*').eq('related_table', relatedTable).eq('related_id', relatedId).order('created_at',{ascending:false}).limit(1).maybeSingle();
+    if (error) { console.error(error); return; }
+    window['currentInterviewRecord_'+relatedTable+'_'+relatedId] = data || null;
+    renderInterviewForm(relatedTable, relatedId, containerId, data);
+  }
+  function renderInterviewForm(relatedTable, relatedId, containerId, rec) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = `
+      <div class="action-row">
+        <div class="action-field"><label>Scheduled date/time</label><input type="datetime-local" id="iv-scheduled" value="${rec && rec.scheduled_at ? rec.scheduled_at.slice(0,16) : ''}"></div>
+        <div class="action-field"><label>Panel members</label><input type="text" id="iv-panel" placeholder="e.g. James, Sarah" value="${esc(rec ? rec.panel_members || '' : '')}"></div>
+        <div class="action-field"><label>Interview questions</label><textarea id="iv-questions">${esc(rec ? rec.questions || '' : '')}</textarea></div>
+        <div class="action-field"><label>Recording link</label><input type="text" id="iv-recording" value="${esc(rec ? rec.recording_link || '' : '')}"></div>
+        <div class="action-field"><label>Scoring (1–10)</label><input type="number" min="1" max="10" id="iv-scoring" value="${rec && rec.scoring != null ? rec.scoring : ''}"></div>
+        <div class="action-field"><label>Notes</label><textarea id="iv-notes">${esc(rec ? rec.notes || '' : '')}</textarea></div>
+        <div class="action-field">
+          <label>Decision</label>
+          <select id="iv-decision">
+            <option value="">— Pending —</option>
+            <option ${rec&&rec.decision==='Passed'?'selected':''}>Passed</option>
+            <option ${rec&&rec.decision==='Failed'?'selected':''}>Failed</option>
+            <option ${rec&&rec.decision==='On hold'?'selected':''}>On hold</option>
+          </select>
+        </div>
+        <div class="action-field"><label>Feedback</label><textarea id="iv-feedback">${esc(rec ? rec.feedback || '' : '')}</textarea></div>
+        <button class="btn-save" onclick="saveInterviewRecord('${relatedTable}','${relatedId}','${containerId}')">Save interview details</button>
+      </div>`;
+  }
+  async function saveInterviewRecord(relatedTable, relatedId, containerId) {
+    const scheduledVal = document.getElementById('iv-scheduled').value;
+    const scheduled_at = scheduledVal ? new Date(scheduledVal).toISOString() : null;
+    const payload = {
+      related_table: relatedTable, related_id: relatedId, scheduled_at,
+      panel_members: document.getElementById('iv-panel').value.trim() || null,
+      questions: document.getElementById('iv-questions').value.trim() || null,
+      recording_link: document.getElementById('iv-recording').value.trim() || null,
+      scoring: document.getElementById('iv-scoring').value ? parseFloat(document.getElementById('iv-scoring').value) : null,
+      notes: document.getElementById('iv-notes').value.trim() || null,
+      decision: document.getElementById('iv-decision').value || null,
+      feedback: document.getElementById('iv-feedback').value.trim() || null,
+      created_by: currentUser.id
+    };
+    const existing = window['currentInterviewRecord_'+relatedTable+'_'+relatedId];
+    let error;
+    if (existing) ({ error } = await sb.from('interview_records').update(payload).eq('id', existing.id));
+    else ({ error } = await sb.from('interview_records').insert(payload));
+    if (error) { alert('Error saving interview record: ' + error.message); return; }
+    if (scheduled_at && relatedTable === 'applications') {
+      await sb.from('applications').update({ interview_at: scheduled_at }).eq('id', relatedId);
+      const idx = allApplications.findIndex(a => a.id == relatedId);
+      if (idx !== -1) allApplications[idx].interview_at = scheduled_at;
+    }
+    logActivity('interview_updated', `Updated interview details`, relatedTable, relatedId);
+    loadInterviewRecord(relatedTable, relatedId, containerId);
+    if (loadedTabs.calendar) renderCalendarGrid();
+  }
+
   function closeInvite() { document.getElementById("invite-modal").classList.remove('show'); }
+
+  async function callAI(task, payload) {
+    const { data, error } = await sb.functions.invoke('ai-assist', { body: { task, payload } });
+    if (error) { alert('AI request failed: ' + error.message + ' — make sure the ai-assist edge function is deployed.'); return null; }
+    return data;
+  }
+
+  async function aiSummarizeApplicant(relatedTable, relatedId) {
+    const record = relatedTable === 'applications' ? allApplications.find(r=>r.id==relatedId) : allTalentPool.find(r=>r.id==relatedId);
+    if (!record) return;
+    const out = document.getElementById(relatedTable==='applications' ? 'app-ai-output' : 'talent-ai-output');
+    if (out) out.textContent = 'Thinking…';
+    const result = await callAI('summarize_candidate', { record });
+    if (!result) { if (out) out.textContent = ''; return; }
+    if (out) out.textContent = result.text || JSON.stringify(result);
+  }
+
+  async function aiGenerateInterviewQuestions(relatedTable, relatedId) {
+    const record = relatedTable === 'applications' ? allApplications.find(r=>r.id==relatedId) : allTalentPool.find(r=>r.id==relatedId);
+    if (!record) return;
+    const result = await callAI('generate_interview_questions', { record });
+    if (!result) return;
+    const qEl = document.getElementById('iv-questions');
+    if (qEl) qEl.value = result.text || '';
+    else alert('Open the Interview section on this profile first, then try again.');
+  }
+
+  async function aiGenerateOfferLetter(relatedTable, relatedId) {
+    const record = relatedTable === 'applications' ? allApplications.find(r=>r.id==relatedId) : allTalentPool.find(r=>r.id==relatedId);
+    if (!record) return;
+    const result = await callAI('generate_offer_letter', { record });
+    if (!result) return;
+    const prefix = relatedTable === 'applications' ? 'app' : 'talent';
+    const channelSel = document.getElementById(prefix+'-comm-channel');
+    const bodyEl = document.getElementById(prefix+'-comm-body');
+    const subjectEl = document.getElementById(prefix+'-comm-subject');
+    if (channelSel) channelSel.value = 'Offer Letter';
+    if (subjectEl) subjectEl.value = `Offer of engagement — ${record.full_name}`;
+    if (bodyEl) bodyEl.value = result.text || '';
+    else alert('Open the Communications tab on this profile first, then try again.');
+  }
+
+  function suggestBestReviewer() {
+    const reviewers = allTeamMembers.filter(m => m.role === 'reviewer' || m.role === 'admin');
+    if (reviewers.length === 0) { alert('No reviewers available.'); return; }
+    const loadCounts = reviewers.map(r => ({
+      reviewer: r,
+      open: activeApplications().filter(a => a.assigned_reviewer_id === r.id && ['Submitted','Under Review'].includes(a.status)).length
+        + allTalentPool.filter(t => t.owner_id === r.id && t.status !== 'Inactive' && t.status !== 'Assigned').length
+    })).sort((a,b) => a.open - b.open);
+    alert(`Lightest current workload: ${loadCounts[0].reviewer.email} (${loadCounts[0].open} open items).`);
+  }
 
   async function sendInvite() {
     const email = document.getElementById("invite-email").value;
@@ -3863,6 +5458,54 @@ renderTalentPool();
     renderProjects();
   }
 
+  function computeMatchScore(project, candidate) {
+    let score = 0, maxScore = 0;
+    const reqSkills = toList(project.required_skills);
+    if (reqSkills.length) {
+      maxScore += 30;
+      const candSkills = [...getCandidateSkills(candidate), ...toList(candidate.areas_of_expertise)].map(s => s.toLowerCase());
+      const hits = reqSkills.filter(s => candSkills.some(cs => cs.includes(s.toLowerCase()))).length;
+      score += 30 * (hits / reqSkills.length);
+    }
+    if (project.required_country) {
+      maxScore += 20;
+      if ((candidate.country || '').toLowerCase() === project.required_country.toLowerCase()) score += 20;
+    }
+    if (project.min_experience) {
+      maxScore += 20;
+      const years = parseFloat(candidate.years_experience) || 0;
+      const minYears = parseFloat(project.min_experience) || 0;
+      if (years >= minYears) score += 20;
+    }
+    if (project.required_languages) {
+      maxScore += 10;
+      const reqLangs = toList(project.required_languages).map(l => l.toLowerCase());
+      const candLangs = (candidate.languages || '').toLowerCase();
+      if (reqLangs.some(l => candLangs.includes(l))) score += 10;
+    }
+    maxScore += 20;
+    score += Math.min(20, ((candidate.reviewer_score || 0) / 10) * 20);
+    return maxScore > 0 ? Math.round((score / maxScore) * 100) : null;
+  }
+
+  function renderProjectMatches() {
+    const el = document.getElementById('project-matches-list');
+    if (!el || !currentProjectId) return;
+    const project = allProjects.find(p => p.id === currentProjectId);
+    if (!project) return;
+    const candidates = allTalentPool.filter(c => c.status !== 'Inactive');
+    const scored = candidates.map(c => ({ candidate: c, score: computeMatchScore(project, c) }))
+      .filter(x => x.score != null)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5);
+    el.innerHTML = scored.length ? scored.map(x => `
+      <div class="assign-row">
+        <div class="assign-info"><div class="assign-name">${esc(x.candidate.full_name)}</div><div class="assign-role">${esc(x.candidate.country || '')}</div></div>
+        <span class="badge primary">${x.score}%</span>
+      </div>
+    `).join('') : '<p style="color:var(--fg2);font-size:.8125rem;">Set required skills/country/experience below to see matches.</p>';
+  }
+
   function renderProjects() {
     const grid = document.getElementById('projects-grid');
     if (allProjects.length === 0) {
@@ -3878,7 +5521,10 @@ renderTalentPool();
           <span class="status-badge ${projectStatusClass(p.status)}">${esc(p.status || 'Active')}</span>
         </div>
         <p>${esc(p.description || 'No description')}</p>
-        <div class="member-count">${count} member${count===1?'':'s'} assigned</div>
+        <div style="background:var(--bg2); border-radius:6px; height:6px; margin-top:.6rem; overflow:hidden;">
+          <div style="background:var(--primary); height:100%; width:${p.progress||0}%;"></div>
+        </div>
+        <div class="member-count">${count} member${count===1?'':'s'} assigned${p.deadline ? ' · Due ' + fmtDate(p.deadline) : ''}</div>
       </div>`;
     }).join('');
   }
@@ -3904,14 +5550,25 @@ renderTalentPool();
     logActivity('project_created', `Created project "${name}"`, 'projects', data.id);
   }
 
-  function openProjectModal(id) {
+  async function openProjectModal(id) {
     if (!id) { openProjectNewModal(); return; }
     currentProjectId = id;
     const project = allProjects.find(p => p.id === id);
     if (!project) return;
+    if (!loadedTabs.talent) await loadTalentPool();
 
     document.getElementById('project-manage-title').textContent = project.name;
     document.getElementById('project-status-select').value = project.status || 'Active';
+    document.getElementById('project-deadline').value = project.deadline || '';
+    document.getElementById('project-progress').value = project.progress || 0;
+    document.getElementById('project-progress-label').textContent = (project.progress || 0) + '%';
+    loadProjectFiles(id);
+    loadProjectNotes(id);
+    document.getElementById('project-req-skills').value = project.required_skills || '';
+    document.getElementById('project-req-country').value = project.required_country || '';
+    document.getElementById('project-req-experience').value = project.min_experience || '';
+    document.getElementById('project-req-languages').value = project.required_languages || '';
+    renderProjectMatches();
     renderProjectMembers();
 
     const assignedIds = allProjectMembers.filter(pm => pm.project_id === id).map(pm => pm.team_member_id);
@@ -3988,6 +5645,7 @@ renderTalentPool();
     logActivity('project_member_removed', `Removed ${removedMember ? removedMember.email : 'a member'} from project "${project ? project.name : ''}"`, 'projects', pmRow ? pmRow.project_id : null);
   }
 
+
   async function updateProjectStatus() {
     const status = document.getElementById('project-status-select').value;
     const project = allProjects.find(p => p.id === currentProjectId);
@@ -3997,6 +5655,88 @@ renderTalentPool();
     if (idx !== -1) allProjects[idx].status = status;
     renderProjects();
     if (project) logActivity('project_status_change', `Changed project "${project.name}" status to ${status}`, 'projects', currentProjectId);
+  }
+
+  async function updateProjectDeadline() {
+    const deadline = document.getElementById('project-deadline').value || null;
+    const { error } = await sb.from('projects').update({ deadline }).eq('id', currentProjectId);
+    if (error) { alert('Error saving deadline: ' + error.message); return; }
+    const idx = allProjects.findIndex(p => p.id === currentProjectId);
+    if (idx !== -1) allProjects[idx].deadline = deadline;
+  }
+
+  async function updateProjectProgress(value) {
+    const progress = parseInt(value);
+    const { error } = await sb.from('projects').update({ progress }).eq('id', currentProjectId);
+    if (error) { alert('Error saving progress: ' + error.message); return; }
+    const idx = allProjects.findIndex(p => p.id === currentProjectId);
+    if (idx !== -1) allProjects[idx].progress = progress;
+  }
+
+  async function loadProjectFiles(projectId) {
+    const el = document.getElementById('project-files-list');
+    const { data, error } = await sb.from('project_files').select('*').eq('project_id', projectId).order('uploaded_at', { ascending: false });
+    if (error) { el.innerHTML = '<p style="color:var(--red);font-size:.8125rem;">Could not load files.</p>'; return; }
+    el.innerHTML = (data && data.length) ? data.map(f => {
+      const uploader = allTeamMembers.find(m => m.id === f.uploaded_by);
+      const name = f.file_path.split('/').pop();
+      return `
+        <div class="assign-row">
+          <div class="assign-info"><div class="assign-name">${esc(name)}</div><div class="assign-role">${uploader ? esc(uploader.email) : ''} · ${fmtDateTime(f.uploaded_at)}</div></div>
+          <button class="btn-secondary" onclick="downloadFile('project-files','${esc(f.file_path)}')">Download</button>
+        </div>`;
+    }).join('') : '<p style="color:var(--fg2);font-size:.8125rem;">No files uploaded yet.</p>';
+  }
+
+  async function uploadProjectFile() {
+    const file = document.getElementById('project-file-input').files[0];
+    if (!file) { alert('Choose a file first.'); return; }
+    const path = `${currentProjectId}/${Date.now()}-${file.name}`;
+    const { error: upErr } = await sb.storage.from('project-files').upload(path, file, { upsert: true });
+    if (upErr) { alert('Upload failed: ' + upErr.message); return; }
+    const { error } = await sb.from('project_files').insert({ project_id: currentProjectId, file_path: path, uploaded_by: currentUser.id });
+    if (error) { alert('Error saving file record: ' + error.message); return; }
+    document.getElementById('project-file-input').value = '';
+    const project = allProjects.find(p => p.id === currentProjectId);
+    logActivity('project_file_uploaded', `Uploaded "${file.name}" to project "${project ? project.name : ''}"`, 'projects', currentProjectId);
+    loadProjectFiles(currentProjectId);
+  }
+
+  async function loadProjectNotes(projectId) {
+    const el = document.getElementById('project-notes-list');
+    const { data, error } = await sb.from('project_notes').select('*').eq('project_id', projectId).order('created_at', { ascending: true });
+    if (error) { el.innerHTML = '<p style="color:var(--red);font-size:.8125rem;">Could not load notes.</p>'; return; }
+    el.innerHTML = (data && data.length) ? data.map(n => {
+      const author = allTeamMembers.find(m => m.id === n.author_id);
+      return `<div style="border-bottom:1px solid var(--border); padding:.5rem 0; font-size:.8125rem;">
+        <strong>${esc(author ? author.email : 'Unknown')}</strong> <span style="color:var(--subtle);">${fmtDateTime(n.created_at)}</span>
+        <div style="margin-top:.2rem; white-space:pre-wrap;">${esc(n.body)}</div>
+      </div>`;
+    }).join('') : '<p style="color:var(--fg2);font-size:.8125rem;">No notes yet.</p>';
+  }
+
+  async function postProjectNote() {
+    const input = document.getElementById('project-note-input');
+    const body = input.value.trim();
+    if (!body) return;
+    const { error } = await sb.from('project_notes').insert({ project_id: currentProjectId, author_id: currentUser.id, body });
+    if (error) { alert('Error posting note: ' + error.message); return; }
+    input.value = '';
+    loadProjectNotes(currentProjectId);
+  }
+
+  async function saveProjectRequirements() {
+    const update = {
+      required_skills: document.getElementById('project-req-skills').value.trim() || null,
+      required_country: document.getElementById('project-req-country').value.trim() || null,
+      min_experience: document.getElementById('project-req-experience').value.trim() || null,
+      required_languages: document.getElementById('project-req-languages').value.trim() || null
+    };
+    const { error } = await sb.from('projects').update(update).eq('id', currentProjectId);
+    if (error) { alert('Error saving requirements: ' + error.message); return; }
+    const idx = allProjects.findIndex(p => p.id === currentProjectId);
+    if (idx !== -1) Object.assign(allProjects[idx], update);
+    renderProjectMatches();
   }
 
   // ══════════════════════ ACTIVITY TAB ══════════════════════
@@ -4011,6 +5751,46 @@ renderTalentPool();
     return records
       .filter(r => r.assigned_at && r.reviewed_at && new Date(r.reviewed_at) > new Date(r.assigned_at))
       .map(r => ({ reviewerId: r.assigned_reviewer_id || r.owner_id, hours: (new Date(r.reviewed_at) - new Date(r.assigned_at)) / 3600000, reviewedAt: r.reviewed_at }));
+  }
+
+  function renderWorkforceAnalytics() {
+    const { start } = periodRange('month');
+    const sessions30 = allActivitySessions.filter(s => new Date(s.login_at) >= start);
+    const byMember = {};
+    allTeamMembers.forEach(m => byMember[m.id] = { member: m, sessions: [] });
+    sessions30.forEach(s => { if (byMember[s.team_member_id]) byMember[s.team_member_id].sessions.push(s); });
+
+    const rows = Object.values(byMember).map(x => {
+      const daysActive = new Set(x.sessions.map(s => dayKey(s.login_at))).size;
+      const totalActiveSec = x.sessions.reduce((sum,s)=>sum+(s.active_seconds||0),0);
+      const avgDailyHours = daysActive ? (totalActiveSec/3600/daysActive) : 0;
+      const attendancePct = Math.round((daysActive / 30) * 100);
+      let lateCount = 0, earlyCount = 0, overtimeHours = 0;
+      x.sessions.forEach(s => {
+        const loginHour = new Date(s.login_at).getHours() + new Date(s.login_at).getMinutes()/60;
+        if (loginHour >= 10) lateCount++;
+        if (s.logout_at) {
+          const logoutHour = new Date(s.logout_at).getHours() + new Date(s.logout_at).getMinutes()/60;
+          if (logoutHour < 16 && logoutHour > 0) earlyCount++;
+        }
+        const sessionHours = (s.active_seconds||0)/3600;
+        if (sessionHours > 8) overtimeHours += (sessionHours - 8);
+      });
+      return { member: x.member, avgDailyHours, attendancePct, lateCount, earlyCount, overtimeHours, totalActiveSec };
+    }).filter(r => r.totalActiveSec > 0);
+
+    rows.sort((a,b) => b.totalActiveSec - a.totalActiveSec);
+    const mostActive = rows[0];
+    const leastActive = rows[rows.length - 1];
+
+    document.getElementById('workforce-analytics-row').innerHTML = `
+      <div class="stat-card" style="--stat-color:var(--green); --stat-dim:var(--green-dim);"><div class="stat-num" style="font-size:1.1rem;">${mostActive ? esc(mostActive.member.email) : '—'}</div><div class="stat-label">Most active member</div></div>
+      <div class="stat-card" style="--stat-color:var(--orange); --stat-dim:var(--orange-dim);"><div class="stat-num" style="font-size:1.1rem;">${leastActive ? esc(leastActive.member.email) : '—'}</div><div class="stat-label">Least active member</div></div>
+      <div class="stat-card" style="--stat-color:var(--primary); --stat-dim:var(--primary-dim);"><div class="stat-num">${rows.length ? (rows.reduce((s,r)=>s+r.avgDailyHours,0)/rows.length).toFixed(1)+'h' : '—'}</div><div class="stat-label">Avg daily hours (team)</div></div>
+    `;
+    document.getElementById('workforce-analytics-tbody').innerHTML = rows.length ? rows.map(r => `
+      <tr><td class="td-name">${esc(r.member.email)}</td><td>${r.avgDailyHours.toFixed(1)}h</td><td>${r.attendancePct}%</td><td>${r.lateCount}</td><td>${r.earlyCount}</td><td>${r.overtimeHours.toFixed(1)}h</td></tr>
+    `).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--fg2);padding:2rem;">No activity in the last 30 days.</td></tr>';
   }
 
   async function renderLeaderboard() {
@@ -4086,6 +5866,7 @@ renderTalentPool();
     renderActivityStats();
     renderActivityLog();
     renderLeaderboard();
+    renderWorkforceAnalytics();
   }
 
   function fmtDuration(totalSeconds) {
@@ -4638,14 +6419,18 @@ renderTalentPool();
     if (error) { alert('Error updating task: ' + error.message); return; }
     const idx = allTasks.findIndex(t => t.id === id);
     if (idx !== -1) Object.assign(allTasks[idx], update);
+    const task = allTasks.find(t => t.id === id);
+    if (task) logActivity(completed ? 'task_completed' : 'task_reopened', `${completed ? 'Completed' : 'Reopened'} task "${task.title}"`, task.related_table, task.related_id);
     renderTasks();
     updateTaskBadge();
   }
 
   async function deleteTask(id) {
     if (!confirm('Delete this task?')) return;
+    const task = allTasks.find(t => t.id === id);
     const { error } = await sb.from('tasks').delete().eq('id', id);
     if (error) { alert('Error deleting task: ' + error.message); return; }
+    if (task) logActivity('task_deleted', `Deleted task "${task.title}"`, task.related_table, task.related_id);
     allTasks = allTasks.filter(t => t.id !== id);
     renderTasks();
     updateTaskBadge();
@@ -4656,6 +6441,51 @@ renderTalentPool();
     if (!btn) return;
     const myOpenCount = allTasks.filter(t => t.assignee_id === currentUser.id && !t.completed).length;
     btn.textContent = myOpenCount > 0 ? `Tasks (${myOpenCount})` : 'Tasks';
+  }
+
+  const PIPELINE_STAGES = ['Submitted','Under Review','Interview Required','Passed','Accepted'];
+
+  function renderPipelineBoard() {
+    const board = document.getElementById('pipeline-board');
+    if (!board) return;
+    board.innerHTML = PIPELINE_STAGES.map(stage => {
+      const rows = activeApplications().filter(a => a.status === stage);
+      return `
+        <div class="table-wrap" style="min-width:260px; flex:1; padding:.75rem;" ondragover="event.preventDefault()" ondrop="onPipelineDrop(event,'${esc(stage)}')">
+          <div style="font-weight:700; font-size:.85rem; margin-bottom:.75rem; display:flex; justify-content:space-between;">
+            <span>${esc(stage)}</span><span class="badge">${rows.length}</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:.6rem;">
+            ${rows.map(a => `
+              <div class="project-card" draggable="true" ondragstart="onPipelineDragStart(event,'${a.id}')" style="padding:.75rem; cursor:grab;" onclick="openAppPanel('${a.id}')">
+                <div style="font-weight:600; font-size:.85rem;">${esc(a.full_name)}</div>
+                <div style="font-size:.75rem; color:var(--fg2); margin-top:.2rem;">${esc(a.position||'')}</div>
+                <div style="margin-top:.4rem;">${slaBadge(daysWaitingFor(a))}</div>
+              </div>
+            `).join('') || '<p style="color:var(--fg2);font-size:.78rem;">No candidates.</p>'}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function onPipelineDragStart(ev, appId) {
+    ev.dataTransfer.setData('text/plain', appId);
+  }
+
+  async function onPipelineDrop(ev, newStatus) {
+    ev.preventDefault();
+    const appId = ev.dataTransfer.getData('text/plain');
+    const app = allApplications.find(a => a.id == appId);
+    if (!app || app.status === newStatus) return;
+    const previousStatus = app.status;
+    const update = { status: newStatus };
+    if (['Passed','Failed','Interview Required','Accepted'].includes(newStatus)) update.reviewed_at = new Date().toISOString();
+    const { error } = await sb.from('applications').update(update).eq('id', appId);
+    if (error) { alert('Error updating status: ' + error.message); return; }
+    Object.assign(app, update);
+    logActivity('status_change', `Moved ${app.full_name} from ${previousStatus} to ${newStatus} via pipeline board`, 'applications', appId);
+    updateAppStats();
+    renderPipelineBoard();
   }
 
 
@@ -4681,6 +6511,7 @@ renderTalentPool();
   }
 
   async function quickAssignReviewer(appId, reviewerId) {
+    if (!hasPermission('can_assign')) { alert('You do not have permission to assign reviewers.'); return; }
     const idxBefore = allApplications.findIndex(a => a.id === appId);
     const previousReviewerId = idxBefore !== -1 ? allApplications[idxBefore].assigned_reviewer_id : null;
 
