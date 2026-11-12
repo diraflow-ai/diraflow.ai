@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://diraflow.ai/sitemap.xml
